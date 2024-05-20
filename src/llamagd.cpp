@@ -29,10 +29,6 @@ namespace godot
       ClassDB::bind_method(D_METHOD("set_flash_attn"), &LlamaGD::set_flash_attn);
       ClassDB::add_property("LlamaGD", PropertyInfo(Variant::STRING, "enable_flash_attn", PROPERTY_HINT_FILE), "set_flash_attn", "get_flash_attn");
 
-      ClassDB::bind_method(D_METHOD("get_model_path"), &LlamaGD::get_model_path);
-      ClassDB::bind_method(D_METHOD("set_model_path"), &LlamaGD::set_model_path);
-      ClassDB::add_property("LlamaGD", PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE), "set_model_path", "get_model_path");
-
       ClassDB::bind_method(D_METHOD("get_input_prefix"), &LlamaGD::get_input_prefix);
       ClassDB::bind_method(D_METHOD("set_input_prefix", "p_input_prefix"), &LlamaGD::set_input_prefix);
       ClassDB::add_property("LlamaGD", PropertyInfo(Variant::STRING, "input_prefix", PROPERTY_HINT_NONE), "set_input_prefix", "get_input_prefix");
