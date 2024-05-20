@@ -117,9 +117,6 @@ namespace godot
 
       text_generation_thread.instantiate();
       model_loader_thread.instantiate();
-
-      // TODO: not sure if we should put this on the constructor
-      init_backend();
    }
    void LlamaGD::init_backend()
    {
