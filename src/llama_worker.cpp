@@ -30,8 +30,18 @@ LlamaWorker::LlamaWorker(
    ctx = loaded_ctx;
    model = loaded_model;
    params = *locked_params;
+
    await_input = false;
    should_yield = false;
+
+   // Default on_new_token that does absolutely nothing
+   on_new_token = [this](std::string token) {
+   };
+}
+
+void LlamaWorker::listen_for_new_token(std::function<void(std::string)> callback)
+{
+   on_new_token = callback;
 }
 
 bool LlamaWorker::file_exists(const std::string path)

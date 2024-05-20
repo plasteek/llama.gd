@@ -34,6 +34,7 @@ public:
        llama_context *loaded_ctx,
        gpt_params *locked_params);
    void listen_for_new_token(std::function<void(std::string)>);
+   // NOTICE: might throw error
    std::string run(std::string prompt);
    void stop();
 };
