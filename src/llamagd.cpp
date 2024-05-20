@@ -30,18 +30,6 @@ namespace godot
       ClassDB::bind_method(D_METHOD("set_model_path"), &LlamaGD::set_model_path);
       ClassDB::add_property("LlamaGD", PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE), "set_model_path", "get_model_path");
 
-      ClassDB::bind_method(D_METHOD("get_instruct"), &LlamaGD::get_instruct);
-      ClassDB::bind_method(D_METHOD("set_instruct", "p_instruct"), &LlamaGD::set_instruct);
-      ClassDB::add_property("LlamaGD", PropertyInfo(Variant::BOOL, "instruct", PROPERTY_HINT_NONE), "set_instruct", "get_instruct");
-
-      ClassDB::bind_method(D_METHOD("get_interactive"), &LlamaGD::get_interactive);
-      ClassDB::bind_method(D_METHOD("set_interactive", "p_interactive"), &LlamaGD::set_interactive);
-      ClassDB::add_property("LlamaGD", PropertyInfo(Variant::BOOL, "interactive", PROPERTY_HINT_NONE), "set_interactive", "get_interactive");
-
-      ClassDB::bind_method(D_METHOD("get_antiprompt"), &LlamaGD::get_antiprompt);
-      ClassDB::bind_method(D_METHOD("set_antiprompt", "p_anti_prompt"), &LlamaGD::set_antiprompt);
-      ClassDB::add_property("LlamaGD", PropertyInfo(Variant::STRING, "antiprompt", PROPERTY_HINT_NONE), "set_antiprompt", "get_antiprompt");
-
       ClassDB::bind_method(D_METHOD("get_input_prefix"), &LlamaGD::get_input_prefix);
       ClassDB::bind_method(D_METHOD("set_input_prefix", "p_input_prefix"), &LlamaGD::set_input_prefix);
       ClassDB::add_property("LlamaGD", PropertyInfo(Variant::STRING, "input_prefix", PROPERTY_HINT_NONE), "set_input_prefix", "get_input_prefix");
@@ -197,30 +185,13 @@ namespace godot
    {
       function_call_mutex->lock();
 
-      // Do the generation here please
       std::string normalized_prompt = string_gd_to_std(prompt);
-
-      // TODO: maybe move to runner for param reset
-      reset_antiprompt();
-      // main llama.cpp code only appends prefix and suffix in
-      // instruct and interactive mode. Manual append.
       std::string prompt_payload = normalized_prompt;
-      if (!params.instruct || !params.interactive)
-      {
-         prompt_payload = params.input_prefix + normalized_prompt + params.input_suffix;
-      }
+      prompt_payload = params.input_prefix + normalized_prompt + params.input_suffix;
+
+      // Prompt has been prepared, run the generation!
 
       function_call_mutex->unlock();
-   }
-   void LlamaGD::reset_antiprompt()
-   {
-      // Internally, the generator code will modify the antiprompt which
-      // we would want to replace
-      params.antiprompt.clear();
-      if (antiprompt != "")
-      {
-         params.antiprompt.emplace_back(antiprompt);
-      }
    }
 
    // Below here are godot getter and setters
@@ -243,41 +214,6 @@ namespace godot
    {
       params.flash_attn = enabled;
    }
-
-   bool LlamaGD::get_instruct() const
-   {
-      return params.instruct;
-   }
-   void LlamaGD::set_instruct(const bool p_instruct)
-   {
-      if (should_block_setting_param())
-         return;
-      params.instruct = p_instruct;
-   }
-
-   bool LlamaGD::get_interactive() const
-   {
-      return params.interactive;
-   }
-
-   void LlamaGD::set_interactive(const bool p_interactive)
-   {
-      if (should_block_setting_param())
-         return;
-      params.interactive = p_interactive;
-   }
-
-   String LlamaGD::get_antiprompt() const
-   {
-      return string_std_to_gd(antiprompt);
-   };
-
-   void LlamaGD::set_antiprompt(const String p_anti_prompt)
-   {
-      if (should_block_setting_param())
-         return;
-      antiprompt = string_gd_to_std(p_anti_prompt);
-   };
 
    String LlamaGD::get_input_prefix() const
    {

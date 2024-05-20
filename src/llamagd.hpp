@@ -25,14 +25,12 @@ namespace godot
       struct llama_model *model;
       bool should_output_bos;
       bool should_output_eos;
-      std::string antiprompt;
 
       // Implementation for loading the model
       // and notifying godot through signal
       void load_model_impl();
       bool is_params_locked();
       bool should_block_setting_param();
-      void reset_antiprompt();
 
    protected:
       static void _bind_methods();
@@ -52,15 +50,6 @@ namespace godot
 
       bool get_flash_attn() const;
       void set_flash_attn(const bool enabled);
-
-      bool get_instruct() const;
-      void set_instruct(const bool p_instruct);
-
-      bool get_interactive() const;
-      void set_interactive(const bool p_interactive);
-
-      String get_antiprompt() const;
-      void set_antiprompt(const String neg_prompt);
 
       bool get_should_output_bos() const;
       void set_should_output_bos(const bool p_should_output_bos);
