@@ -1,6 +1,7 @@
 #include <string>
 #include <llama.h>
 #include <functional>
+#include <common.h>
 
 #ifndef LLAMA_WORKER_TYPES
 #define LLAMA_WORKER_TYPES

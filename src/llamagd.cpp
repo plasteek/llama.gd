@@ -7,7 +7,7 @@
 
 #include <string>
 #include <llama.h>
-#include <common/common.h>
+#include <common.h>
 
 namespace godot
 {
@@ -241,7 +241,7 @@ namespace godot
 
    void LlamaGD::create_completion_async(String prompt)
    {
-      text_generation_thread->start(callable_mp(this, create_completion).bind(prompt));
+      text_generation_thread->start(callable_mp(this, &LlamaGD::create_completion).bind(prompt));
    }
    String LlamaGD::create_completion(String prompt)
    {

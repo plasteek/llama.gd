@@ -1,6 +1,6 @@
 #include "llama_worker.hpp"
 #include <llama.h>
-#include <common/common.h>
+#include <common.h>
 #include <fstream>
 #include <string>
 #include <cmath>
