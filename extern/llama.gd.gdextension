@@ -1,0 +1,19 @@
+[configuration]
+
+entry_symbol = "llm_init"
+compatibility_minimum = "4.2"
+
+[libraries]
+# Debug build is really slow, using release build in godot project debug mode
+
+#windows.debug.x86_64 = "bin/libllama.gd.windows.debug.amd64.dll"
+windows.debug.x86_64 = "bin/libllama.gd.windows.release.amd64.dll"
+windows.release.x86_64 = "bin/libllama.gd.windows.release.amd64.dll"
+
+#linux.debug.x86_64 = "bin/libllama.gd.linux.debug.x86_64.so"
+linux.debug.x86_64 = "bin/libllama.gd.linux.release.x86_64.so"
+linux.release.x86_64 = "bin/libllama.gd.linux.release.x86_64.so"
+
+#android.debug.arm64 = "bin/libllama.gd.android.debug.arch64.so"
+android.debug.arm64 = "bin/libllama.gd.android.release.arch64.so"
+android.release.arm64 = "bin/libllama.gd.android.release.arch64.so"
