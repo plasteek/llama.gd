@@ -1,5 +1,6 @@
 #include "conversion.hpp"
 #include "llamagd.hpp"
+#include <stdexcept>
 
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/classes/mutex.hpp>
@@ -16,6 +17,8 @@ namespace godot
       ADD_SIGNAL(MethodInfo("model_loaded"));
       ADD_SIGNAL(MethodInfo("model_load_failed"));
       ADD_SIGNAL(MethodInfo("new_token_generated", PropertyInfo(Variant::STRING, "token")));
+      ADD_SIGNAL(MethodInfo("generation_completed", PropertyInfo(Variant::STRING, "result")));
+      ADD_SIGNAL(MethodInfo("generation_failed", PropertyInfo(Variant::STRING, "msg")));
 
       // Below here are just godot getter and setters
       ClassDB::bind_method(D_METHOD("get_model_path"), &LlamaGD::get_model_path);
@@ -111,6 +114,7 @@ namespace godot
       params = gpt_params();
       should_output_bos = true;
       should_output_eos = true;
+      backend_initialized = false;
 
       generation_mutex.instantiate();
       function_call_mutex.instantiate();
@@ -118,27 +122,70 @@ namespace godot
       text_generation_thread.instantiate();
       model_loader_thread.instantiate();
 
-      // Todo: might not wanna do this
-      // To instantiate the llama backend
+      // TODO: not sure if we should put this on the constructor
+      init_backend();
+   }
+   void LlamaGD::init_backend()
+   {
+      if (backend_initialized)
+         return;
+      backend_initialized = true;
       llama_backend_init();
       llama_numa_init(params.numa);
    }
    LlamaGD::~LlamaGD()
    {
-      // Just in case not unloaded
+      cleanup();
+   }
+   void LlamaGD::_exit_tree()
+   {
+      cleanup();
+   }
+   void LlamaGD::cleanup()
+   {
+      // Make sure no other function runs (if possible)
+      function_call_mutex->try_lock();
+
+      // If there is a running worker (meaning working is not null pointer)
+      // (Note that this is kind of an overkill but assume there can be multiple
+      // worker in the future or something). We stop it and wait.
+      if (worker != nullptr || !generation_mutex->try_lock())
+      {
+         // Stop the worker and let the function clean it up
+         worker->stop();
+      }
+
+      // Properly cleanup the threads
+      if (model_loader_thread->is_started())
+         model_loader_thread->wait_to_finish();
+      if (text_generation_thread->is_started())
+         text_generation_thread->wait_to_finish();
+
       unload_model();
-      // Free everything tthat is not freed
       llama_backend_free();
    }
    void LlamaGD::load_model()
    {
-      // TODO: maybe lock the params when the model is finally loaded
-      // Unlocked when loading failed or success
       function_call_mutex->lock();
+
+      if (!backend_initialized)
+      {
+         init_backend();
+      }
+
+      // Is a model is loaded, don't do anything
+      if (model != nullptr)
+      {
+         UtilityFunctions::push_error("Model is already loaded, please unload before using");
+         function_call_mutex->unlock();
+         return;
+      }
+      // Unlocked when loading failed or success
       model_loader_thread->start(callable_mp(this, &LlamaGD::load_model_impl));
    }
    void LlamaGD::load_model_impl()
    {
+      // NOTE: the lock is in the main thread call
       // What the hell?
       // dedicate one sequence to the system prompt
       params.n_parallel += 1;
@@ -149,6 +196,7 @@ namespace godot
       if (model == nullptr)
       {
          LOG("Unable to load model");
+         UtilityFunctions::push_error("Cannot load model");
          emit_signal("model_load_failed");
          function_call_mutex->unlock();
       }
@@ -165,12 +213,21 @@ namespace godot
    }
    void LlamaGD::unload_model()
    {
+      function_call_mutex->lock();
+
       llama_free_model(model);
       llama_free(ctx);
+
+      function_call_mutex->unlock();
+   }
+   bool LlamaGD::is_model_loaded()
+   {
+      return model != nullptr;
    }
    bool LlamaGD::is_params_locked()
    {
-      return model == nullptr;
+      // Might add more constraint to when locking params
+      return is_model_loaded();
    }
    bool LlamaGD::should_block_setting_param()
    {
@@ -181,17 +238,70 @@ namespace godot
       }
       return false;
    }
+
+   void LlamaGD::create_completion_async(String prompt)
+   {
+      text_generation_thread->start(callable_mp(this, create_completion).bind(prompt));
+   }
    String LlamaGD::create_completion(String prompt)
    {
       function_call_mutex->lock();
+
+      if (!is_model_loaded())
+      {
+         UtilityFunctions::push_error("Please load the model before creating completion");
+         function_call_mutex->unlock();
+         return "";
+      }
+
+      generation_mutex->lock();
 
       std::string normalized_prompt = string_gd_to_std(prompt);
       std::string prompt_payload = normalized_prompt;
       prompt_payload = params.input_prefix + normalized_prompt + params.input_suffix;
 
-      // Prompt has been prepared, run the generation!
+      // Create worker and run
+      prepare_worker();
+      String completion_result = "";
+      try
+      {
+         auto completion = worker->run(prompt_payload);
+         completion_result = string_std_to_gd(completion);
+      }
+      catch (std::runtime_error err)
+      {
+         std::string msg(err.what());
+         String normalized_msg = string_std_to_gd(msg);
+         UtilityFunctions::push_error(normalized_msg);
+         call_deferred("emit_signal", "generation_failed", normalized_msg);
+      }
 
+      // Free after use
+      delete worker;
+
+      generation_mutex->unlock();
+
+      // Prompt has been prepared, run the generation!
       function_call_mutex->unlock();
+      call_deferred("emit_signal", "generation_completed", completion_result);
+      return completion_result;
+   }
+   LlamaWorker *LlamaGD::prepare_worker()
+   {
+      worker = new LlamaWorker(
+          model,
+          ctx,
+          &params);
+
+      worker->output_eos = should_output_eos;
+      worker->output_bos = should_output_bos;
+      // Attach the signal listener
+      worker->on_new_token = [this](std::string new_token)
+      {
+         call_deferred("emit_signal", "new_token_generated", string_std_to_gd(new_token));
+      };
+
+      return worker;
    }
 
    // Below here are godot getter and setters
@@ -219,7 +329,6 @@ namespace godot
    {
       return string_std_to_gd(params.input_prefix);
    };
-
    void LlamaGD::set_input_prefix(const String p_input_prefix)
    {
       if (should_block_setting_param())
@@ -231,7 +340,6 @@ namespace godot
    {
       return string_std_to_gd(params.input_suffix);
    };
-
    void LlamaGD::set_input_suffix(const String p_input_suffix)
    {
       if (should_block_setting_param())
@@ -243,7 +351,6 @@ namespace godot
    {
       return should_output_bos;
    };
-
    void LlamaGD::set_should_output_bos(const bool p_should_output_bos)
    {
       if (should_block_setting_param())
@@ -255,7 +362,6 @@ namespace godot
    {
       return should_output_eos;
    };
-
    void LlamaGD::set_should_output_eos(const bool p_should_output_eos)
    {
       if (should_block_setting_param())
@@ -267,7 +373,6 @@ namespace godot
    {
       return params.n_ctx;
    }
-
    void LlamaGD::set_n_ctx(const int32_t p_n_ctx)
    {
       if (should_block_setting_param())
@@ -279,7 +384,6 @@ namespace godot
    {
       return params.n_predict;
    }
-
    void LlamaGD::set_n_predict(const int32_t p_n_predict)
    {
       if (should_block_setting_param())
@@ -291,7 +395,6 @@ namespace godot
    {
       return params.n_keep;
    }
-
    void LlamaGD::set_n_keep(const int32_t p_n_keep)
    {
       if (should_block_setting_param())
@@ -303,7 +406,6 @@ namespace godot
    {
       return params.sparams.temp;
    }
-
    void LlamaGD::set_temperature(const float p_temperature)
    {
       if (should_block_setting_param())
@@ -315,7 +417,6 @@ namespace godot
    {
       return params.sparams.penalty_repeat;
    }
-
    void LlamaGD::set_penalty_repeat(const float p_penalty_repeat)
    {
       if (should_block_setting_param())
@@ -327,7 +428,6 @@ namespace godot
    {
       return params.sparams.penalty_last_n;
    }
-
    void LlamaGD::set_penalty_last_n(const int32_t p_penalty_last_n)
    {
       if (should_block_setting_param())
@@ -339,7 +439,6 @@ namespace godot
    {
       return params.sparams.penalize_nl;
    }
-
    void LlamaGD::set_penalize_nl(const bool p_penalize_nl)
    {
       if (should_block_setting_param())
@@ -351,7 +450,6 @@ namespace godot
    {
       return params.sparams.top_k;
    }
-
    void LlamaGD::set_top_k(const int32_t p_top_k)
    {
       if (should_block_setting_param())
@@ -363,7 +461,6 @@ namespace godot
    {
       return params.sparams.top_p;
    }
-
    void LlamaGD::set_top_p(const float p_top_p)
    {
       if (should_block_setting_param())
@@ -375,7 +472,6 @@ namespace godot
    {
       return params.sparams.min_p;
    }
-
    void LlamaGD::set_min_p(const float p_min_p)
    {
       if (should_block_setting_param())
@@ -387,7 +483,6 @@ namespace godot
    {
       return params.n_threads;
    }
-
    void LlamaGD::set_n_threads(const int32_t p_n_threads)
    {
       if (should_block_setting_param())
@@ -399,7 +494,6 @@ namespace godot
    {
       return params.n_gpu_layers;
    }
-
    void LlamaGD::set_n_gpu_layer(const int32_t p_n_gpu_layers)
    {
       if (should_block_setting_param())
@@ -411,7 +505,6 @@ namespace godot
    {
       return params.escape;
    }
-
    void LlamaGD::set_escape(const bool p_escape)
    {
       if (should_block_setting_param())
@@ -423,7 +516,6 @@ namespace godot
    {
       return params.n_batch;
    }
-
    void LlamaGD::set_n_batch(const int32_t p_n_batch)
    {
       if (should_block_setting_param())
@@ -435,7 +527,6 @@ namespace godot
    {
       return params.n_ubatch;
    }
-
    void LlamaGD::set_n_ubatch(const int32_t p_n_ubatch)
    {
       if (should_block_setting_param())

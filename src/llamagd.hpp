@@ -5,6 +5,7 @@
 #include <godot_cpp/classes/thread.hpp>
 #include <godot_cpp/classes/mutex.hpp>
 #include <common/common.h>
+#include "llama_worker.hpp"
 
 namespace godot
 {
@@ -12,25 +13,31 @@ namespace godot
    {
       GDCLASS(LlamaGD, Node)
    private:
-      // Generation
-      Ref<Mutex> generation_mutex;
       // Calling a function should not be able to be
       // done concurrently (generating text and load model)
       Ref<Mutex> function_call_mutex;
-      Ref<Mutex> model_loader_mutex;
+      Ref<Mutex> generation_mutex;
       Ref<Thread> text_generation_thread;
       Ref<Thread> model_loader_thread;
       struct gpt_params params;
+      // Pointers because that's what the llama library returns
       struct llama_context *ctx;
       struct llama_model *model;
+
+      LlamaWorker *worker;
+
       bool should_output_bos;
       bool should_output_eos;
+      bool backend_initialized;
 
       // Implementation for loading the model
       // and notifying godot through signal
+      void cleanup();
+      void init_backend();
       void load_model_impl();
       bool is_params_locked();
       bool should_block_setting_param();
+      LlamaWorker *prepare_worker();
 
    protected:
       static void _bind_methods();
@@ -41,7 +48,12 @@ namespace godot
       // Starts a thread to load the model async
       void load_model();
       void unload_model();
+      bool is_model_loaded();
+
       String create_completion(String prompt);
+      void create_completion_async(String prompt);
+
+      void _exit_tree() override;
 
       // Getter-setters for godot attributes
       // Error run_create_completion(String prompt);
