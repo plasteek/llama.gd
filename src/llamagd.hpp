@@ -4,7 +4,9 @@
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/thread.hpp>
 #include <godot_cpp/classes/mutex.hpp>
-#include <common/common.h>
+#include <godot_cpp/variant/string.hpp>
+
+#include <common.h>
 #include "llama_worker.hpp"
 
 namespace godot
@@ -19,11 +21,10 @@ namespace godot
       Ref<Mutex> generation_mutex;
       Ref<Thread> text_generation_thread;
       Ref<Thread> model_loader_thread;
-      struct gpt_params params;
+      gpt_params params;
       // Pointers because that's what the llama library returns
-      struct llama_context *ctx;
-      struct llama_model *model;
-
+      llama_context *ctx;
+      llama_model *model;
       LlamaWorker *worker;
 
       bool should_output_bos;

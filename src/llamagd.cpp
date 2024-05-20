@@ -2,24 +2,23 @@
 #include "llamagd.hpp"
 #include <stdexcept>
 
-#include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/classes/mutex.hpp>
+#include <godot_cpp/classes/global_constants.hpp>
 
-#include <string>
+#include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/variant/string.hpp>
+#include <godot_cpp/variant/callable.hpp>
+#include <godot_cpp/variant/callable_method_pointer.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
+
 #include <llama.h>
+#include <string>
 #include <common.h>
 
 namespace godot
 {
    void LlamaGD::_bind_methods()
    {
-
-      ADD_SIGNAL(MethodInfo("model_loaded"));
-      ADD_SIGNAL(MethodInfo("model_load_failed"));
-      ADD_SIGNAL(MethodInfo("new_token_generated", PropertyInfo(Variant::STRING, "token")));
-      ADD_SIGNAL(MethodInfo("generation_completed", PropertyInfo(Variant::STRING, "result")));
-      ADD_SIGNAL(MethodInfo("generation_failed", PropertyInfo(Variant::STRING, "msg")));
-
       // Below here are just godot getter and setters
       ClassDB::bind_method(D_METHOD("get_model_path"), &LlamaGD::get_model_path);
       ClassDB::bind_method(D_METHOD("set_model_path"), &LlamaGD::set_model_path);
@@ -104,6 +103,12 @@ namespace godot
       ClassDB::bind_method(D_METHOD("get_n_ubatch"), &LlamaGD::get_n_ubatch);
       ClassDB::bind_method(D_METHOD("set_n_ubatch", "p_n_ubatch"), &LlamaGD::set_n_ubatch);
       ClassDB::add_property("LlamaGD", PropertyInfo(Variant::INT, "n_ubatch", PROPERTY_HINT_NONE), "set_n_ubatch", "get_n_ubatch");
+
+      ADD_SIGNAL(MethodInfo("model_loaded"));
+      ADD_SIGNAL(MethodInfo("model_load_failed"));
+      ADD_SIGNAL(MethodInfo("new_token_generated", PropertyInfo(Variant::STRING, "token")));
+      ADD_SIGNAL(MethodInfo("generation_completed", PropertyInfo(Variant::STRING, "result")));
+      ADD_SIGNAL(MethodInfo("generation_failed", PropertyInfo(Variant::STRING, "msg")));
    }
    LlamaGD::LlamaGD()
    {
@@ -111,6 +116,10 @@ namespace godot
       should_output_bos = true;
       should_output_eos = true;
       backend_initialized = false;
+
+      ctx = nullptr;
+      model = nullptr;
+      worker = nullptr;
 
       generation_mutex.instantiate();
       function_call_mutex.instantiate();

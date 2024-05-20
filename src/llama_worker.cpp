@@ -5,7 +5,6 @@
 #include <string>
 #include <cmath>
 #include <stdexcept>
-#include <algorithm>
 
 // Black magic from the llama.cpp main app
 #if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
@@ -35,7 +34,6 @@ LlamaWorker::LlamaWorker(
    output_eos = true;
    output_bos = false;
    should_yield = false;
-
    // Default on_new_token that does absolutely nothing
    on_new_token = [this](std::string token) {
    };

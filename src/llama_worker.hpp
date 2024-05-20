@@ -1,10 +1,9 @@
-#include <string>
-#include <llama.h>
-#include <functional>
-#include <common.h>
-
 #ifndef LLAMA_WORKER_TYPES
 #define LLAMA_WORKER_TYPES
+
+#include <string>
+#include <functional>
+#include <common.h>
 
 // Runner steps:
 // 1. Setup the runner parameters
