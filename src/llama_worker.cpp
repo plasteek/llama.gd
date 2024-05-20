@@ -5,6 +5,7 @@
 #include <string>
 #include <cmath>
 #include <stdexcept>
+#include <algorithm>
 
 // Black magic from the llama.cpp main app
 #if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
