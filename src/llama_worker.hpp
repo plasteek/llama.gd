@@ -20,7 +20,6 @@ private:
 
    bool output_bos; // TODO: export this and token new somehow
    bool output_eos;
-   bool await_input;
 
    bool file_exists(const std::string path);
    bool file_is_empty(const std::string path);

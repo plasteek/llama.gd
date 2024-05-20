@@ -31,7 +31,8 @@ LlamaWorker::LlamaWorker(
    model = loaded_model;
    params = *locked_params;
 
-   await_input = false;
+   output_eos = true;
+   output_bos = false;
    should_yield = false;
 
    // Default on_new_token that does absolutely nothing
