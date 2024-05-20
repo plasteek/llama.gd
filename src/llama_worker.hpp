@@ -32,6 +32,8 @@ public:
        llama_model *loaded_model,
        llama_context *loaded_ctx,
        gpt_params *locked_params);
+   void set_output_bos(bool enabled);
+   void set_output_eos(bool enabled);
    void listen_for_new_token(std::function<void(std::string)>);
    // NOTICE: might throw error
    std::string run(std::string prompt);

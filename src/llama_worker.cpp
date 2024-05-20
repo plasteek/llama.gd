@@ -40,6 +40,15 @@ LlamaWorker::LlamaWorker(
    };
 }
 
+void LlamaWorker::set_output_bos(bool enable)
+{
+   output_bos = enable;
+}
+void LlamaWorker::set_output_eos(bool enable)
+{
+   output_eos = enable;
+}
+
 void LlamaWorker::listen_for_new_token(std::function<void(std::string)> callback)
 {
    on_new_token = callback;
