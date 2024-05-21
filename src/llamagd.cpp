@@ -116,6 +116,10 @@ namespace godot
       ClassDB::bind_method(D_METHOD("get_n_ubatch"), &LlamaGD::get_n_ubatch);
       ClassDB::bind_method(D_METHOD("set_n_ubatch", "p_n_ubatch"), &LlamaGD::set_n_ubatch);
       ClassDB::add_property("LlamaGD", PropertyInfo(Variant::INT, "n_ubatch", PROPERTY_HINT_NONE), "set_n_ubatch", "get_n_ubatch");
+
+      ClassDB::bind_method(D_METHOD("get_verbose"), &LlamaGD::get_verbose);
+      ClassDB::bind_method(D_METHOD("set_verbose", "p_n_ubatch"), &LlamaGD::set_verbose);
+      ClassDB::add_property("LlamaGD", PropertyInfo(Variant::BOOL, "verbose", PROPERTY_HINT_NONE), "set_verbose", "get_verbose");
    }
    LlamaGD::LlamaGD()
    {
@@ -123,6 +127,7 @@ namespace godot
       should_output_bos = true;
       should_output_eos = true;
       backend_initialized = false;
+      verbose = false;
 
       ctx = nullptr;
       model = nullptr;
@@ -133,6 +138,11 @@ namespace godot
 
       text_generation_thread.instantiate();
       model_loader_thread.instantiate();
+   }
+   void LlamaGD::log(std::string msg)
+   {
+      if (!verbose)
+         UtilityFunctions::print(msg.c_str());
    }
    void LlamaGD::init_backend()
    {
@@ -541,5 +551,14 @@ namespace godot
       if (should_block_setting_param())
          return;
       params.n_ubatch = p_n_ubatch;
+   }
+
+   bool LlamaGD::get_verbose() const
+   {
+      return verbose;
+   }
+   void LlamaGD::set_verbose(bool enabled)
+   {
+      verbose = enabled;
    }
 }

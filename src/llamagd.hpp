@@ -17,6 +17,7 @@ namespace godot
    private:
       // Calling a function should not be able to be
       // done concurrently (generating text and load model)
+      bool verbose;
       Ref<Mutex> function_call_mutex;
       Ref<Mutex> generation_mutex;
       Ref<Thread> text_generation_thread;
@@ -30,13 +31,12 @@ namespace godot
       bool should_output_eos;
       bool backend_initialized;
 
-      // Implementation for loading the model
-      // and notifying godot through signal
       void cleanup();
       void init_backend();
       void load_model_impl();
       bool is_params_locked();
       bool should_block_setting_param();
+      void log(std::string msg);
       LlamaWorker *prepare_worker();
 
    protected:
@@ -119,6 +119,9 @@ namespace godot
 
       int32_t get_n_ubatch() const;
       void set_n_ubatch(const int32_t p_n_ubatch);
+
+      bool get_verbose() const;
+      void set_verbose(bool enabled);
    };
 }
 
