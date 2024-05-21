@@ -206,7 +206,7 @@ namespace godot
       {
          LOG("Unable to load model");
          UtilityFunctions::push_error("Cannot load model");
-         emit_signal("model_load_failed");
+         call_deferred("emit_signal", "model_load_failed");
          function_call_mutex->unlock();
       }
 
@@ -217,7 +217,7 @@ namespace godot
       // params.n_ctx = llama_n_ctx(ctx);
 
       GGML_ASSERT(llama_add_eos_token(model) != 1);
-      emit_signal("model_loaded");
+      call_deferred("emit_signal", "model_loaded");
       function_call_mutex->unlock();
    }
    void LlamaGD::unload_model()
