@@ -14,6 +14,7 @@
 #include <llama.h>
 #include <string>
 #include <common.h>
+#include <vector>
 
 namespace godot
 {
@@ -263,6 +264,23 @@ namespace godot
       };
 
       return worker;
+   }
+
+   // Llama methods we extend to godot
+   // We use Array because godot typed array usually not great
+   Array LlamaGD::tokenize(const String prompt)
+   {
+      if (model != nullptr)
+      {
+
+         std::string payload = string_gd_to_std(prompt);
+         auto tokens = ::llama_tokenize(model, payload, true, true);
+         return int_vec_to_gd_arr(tokens);
+      }
+
+      /// Return empty array if model is not loaded
+      UtilityFunctions::push_error("Cannot tokenize. Model has not been loaded");
+      return Array();
    }
 
    // Below here are godot getter and setters

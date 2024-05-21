@@ -3,6 +3,10 @@
 #include <vector>
 #include <godot_cpp/variant/packed_float32_array.hpp>
 #include <godot_cpp/variant/string.hpp>
+#include <godot_cpp/variant/array.hpp>
+#include <godot_cpp/variant/variant.hpp>
+#include <godot_cpp/core/memory.hpp>
+#include <stdexcept>
 
 namespace godot
 {
@@ -25,6 +29,34 @@ namespace godot
             array.push_back(f);
         }
         return array;
+    }
+
+    std::vector<int> gd_arr_to_int_vec(Array arr)
+    {
+        std::vector<int> vec;
+        for (int i = 0; i < arr.size(); i++)
+        {
+            Variant item = arr[i];
+            auto item_type = item.get_type();
+
+            if (item_type != Variant::INT)
+                throw std::runtime_error("An item in the array is not an int");
+
+            vec.emplace_back((int)item);
+        }
+
+        return vec;
+    }
+
+    Array int_vec_to_gd_arr(std::vector<int> vec)
+    {
+        Array arr = Array();
+        for (const int &item : vec)
+        {
+            arr.append(item);
+        }
+
+        return arr;
     }
 
     std::string string_gd_to_std(String s)

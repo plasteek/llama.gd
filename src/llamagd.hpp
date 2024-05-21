@@ -53,6 +53,7 @@ namespace godot
 
       String create_completion(String prompt);
       void create_completion_async(String prompt);
+      Array tokenize(const String prompt);
 
       void _exit_tree() override;
 
