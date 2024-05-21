@@ -35,6 +35,8 @@ public:
    ~LlamaWorker();
    // NOTICE: might throw error
    std::string run(std::string prompt);
+   // More direct token prediction
+   std::string predict(std::vector<llama_token> tokens);
    void stop();
 };
 

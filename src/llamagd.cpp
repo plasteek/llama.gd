@@ -30,6 +30,8 @@ namespace godot
       // Primary generation method
       ClassDB::bind_method(D_METHOD("create_completion", "prompt"), &LlamaGD::create_completion);
       ClassDB::bind_method(D_METHOD("create_completion_async", "prompt"), &LlamaGD::create_completion_async);
+      ClassDB::bind_method(D_METHOD("tokenize", "prompt"), &LlamaGD::tokenize);
+      ClassDB::bind_method(D_METHOD("predict_sequence", "tokens"), &LlamaGD::predict_sequence);
       ClassDB::bind_method(D_METHOD("load_model"), &LlamaGD::load_model);
       ClassDB::bind_method(D_METHOD("unload_model"), &LlamaGD::unload_model);
       ClassDB::bind_method(D_METHOD("is_model_loaded"), &LlamaGD::is_model_loaded);
@@ -193,28 +195,34 @@ namespace godot
 
    void LlamaGD::create_completion_async(String prompt)
    {
-      log("Starting generation thread");
+      await_generation_thread();
       text_generation_thread->start(callable_mp(this, &LlamaGD::create_completion).bind(prompt));
+   }
+   void LlamaGD::await_generation_thread()
+   {
+      // This guaranteed that one function uses one thread at a time
+      // We treat the generation mutex as a representation of the thread work
+      // Hence as a shared resource that has to be protected
+      function_call_mutex->lock();
+      if (!generation_mutex->try_lock())
+      {
+         // Unlocked by the sync process of the caller
+         log("Another generation running. Waiting.");
+         generation_mutex->lock();
+      }
+      function_call_mutex->unlock();
    }
    String LlamaGD::create_completion(String prompt)
    {
-      if (!function_call_mutex->try_lock())
-      {
-         log("Another generation running. Waiting");
-         function_call_mutex->lock();
-      }
 
       if (!is_model_loaded())
       {
          log("Model not loaded before generating completion. Aborting");
          UtilityFunctions::push_error("Please load the model before creating completion");
-         function_call_mutex->unlock();
          return "";
       }
 
-      generation_mutex->lock();
       log("Start generation process");
-
       log("Pre-processing prompt");
       std::string normalized_prompt = string_gd_to_std(prompt);
       std::string prompt_payload = normalized_prompt;
@@ -242,10 +250,9 @@ namespace godot
       log("Completion successful. Releasing worker");
       delete worker;
 
+      // Free up generation if this uses mutex
       generation_mutex->unlock();
 
-      // Prompt has been prepared, run the generation!
-      function_call_mutex->unlock();
       call_deferred("emit_signal", "generation_completed", completion_result);
       return completion_result;
    }
@@ -271,7 +278,7 @@ namespace godot
    // We use Array because godot typed array usually not great
    Array LlamaGD::tokenize(const String prompt)
    {
-      if (model != nullptr)
+      if (!is_model_loaded())
       {
 
          std::string payload = string_gd_to_std(prompt);
@@ -282,6 +289,49 @@ namespace godot
       /// Return empty array if model is not loaded
       UtilityFunctions::push_error("Cannot tokenize. Model has not been loaded");
       return Array();
+   }
+   // More direct token based approach
+   void LlamaGD::predict_sequence_async(Array tokens)
+   {
+      await_generation_thread();
+      text_generation_thread->start(callable_mp(this, &LlamaGD::predict_sequence).bind(tokens));
+   }
+   String LlamaGD::predict_sequence(Array tokens)
+   {
+      log("Starting token prediction");
+
+      if (!is_model_loaded())
+      {
+         log("Model not loaded. Aborting");
+         UtilityFunctions::push_error("Model is not loaded, cannot predict next sequence");
+         return "";
+      }
+
+      String prediction_result = "";
+      try
+      {
+         log("Converting GD Array to Vector");
+         std::vector<llama_token> payload = gd_arr_to_int_vec(tokens);
+
+         log("Preparing worker");
+         prepare_worker();
+         std::string result = worker->predict(payload);
+         prediction_result = string_std_to_gd(result);
+      }
+      catch (std::runtime_error err)
+      {
+         log("Error while predicting tokens. Aborting");
+         std::string msg(err.what());
+         String normalized_msg = string_std_to_gd(msg);
+         UtilityFunctions::push_error(normalized_msg);
+         call_deferred("emit_signal", "generation_failed", normalized_msg);
+      }
+      log("Cleaning up worker");
+      delete worker;
+
+      // Ensure we cleanup mutex if we used a thread
+      generation_mutex->unlock();
+      return prediction_result;
    }
 
    // Below here are godot getter and setters

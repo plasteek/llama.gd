@@ -61,13 +61,18 @@ void LlamaWorker::stop()
    should_yield = true;
 }
 
-// This long function is direct implementation from the main.cpp
-// TODO(MAYBE): strip down the function
 std::string LlamaWorker::run(std::string prompt)
+{
+   (*params).prompt = prompt;
+   auto tokens = ::llama_tokenize(model, prompt, true, true);
+   return predict(tokens);
+}
+
+// This long function is direct implementation from the main.cpp
+std::string LlamaWorker::predict(std::vector<llama_token> tokens)
 {
    // NOTE: the comments contains my version of what the hell is going on
    // Append the prompt
-   (*params).prompt = prompt;
    std::string generated_text = "";
 
    // Needed llama_context
@@ -123,9 +128,10 @@ std::string LlamaWorker::run(std::string prompt)
    LOG("add_bos: %d\n", add_bos);
 
    // Tokenize the prompt
-   std::vector<llama_token> embd_inp = ::llama_tokenize(ctx, (*params).prompt, true, true);
+   std::vector<llama_token> embd_inp = tokens;
 
-   LOG("prompt: \"%s\"\n", log_tostr((*params).prompt));
+   // TODO: because the prompt is optional and we only have token
+   // LOG("prompt: \"%s\"\n", log_tostr((*params).prompt));
    LOG("tokens: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd_inp).c_str());
 
    // If the prompt is empty, add starting token
@@ -146,7 +152,7 @@ std::string LlamaWorker::run(std::string prompt)
       guidance_inp = ::llama_tokenize(ctx_guidance, sparams.cfg_negative_prompt, true, true);
       LOG("guidance_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_guidance, guidance_inp).c_str());
 
-      std::vector<llama_token> original_inp = ::llama_tokenize(ctx, (*params).prompt, true, true);
+      std::vector<llama_token> original_inp = tokens;
       LOG("original_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, original_inp).c_str());
 
       original_prompt_len = original_inp.size();
@@ -175,7 +181,7 @@ std::string LlamaWorker::run(std::string prompt)
    if ((*params).verbose_prompt)
    {
       LOG_TEE("\n");
-      LOG_TEE("%s: prompt: '%s'\n", __func__, (*params).prompt.c_str());
+      // LOG_TEE("%s: prompt: '%s'\n", __func__, (*params).prompt.c_str());
       LOG_TEE("%s: number of tokens in prompt = %zu\n", __func__, embd_inp.size());
       for (int i = 0; i < (int)embd_inp.size(); i++)
       {

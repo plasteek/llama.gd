@@ -53,7 +53,10 @@ namespace godot
 
       String create_completion(String prompt);
       void create_completion_async(String prompt);
+      String predict_sequence(Array tokens);
+      void predict_sequence_async(Array tokens);
       Array tokenize(const String prompt);
+      void await_generation_thread();
 
       void _exit_tree() override;
 
