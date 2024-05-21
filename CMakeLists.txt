@@ -87,3 +87,8 @@ else()
   )
 endif()
 install(FILES "extern/llama.gd.gdextension" DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/addons/llama.gd/)
+
+# Automatically install to demo too if exist
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/demo)
+  install(DIRECTORY "install/addons" DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/demo)
+endif()
