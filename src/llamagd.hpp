@@ -22,7 +22,6 @@ namespace godot
       Ref<Thread> text_generation_thread;
       Ref<Thread> model_loader_thread;
       gpt_params params;
-      // Pointers because that's what the llama library returns
       llama_context *ctx;
       llama_model *model;
       LlamaWorker *worker;
