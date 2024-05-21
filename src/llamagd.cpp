@@ -5,6 +5,7 @@
 #include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/classes/global_constants.hpp>
 
+#include <godot_cpp/core/object.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/callable.hpp>
@@ -298,7 +299,7 @@ namespace godot
 
       ClassDB::bind_method(D_METHOD("get_input_suffix"), &LlamaGD::get_input_suffix);
       ClassDB::bind_method(D_METHOD("set_input_suffix", "suffix"), &LlamaGD::set_input_suffix);
-      ADD_PROPERTY(PropertyInfo(Variant::STRING, "input_suffix", PROPERTY_HINT_MULTILINE_TEXT), "Append to the end of prompt", "set_input_suffix", "get_input_suffix");
+      ADD_PROPERTY(PropertyInfo(Variant::STRING, "input_suffix", PROPERTY_HINT_MULTILINE_TEXT, "Append to the end of prompt"), "set_input_suffix", "get_input_suffix");
 
       ADD_GROUP("Output Tokens", "");
       ClassDB::bind_method(D_METHOD("get_output_bos"), &LlamaGD::get_output_bos);
