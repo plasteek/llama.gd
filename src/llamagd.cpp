@@ -212,6 +212,9 @@ namespace godot
          generation_mutex->lock();
       }
       function_call_mutex->unlock();
+      // Make sure that the thread is on idle
+      if (text_generation_thread->is_started())
+         text_generation_thread->wait_to_finish();
    }
    String LlamaGD::create_completion(String prompt)
    {
