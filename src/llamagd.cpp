@@ -32,7 +32,7 @@ namespace godot
       ClassDB::bind_method(D_METHOD("unload_model"), &LlamaGD::unload_model);
       ClassDB::bind_method(D_METHOD("is_model_loaded"), &LlamaGD::is_model_loaded);
 
-      // Below here are just godot getter and setters
+      // Below here are just godot getters and setters
       ClassDB::bind_method(D_METHOD("get_model_path"), &LlamaGD::get_model_path);
       ClassDB::bind_method(D_METHOD("set_model_path"), &LlamaGD::set_model_path);
       ClassDB::add_property("LlamaGD", PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE), "set_model_path", "get_model_path");
