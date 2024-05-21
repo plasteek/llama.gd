@@ -41,6 +41,7 @@ namespace godot
 
    protected:
       static void _bind_methods();
+      static void _bind_panel_attributes();
 
    public:
       LlamaGD();
@@ -63,65 +64,65 @@ namespace godot
       bool get_flash_attn() const;
       void set_flash_attn(const bool enabled);
 
-      bool get_should_output_bos() const;
-      void set_should_output_bos(const bool p_should_output_bos);
+      bool get_output_bos() const;
+      void set_output_bos(const bool enabled);
 
-      bool get_should_output_eos() const;
-      void set_should_output_eos(const bool p_should_output_eos);
+      bool get_output_eos() const;
+      void set_output_eos(const bool enabled);
 
       String get_input_prefix() const;
-      void set_input_prefix(const String p_input_prefix);
+      void set_input_prefix(const String new_prefix);
 
       String get_input_suffix() const;
-      void set_input_suffix(const String p_input_suffix);
+      void set_input_suffix(const String new_suffix);
 
       int32_t get_n_ctx() const;
-      void set_n_ctx(const int32_t p_n_ctx);
+      void set_n_ctx(const int32_t n);
 
       int32_t get_n_predict() const;
-      void set_n_predict(const int32_t p_n_predict);
+      void set_n_predict(const int32_t n);
 
       int32_t get_n_keep() const;
-      void set_n_keep(const int32_t p_n_keep);
+      void set_n_keep(const int32_t n);
 
       float get_temperature() const;
-      void set_temperature(const float p_temperature);
+      void set_temperature(const float temperature);
 
       float get_penalty_repeat() const;
-      void set_penalty_repeat(const float p_penalty_repeat);
+      void set_penalty_repeat(const float penalty_value);
 
       int32_t get_penalty_last_n() const;
-      void set_penalty_last_n(const int32_t p_penalty_last_n);
+      void set_penalty_last_n(const int32_t total);
 
       bool get_penalize_nl() const;
-      void set_penalize_nl(const bool p_penalize_nl);
+      void set_penalize_nl(const bool penalty_value);
 
       int32_t get_top_k() const;
-      void set_top_k(const int32_t p_top_k);
+      void set_top_k(const int32_t k);
 
       float get_top_p() const;
-      void set_top_p(const float p_top_p);
+      void set_top_p(const float p);
 
       float get_min_p() const;
-      void set_min_p(const float p_min_p);
+      void set_min_p(const float p);
 
       int32_t get_n_threads() const;
-      void set_n_threads(const int32_t n_threads);
+      void set_n_threads(const int32_t n);
 
       int32_t get_n_gpu_layer() const;
-      void set_n_gpu_layer(const int32_t p_n_gpu_layers);
+      void set_n_gpu_layer(const int32_t n);
 
       bool get_escape() const;
-      void set_escape(const bool p_escape);
+      void set_escape(const bool enabled);
 
       int32_t get_n_batch() const;
-      void set_n_batch(const int32_t p_n_batch);
+      void set_n_batch(const int32_t n);
 
       int32_t get_n_ubatch() const;
-      void set_n_ubatch(const int32_t p_n_ubatch);
+      void set_n_ubatch(const int32_t n);
 
       bool get_verbose() const;
-      void set_verbose(bool enabled);
+      void set_verbose(const bool enabled);
    };
 }
 
