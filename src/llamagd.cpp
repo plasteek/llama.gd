@@ -60,22 +60,29 @@ namespace godot
    }
    void LlamaGD::init_backend()
    {
+      log("Initializing Llama.cpp Backend");
       if (backend_initialized)
+      {
+         log("Backend has been initialized. Aborting.");
          return;
+      }
       backend_initialized = true;
       llama_backend_init();
       llama_numa_init(params.numa);
    }
    LlamaGD::~LlamaGD()
    {
+      log("LlamaGD node deconstructor");
       cleanup();
    }
    void LlamaGD::_exit_tree()
    {
+      log("LlamaGD node left the tree");
       cleanup();
    }
    void LlamaGD::cleanup()
    {
+      log("Cleaning up LlamaGD module");
       // Make sure no other function runs (if possible)
       function_call_mutex->try_lock();
 
@@ -84,36 +91,43 @@ namespace godot
       // worker in the future or something). We stop it and wait.
       if (worker != nullptr || !generation_mutex->try_lock())
       {
-         // Stop the worker and let the function clean it up
+         log("A running worker detected. Stopping work forcefully");
+         // Stop the worker and let the calling function clean it up
          worker->stop();
       }
 
       // Properly cleanup the threads
+      log("Waiting threads to finish running");
       if (model_loader_thread->is_started())
          model_loader_thread->wait_to_finish();
       if (text_generation_thread->is_started())
          text_generation_thread->wait_to_finish();
 
+      log("Freeing llama backends and model");
       unload_model();
       llama_backend_free();
    }
    void LlamaGD::load_model()
    {
       function_call_mutex->lock();
+      log("Attempting to load model");
 
       if (!backend_initialized)
       {
+         log("Backend has not been initialized. Initializing");
          init_backend();
       }
 
       // Is a model is loaded, don't do anything
       if (model != nullptr)
       {
+         log("Another model has been loaded. Aborting");
          UtilityFunctions::push_error("Model is already loaded, please unload before using");
          function_call_mutex->unlock();
          return;
       }
       // Unlocked when loading failed or success
+      log("Beginning to load model in another thread");
       model_loader_thread->start(callable_mp(this, &LlamaGD::load_model_impl));
    }
    void LlamaGD::load_model_impl()
@@ -128,10 +142,11 @@ namespace godot
 
       if (model == nullptr)
       {
-         LOG("Unable to load model");
+         log("Unable to load model");
          UtilityFunctions::push_error("Cannot load model");
          call_deferred("emit_signal", "model_load_failed");
          function_call_mutex->unlock();
+         return;
       }
 
       // We don't want to use the model default
@@ -140,6 +155,7 @@ namespace godot
       // Might be important but LOL
       // params.n_ctx = llama_n_ctx(ctx);
 
+      log("Model loaded successfully");
       GGML_ASSERT(llama_add_eos_token(model) != 1);
       call_deferred("emit_signal", "model_loaded");
       function_call_mutex->unlock();
@@ -148,6 +164,7 @@ namespace godot
    {
       function_call_mutex->lock();
 
+      log("Freeing model and context");
       llama_free_model(model);
       llama_free(ctx);
 
@@ -174,35 +191,45 @@ namespace godot
 
    void LlamaGD::create_completion_async(String prompt)
    {
+      log("Starting generation thread");
       text_generation_thread->start(callable_mp(this, &LlamaGD::create_completion).bind(prompt));
    }
    String LlamaGD::create_completion(String prompt)
    {
-      function_call_mutex->lock();
+      if (!function_call_mutex->try_lock())
+      {
+         log("Another generation running. Waiting");
+         function_call_mutex->lock();
+      }
 
       if (!is_model_loaded())
       {
+         log("Model not loaded before generating completion. Aborting");
          UtilityFunctions::push_error("Please load the model before creating completion");
          function_call_mutex->unlock();
          return "";
       }
 
       generation_mutex->lock();
+      log("Start generation process");
 
+      log("Pre-processing prompt");
       std::string normalized_prompt = string_gd_to_std(prompt);
       std::string prompt_payload = normalized_prompt;
       prompt_payload = params.input_prefix + normalized_prompt + params.input_suffix;
 
-      // Create worker and run
+      log("Initializing llama worker");
       prepare_worker();
       String completion_result = "";
       try
       {
+         log("Running completion");
          auto completion = worker->run(prompt_payload);
          completion_result = string_std_to_gd(completion);
       }
       catch (std::runtime_error err)
       {
+         log("Error while creating completion. Aborting");
          std::string msg(err.what());
          String normalized_msg = string_std_to_gd(msg);
          UtilityFunctions::push_error(normalized_msg);
@@ -210,6 +237,7 @@ namespace godot
       }
 
       // Free after use
+      log("Completion successful. Releasing worker");
       delete worker;
 
       generation_mutex->unlock();
