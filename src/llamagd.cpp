@@ -19,6 +19,19 @@ namespace godot
 {
    void LlamaGD::_bind_methods()
    {
+      ADD_SIGNAL(MethodInfo("model_loaded"));
+      ADD_SIGNAL(MethodInfo("model_load_failed"));
+      ADD_SIGNAL(MethodInfo("new_token_generated", PropertyInfo(Variant::STRING, "token")));
+      ADD_SIGNAL(MethodInfo("generation_completed", PropertyInfo(Variant::STRING, "result")));
+      ADD_SIGNAL(MethodInfo("generation_failed", PropertyInfo(Variant::STRING, "msg")));
+
+      // Primary generation method
+      ClassDB::bind_method(D_METHOD("create_completion", "prompt"), &LlamaGD::create_completion);
+      ClassDB::bind_method(D_METHOD("create_completion_async", "prompt"), &LlamaGD::create_completion_async);
+      ClassDB::bind_method(D_METHOD("load_model"), &LlamaGD::load_model);
+      ClassDB::bind_method(D_METHOD("unload_model"), &LlamaGD::unload_model);
+      ClassDB::bind_method(D_METHOD("is_model_loaded"), &LlamaGD::is_model_loaded);
+
       // Below here are just godot getter and setters
       ClassDB::bind_method(D_METHOD("get_model_path"), &LlamaGD::get_model_path);
       ClassDB::bind_method(D_METHOD("set_model_path"), &LlamaGD::set_model_path);
@@ -103,12 +116,6 @@ namespace godot
       ClassDB::bind_method(D_METHOD("get_n_ubatch"), &LlamaGD::get_n_ubatch);
       ClassDB::bind_method(D_METHOD("set_n_ubatch", "p_n_ubatch"), &LlamaGD::set_n_ubatch);
       ClassDB::add_property("LlamaGD", PropertyInfo(Variant::INT, "n_ubatch", PROPERTY_HINT_NONE), "set_n_ubatch", "get_n_ubatch");
-
-      ADD_SIGNAL(MethodInfo("model_loaded"));
-      ADD_SIGNAL(MethodInfo("model_load_failed"));
-      ADD_SIGNAL(MethodInfo("new_token_generated", PropertyInfo(Variant::STRING, "token")));
-      ADD_SIGNAL(MethodInfo("generation_completed", PropertyInfo(Variant::STRING, "result")));
-      ADD_SIGNAL(MethodInfo("generation_failed", PropertyInfo(Variant::STRING, "msg")));
    }
    LlamaGD::LlamaGD()
    {
