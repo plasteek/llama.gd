@@ -91,6 +91,12 @@ namespace godot
       float get_penalty_repeat() const;
       void set_penalty_repeat(const float penalty_value);
 
+      float get_penalty_freq() const;
+      void set_penalty_freq(const float penalty_value);
+
+      float get_penalty_present() const;
+      void set_penalty_present(const float penalty_value);
+
       int32_t get_penalty_last_n() const;
       void set_penalty_last_n(const int32_t total);
 

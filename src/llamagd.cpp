@@ -297,6 +297,14 @@ namespace godot
       ClassDB::bind_method(D_METHOD("set_penalize_nl", "enabled"), &LlamaGD::set_penalize_nl);
       ADD_PROPERTY(PropertyInfo(Variant::BOOL, "penalize_new_line", PROPERTY_HINT_NONE, "Penalize new line"), "set_penalize_nl", "get_penalize_nl");
 
+      ClassDB::bind_method(D_METHOD("get_penalize_freq"), &LlamaGD::get_penalty_present);
+      ClassDB::bind_method(D_METHOD("set_penalize_freq", "enabled"), &LlamaGD::set_penalty_freq);
+      ADD_PROPERTY(PropertyInfo(Variant::BOOL, "frequency_penalty", PROPERTY_HINT_NONE, "Penalize frequently occurring token. 0 to disable"), "set_penalize_nl", "get_penalize_nl");
+
+      ClassDB::bind_method(D_METHOD("get_penalize_present"), &LlamaGD::get_penalty_present);
+      ClassDB::bind_method(D_METHOD("set_penalize_present", "enabled"), &LlamaGD::set_penalty_present);
+      ADD_PROPERTY(PropertyInfo(Variant::BOOL, "presence_penalty", PROPERTY_HINT_NONE, "Penalize present tokens. 0 to disable"), "set_penalize_nl", "get_penalize_nl");
+
       ADD_SUBGROUP("Sampling", "");
       ClassDB::bind_method(D_METHOD("get_top_k"), &LlamaGD::get_top_k);
       ClassDB::bind_method(D_METHOD("set_top_k", "k"), &LlamaGD::set_top_k);
@@ -476,6 +484,28 @@ namespace godot
       if (should_block_setting_param())
          return;
       params.sparams.penalize_nl = penalty;
+   }
+
+   float LlamaGD::get_penalty_freq() const
+   {
+      return params.sparams.penalty_freq;
+   }
+   void LlamaGD::set_penalty_freq(const float penalty_value)
+   {
+      if (should_block_setting_param())
+         return;
+      params.sparams.penalty_freq = penalty_value;
+   }
+
+   float LlamaGD::get_penalty_present() const
+   {
+      return params.sparams.penalty_present;
+   }
+   void LlamaGD::set_penalty_present(const float penalty_value)
+   {
+      if (should_block_setting_param())
+         return;
+      params.sparams.penalty_present = penalty_value;
    }
 
    int32_t LlamaGD::get_top_k() const
