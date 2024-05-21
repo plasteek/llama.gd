@@ -488,6 +488,13 @@ std::string LlamaWorker::run(std::string prompt)
          }
          fflush(stdout);
       }
+
+      // end of generation
+      if (!embd.empty() && llama_token_is_eog(model, embd.back()))
+      {
+         LOG(" [end of text]\n");
+         break;
+      }
    }
 
    // Free all the used context here
