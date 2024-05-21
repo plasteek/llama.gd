@@ -42,7 +42,7 @@ namespace godot
             if (item_type != Variant::INT)
                 throw std::runtime_error("An item in the array is not an int");
 
-            vec.push_back((int)item);
+            vec.emplace_back((int)item);
         }
 
         return vec;
