@@ -65,6 +65,8 @@ namespace godot
 
       text_generation_thread.instantiate();
       model_loader_thread.instantiate();
+
+      init_backend();
    }
    void LlamaGD::log(std::string msg)
    {
