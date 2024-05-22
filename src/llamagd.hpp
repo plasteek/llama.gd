@@ -51,6 +51,11 @@ namespace godot
       void unload_model();
       bool is_model_loaded();
 
+      int get_model_eos_id();
+      int get_model_bos_id();
+      String get_model_eos();
+      String get_model_bos();
+
       String create_completion(String prompt);
       void create_completion_async(String prompt);
       String predict_sequence(Array tokens);

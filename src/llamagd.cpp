@@ -28,11 +28,19 @@ namespace godot
       ADD_SIGNAL(MethodInfo("generation_failed", PropertyInfo(Variant::STRING, "msg")));
 
       // Primary generation method
+      ClassDB::bind_method(D_METHOD("tokenize", "prompt"), &LlamaGD::tokenize);
+
+      ClassDB::bind_method(D_METHOD("get_model_eos"), &LlamaGD::get_model_eos);
+      ClassDB::bind_method(D_METHOD("get_model_bos"), &LlamaGD::get_model_bos);
+      ClassDB::bind_method(D_METHOD("get_model_eos_id"), &LlamaGD::get_model_eos_id);
+      ClassDB::bind_method(D_METHOD("get_model_bos_id"), &LlamaGD::get_model_bos_id);
+
       ClassDB::bind_method(D_METHOD("create_completion", "prompt"), &LlamaGD::create_completion);
       ClassDB::bind_method(D_METHOD("create_completion_async", "prompt"), &LlamaGD::create_completion_async);
-      ClassDB::bind_method(D_METHOD("tokenize", "prompt"), &LlamaGD::tokenize);
+
       ClassDB::bind_method(D_METHOD("predict_sequence", "tokens"), &LlamaGD::predict_sequence);
       ClassDB::bind_method(D_METHOD("predict_sequence_async", "tokens"), &LlamaGD::predict_sequence_async);
+
       ClassDB::bind_method(D_METHOD("load_model"), &LlamaGD::load_model);
       ClassDB::bind_method(D_METHOD("unload_model"), &LlamaGD::unload_model);
       ClassDB::bind_method(D_METHOD("is_model_loaded"), &LlamaGD::is_model_loaded);
@@ -292,6 +300,43 @@ namespace godot
       UtilityFunctions::push_error("Cannot tokenize. Model has not been loaded");
       return Array();
    }
+
+   String LlamaGD::get_model_bos()
+   {
+      auto token_id = get_model_bos_id();
+      if (token_id == -1)
+         return "";
+      return string_std_to_gd(llama_token_to_piece(ctx, token_id, !params.conversation));
+   }
+   String LlamaGD::get_model_eos()
+   {
+      auto token_id = get_model_eos_id();
+      if (token_id == -1)
+         return "";
+      return string_std_to_gd(llama_token_to_piece(ctx, token_id, !params.conversation));
+   }
+
+   int LlamaGD::get_model_bos_id()
+   {
+      if (is_model_loaded())
+      {
+         return llama_token_bos(model);
+      }
+
+      UtilityFunctions::push_error("Cannot get BOS id. Model has not been loaded");
+      return -1;
+   }
+   int LlamaGD::get_model_eos_id()
+   {
+      if (is_model_loaded())
+      {
+         return llama_token_eos(model);
+      }
+      UtilityFunctions::push_error("Cannot get EOS Id. Model has not been loaded");
+      // Assume that token cannot be negative
+      return -1;
+   }
+
    // More direct token based approach
    void LlamaGD::predict_sequence_async(Array tokens)
    {
