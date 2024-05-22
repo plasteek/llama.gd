@@ -357,7 +357,6 @@ namespace godot
       log("Preparing worker");
       prepare_worker();
       String prediction_result = "";
-
       try
       {
          log("Converting GDArray to vector");
@@ -366,7 +365,6 @@ namespace godot
          log("Starting prediction");
          std::string result = worker->predict(payload);
          prediction_result = string_std_to_gd(result);
-         log("Prediction completed");
       }
       catch (std::runtime_error err)
       {
@@ -377,7 +375,7 @@ namespace godot
          call_deferred("emit_signal", "generation_failed", normalized_msg);
       }
 
-      log("Cleaning up worker");
+      log("Prediction Completed. Cleaning up worker");
       delete worker;
 
       // Ensure we cleanup mutex if we used a thread
