@@ -29,6 +29,7 @@ namespace godot
 
       // Primary generation method
       ClassDB::bind_method(D_METHOD("tokenize", "prompt"), &LlamaGD::tokenize);
+      ClassDB::bind_method(D_METHOD("decode", "tokens"), &LlamaGD::decode);
 
       ClassDB::bind_method(D_METHOD("get_model_eos"), &LlamaGD::get_model_eos);
       ClassDB::bind_method(D_METHOD("get_model_bos"), &LlamaGD::get_model_bos);
@@ -317,16 +318,39 @@ namespace godot
    // We use Array because godot typed array usually not great
    Array LlamaGD::tokenize(const String prompt)
    {
-      if (is_model_loaded())
+      if (!is_model_loaded())
       {
-         std::string payload = string_gd_to_std(prompt);
-         auto tokens = ::llama_tokenize(model, payload, true, true);
-         return int_vec_to_gd_arr(tokens);
+         /// Return empty array if model is not loaded
+         UtilityFunctions::push_error("Cannot tokenize. Model has not been loaded");
+         return Array();
       }
 
-      /// Return empty array if model is not loaded
-      UtilityFunctions::push_error("Cannot tokenize. Model has not been loaded");
-      return Array();
+      std::string payload = string_gd_to_std(prompt);
+      auto tokens = ::llama_tokenize(model, payload, true, true);
+      return int_vec_to_gd_arr(tokens);
+   }
+   String LlamaGD::decode(const Array tokens)
+   {
+      if (!is_model_loaded())
+      {
+         UtilityFunctions::push_error("Cannot decode tokens. Model has not been loaded");
+         return "";
+      }
+
+      String result = "";
+      for (int i = 0; i < tokens.size(); i++)
+      {
+         auto token = tokens[i];
+         if (token.get_type() != Variant::INT)
+         {
+            UtilityFunctions::push_error("Invalid token", token);
+            return result;
+         };
+
+         std::string decoded = llama_token_to_piece(ctx, token, !params.conversation);
+         result += string_std_to_gd(decoded);
+      }
+      return result;
    }
 
    String LlamaGD::get_model_bos()

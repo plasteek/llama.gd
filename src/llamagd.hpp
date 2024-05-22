@@ -65,6 +65,7 @@ namespace godot
       void predict_sequence_async(const Array tokens);
 
       Array tokenize(const String prompt);
+      String decode(const Array tokens);
 
       void _exit_tree() override;
 
