@@ -37,7 +37,7 @@ namespace godot
       void load_model_impl();
       bool is_params_locked();
       bool should_block_setting_param();
-      void log(std::string msg);
+      void log(const std::string msg);
       LlamaWorker *prepare_worker();
       void await_generation_thread();
       void release_worker();
@@ -59,10 +59,11 @@ namespace godot
       String get_model_eos();
       String get_model_bos();
 
-      String create_completion(String prompt);
-      void create_completion_async(String prompt);
-      String predict_sequence(Array tokens);
-      void predict_sequence_async(Array tokens);
+      String create_completion(const String prompt);
+      void create_completion_async(const String prompt);
+      String predict_sequence(const Array tokens);
+      void predict_sequence_async(const Array tokens);
+
       Array tokenize(const String prompt);
 
       void _exit_tree() override;

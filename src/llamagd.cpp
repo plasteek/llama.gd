@@ -222,7 +222,7 @@ namespace godot
       return false;
    }
 
-   void LlamaGD::create_completion_async(String prompt)
+   void LlamaGD::create_completion_async(const String prompt)
    {
       await_generation_thread();
       text_generation_thread->start(callable_mp(this, &LlamaGD::create_completion).bind(prompt));
@@ -244,7 +244,7 @@ namespace godot
       if (text_generation_thread->is_started())
          text_generation_thread->wait_to_finish();
    }
-   String LlamaGD::create_completion(String prompt)
+   String LlamaGD::create_completion(const String prompt)
    {
 
       if (!is_model_loaded())
@@ -366,12 +366,12 @@ namespace godot
    }
 
    // More direct token based approach
-   void LlamaGD::predict_sequence_async(Array tokens)
+   void LlamaGD::predict_sequence_async(const Array tokens)
    {
       await_generation_thread();
       text_generation_thread->start(callable_mp(this, &LlamaGD::predict_sequence).bind(tokens));
    }
-   String LlamaGD::predict_sequence(Array tokens)
+   String LlamaGD::predict_sequence(const Array tokens)
    {
       log("Starting token prediction");
 
