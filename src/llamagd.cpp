@@ -137,8 +137,9 @@ namespace godot
    void LlamaGD::cleanup_backend()
    {
       log("Freeing backend");
-      if (backend_initialized)
-         llama_backend_free();
+      if (!backend_initialized)
+         return;
+      llama_backend_free();
    }
 
    void LlamaGD::load_model()
@@ -370,23 +371,23 @@ namespace godot
 
    int LlamaGD::get_model_bos_id()
    {
-      if (is_model_loaded())
+      if (!is_model_loaded())
       {
-         return llama_token_bos(model);
+         UtilityFunctions::push_error("Cannot get BOS id. Model has not been loaded");
+         return -1;
       }
-
-      UtilityFunctions::push_error("Cannot get BOS id. Model has not been loaded");
-      return -1;
+      return llama_token_bos(model);
    }
    int LlamaGD::get_model_eos_id()
    {
-      if (is_model_loaded())
+      if (!!is_model_loaded())
       {
-         return llama_token_eos(model);
+
+         UtilityFunctions::push_error("Cannot get EOS Id. Model has not been loaded");
+         // Assume that token cannot be negative
+         return -1;
       }
-      UtilityFunctions::push_error("Cannot get EOS Id. Model has not been loaded");
-      // Assume that token cannot be negative
-      return -1;
+      return llama_token_eos(model);
    }
 
    // More direct token based approach
