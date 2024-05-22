@@ -83,43 +83,60 @@ namespace godot
       llama_backend_init();
       llama_numa_init(params.numa);
    }
+
    LlamaGD::~LlamaGD()
    {
+      // This is when the object is released
+      // We want to fully cleanup
       log("LlamaGD node deconstructor");
-      cleanup();
+      log("Cleaning up LlamaGD module");
+
+      // We lock but do not wait if mutex waits for another call
+      // we force the cleanup
+      log("Shutting down threads");
+      function_call_mutex->try_lock();
+      cleanup_threads();
+
+      // Because this means complete release, we want to completely
+      // cleanup backend and assume we will never use it again
+      log("Freeing backend and model");
+      unload_model();
+      cleanup_backend();
    }
    void LlamaGD::_exit_tree()
    {
+      // This is when the node is removed, we assume that the model
+      // or the backend will be re-used again unless released
       log("LlamaGD node left the tree");
-      cleanup();
-   }
-   void LlamaGD::cleanup()
-   {
-      log("Cleaning up LlamaGD module");
-      // Make sure no other function runs (if possible)
-      function_call_mutex->try_lock();
 
-      // If there is a running worker (meaning working is not null pointer)
-      // (Note that this is kind of an overkill but assume there can be multiple
-      // worker in the future or something). We stop it and wait.
+      function_call_mutex->lock();
+      log("Shutting down threads");
+      cleanup_threads();
+      function_call_mutex->unlock();
+   }
+   void LlamaGD::cleanup_threads()
+   {
       if (worker != nullptr || !generation_mutex->try_lock())
       {
          log("A running worker detected. Stopping work forcefully");
-         // Stop the worker and let the calling function clean it up
          worker->stop();
+         generation_mutex->lock();
       }
-
       // Properly cleanup the threads
-      log("Waiting threads to finish running");
+      log("Waiting model loader thread to finish running");
       if (model_loader_thread->is_started())
          model_loader_thread->wait_to_finish();
+
+      log("Waiting text generation thread to finish running");
       if (text_generation_thread->is_started())
          text_generation_thread->wait_to_finish();
-
-      log("Freeing llama backends and model");
-      unload_model();
-      llama_backend_free();
    }
+   void LlamaGD::cleanup_backend()
+   {
+      if (backend_initialized)
+         llama_backend_free();
+   }
+
    void LlamaGD::load_model()
    {
       function_call_mutex->lock();

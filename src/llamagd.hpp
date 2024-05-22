@@ -31,8 +31,9 @@ namespace godot
       bool output_eos;
       bool backend_initialized;
 
-      void cleanup();
       void init_backend();
+      void cleanup_backend();
+      void cleanup_threads();
       void load_model_impl();
       bool is_params_locked();
       bool should_block_setting_param();
