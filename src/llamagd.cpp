@@ -282,9 +282,8 @@ namespace godot
    // We use Array because godot typed array usually not great
    Array LlamaGD::tokenize(const String prompt)
    {
-      if (!is_model_loaded())
+      if (is_model_loaded())
       {
-
          std::string payload = string_gd_to_std(prompt);
          auto tokens = ::llama_tokenize(model, payload, true, true);
          return int_vec_to_gd_arr(tokens);
