@@ -39,6 +39,7 @@ namespace godot
       bool should_block_setting_param();
       void log(std::string msg);
       LlamaWorker *prepare_worker();
+      void release_worker();
 
    protected:
       static void _bind_methods();

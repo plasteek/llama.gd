@@ -278,9 +278,8 @@ namespace godot
          call_deferred("emit_signal", "generation_failed", normalized_msg);
       }
 
-      // Free after use
-      log("Completion successful. Releasing worker");
-      delete worker;
+      log("Completion successful");
+      release_worker();
 
       // Free up generation if this uses mutex
       generation_mutex->unlock();
@@ -289,6 +288,7 @@ namespace godot
    }
    LlamaWorker *LlamaGD::prepare_worker()
    {
+      log("Setting up new worker");
       worker = new LlamaWorker(
           model,
           ctx,
@@ -301,8 +301,16 @@ namespace godot
       {
          call_deferred("emit_signal", "new_token_generated", string_std_to_gd(new_token));
       };
+      log("Worker initialized");
 
       return worker;
+   }
+   void LlamaGD::release_worker()
+   {
+      log("Releasing worker from memory");
+      delete worker;
+      worker = nullptr;
+      log("Release completed");
    }
 
    // Llama methods we extend to godot
@@ -374,7 +382,6 @@ namespace godot
          return "";
       }
 
-      log("Preparing worker");
       prepare_worker();
       String prediction_result = "";
       try
@@ -395,8 +402,8 @@ namespace godot
          call_deferred("emit_signal", "generation_failed", normalized_msg);
       }
 
-      log("Prediction Completed. Cleaning up worker");
-      delete worker;
+      log("Prediction Completed");
+      release_worker();
 
       // Ensure we cleanup mutex if we used a thread
       generation_mutex->unlock();
