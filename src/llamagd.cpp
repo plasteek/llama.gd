@@ -346,7 +346,7 @@ namespace godot
       ClassDB::bind_method(D_METHOD("set_model_path"), &LlamaGD::set_model_path);
       ADD_PROPERTY(PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE, "`.gguf` path to model"), "set_model_path", "get_model_path");
 
-      ADD_GROUP("Prompt Preprocessing", "");
+      ADD_GROUP("Preprocessing", "");
       ClassDB::bind_method(D_METHOD("get_input_prefix"), &LlamaGD::get_input_prefix);
       ClassDB::bind_method(D_METHOD("set_input_prefix", "prefix"), &LlamaGD::set_input_prefix);
       ADD_PROPERTY(PropertyInfo(Variant::STRING, "input_prefix", PROPERTY_HINT_MULTILINE_TEXT, "Append to the beginning of prompt"), "set_input_prefix", "get_input_prefix");
@@ -355,7 +355,7 @@ namespace godot
       ClassDB::bind_method(D_METHOD("set_input_suffix", "suffix"), &LlamaGD::set_input_suffix);
       ADD_PROPERTY(PropertyInfo(Variant::STRING, "input_suffix", PROPERTY_HINT_MULTILINE_TEXT, "Append to the end of prompt"), "set_input_suffix", "get_input_suffix");
 
-      ADD_GROUP("Output Tokens", "");
+      ADD_GROUP("Output", "");
       ClassDB::bind_method(D_METHOD("get_output_bos"), &LlamaGD::get_output_bos);
       ClassDB::bind_method(D_METHOD("set_output_bos", "enabled"), &LlamaGD::set_output_bos);
       ADD_PROPERTY(PropertyInfo(Variant::BOOL, "output_bos", PROPERTY_HINT_NONE, "Output the model BOS if enabled"), "set_should_output_bos", "get_should_output_bos");
@@ -364,7 +364,7 @@ namespace godot
       ClassDB::bind_method(D_METHOD("set_output_eos", "enabled"), &LlamaGD::set_output_eos);
       ADD_PROPERTY(PropertyInfo(Variant::BOOL, "output_eos", PROPERTY_HINT_NONE, "Output the model EOS if enabled"), "set_should_output_eos", "get_should_output_eos");
 
-      ADD_GROUP("Generation Config", "");
+      ADD_GROUP("Generation", "");
       ClassDB::bind_method(D_METHOD("get_n_ctx"), &LlamaGD::get_n_ctx);
       ClassDB::bind_method(D_METHOD("set_n_ctx", "context_size"), &LlamaGD::set_n_ctx);
       ADD_PROPERTY(PropertyInfo(Variant::INT, "context_size", PROPERTY_HINT_NONE, "Set context size"), "set_n_ctx", "get_n_ctx");
