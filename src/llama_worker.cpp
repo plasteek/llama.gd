@@ -472,7 +472,6 @@ std::string LlamaWorker::predict(std::vector<llama_token> tokens)
             const std::string token_str = llama_token_to_piece(ctx, id, !(*params).conversation);
             bool is_bos = (id == llama_token_bos(model));
             bool is_eos = (id == llama_token_eos(model));
-            generated_text.append(token_str);
 
             // Output or signal eos or bos when ONLY when the user requested
             if ((!is_bos || output_bos) && (!is_eos || output_eos))
