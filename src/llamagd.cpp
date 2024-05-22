@@ -355,15 +355,6 @@ namespace godot
       ClassDB::bind_method(D_METHOD("set_input_suffix", "suffix"), &LlamaGD::set_input_suffix);
       ADD_PROPERTY(PropertyInfo(Variant::STRING, "input_suffix", PROPERTY_HINT_MULTILINE_TEXT, "Append to the end of prompt"), "set_input_suffix", "get_input_suffix");
 
-      ADD_GROUP("Output", "");
-      ClassDB::bind_method(D_METHOD("get_output_bos"), &LlamaGD::get_output_bos);
-      ClassDB::bind_method(D_METHOD("set_output_bos", "enabled"), &LlamaGD::set_output_bos);
-      ADD_PROPERTY(PropertyInfo(Variant::BOOL, "output_bos", PROPERTY_HINT_NONE, "Output the model BOS if enabled"), "set_output_bos", "get_output_bos");
-
-      ClassDB::bind_method(D_METHOD("get_output_eos"), &LlamaGD::get_output_eos);
-      ClassDB::bind_method(D_METHOD("set_output_eos", "enabled"), &LlamaGD::set_output_eos);
-      ADD_PROPERTY(PropertyInfo(Variant::BOOL, "output_eos", PROPERTY_HINT_NONE, "Output the model EOS if enabled"), "set_output_eos", "get_output_eos");
-
       ADD_GROUP("Generation", "");
       ClassDB::bind_method(D_METHOD("get_n_ctx"), &LlamaGD::get_n_ctx);
       ClassDB::bind_method(D_METHOD("set_n_ctx", "context_size"), &LlamaGD::set_n_ctx);
@@ -384,6 +375,15 @@ namespace godot
       ClassDB::bind_method(D_METHOD("get_escape"), &LlamaGD::get_escape);
       ClassDB::bind_method(D_METHOD("set_escape", "new_escape"), &LlamaGD::set_escape);
       ADD_PROPERTY(PropertyInfo(Variant::BOOL, "escape", PROPERTY_HINT_NONE, "Escape special characters such as \\n, \\r, \\t, ', \", and \\ to make the model process them"), "set_escape", "get_escape");
+
+      ADD_SUBGROUP("Output", "");
+      ClassDB::bind_method(D_METHOD("get_output_bos"), &LlamaGD::get_output_bos);
+      ClassDB::bind_method(D_METHOD("set_output_bos", "enabled"), &LlamaGD::set_output_bos);
+      ADD_PROPERTY(PropertyInfo(Variant::BOOL, "output_bos", PROPERTY_HINT_NONE, "Output the model BOS if enabled"), "set_output_bos", "get_output_bos");
+
+      ClassDB::bind_method(D_METHOD("get_output_eos"), &LlamaGD::get_output_eos);
+      ClassDB::bind_method(D_METHOD("set_output_eos", "enabled"), &LlamaGD::set_output_eos);
+      ADD_PROPERTY(PropertyInfo(Variant::BOOL, "output_eos", PROPERTY_HINT_NONE, "Output the model EOS if enabled"), "set_output_eos", "get_output_eos");
 
       ADD_SUBGROUP("Penalty", "");
       ClassDB::bind_method(D_METHOD("get_penalty_repeat"), &LlamaGD::get_penalty_repeat);
