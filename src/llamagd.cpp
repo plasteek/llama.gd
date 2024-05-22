@@ -43,8 +43,8 @@ namespace godot
    LlamaGD::LlamaGD()
    {
       params = gpt_params();
-      should_output_bos = true;
-      should_output_eos = true;
+      output_bos = false;
+      output_eos = true;
       backend_initialized = false;
       verbose = false;
 
@@ -267,8 +267,8 @@ namespace godot
           ctx,
           &params);
 
-      worker->output_eos = should_output_eos;
-      worker->output_bos = should_output_bos;
+      worker->output_eos = output_eos;
+      worker->output_bos = output_bos;
       // Attach the signal listener
       worker->on_new_token = [this](std::string new_token)
       {
@@ -490,24 +490,24 @@ namespace godot
 
    bool LlamaGD::get_output_bos() const
    {
-      return should_output_bos;
+      return output_bos;
    };
    void LlamaGD::set_output_bos(const bool enabled)
    {
       if (should_block_setting_param())
          return;
-      should_output_bos = enabled;
+      output_bos = enabled;
    };
 
    bool LlamaGD::get_output_eos() const
    {
-      return should_output_eos;
+      return output_eos;
    };
    void LlamaGD::set_output_eos(const bool enabled)
    {
       if (should_block_setting_param())
          return;
-      should_output_eos = enabled;
+      output_eos = enabled;
    };
 
    int32_t LlamaGD::get_n_ctx() const

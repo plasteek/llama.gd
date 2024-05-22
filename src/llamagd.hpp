@@ -27,8 +27,8 @@ namespace godot
       llama_model *model;
       LlamaWorker *worker;
 
-      bool should_output_bos;
-      bool should_output_eos;
+      bool output_bos;
+      bool output_eos;
       bool backend_initialized;
 
       void cleanup();
