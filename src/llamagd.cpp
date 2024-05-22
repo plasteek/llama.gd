@@ -447,7 +447,7 @@ namespace godot
 
       ClassDB::bind_method(D_METHOD("get_escape"), &LlamaGD::get_escape);
       ClassDB::bind_method(D_METHOD("set_escape", "new_escape"), &LlamaGD::set_escape);
-      ADD_PROPERTY(PropertyInfo(Variant::BOOL, "escape", PROPERTY_HINT_NONE, "Escape special characters such as \\n, \\r, \\t, ', \", and \\ to make the model process them"), "set_escape", "get_escape");
+      ADD_PROPERTY(PropertyInfo(Variant::BOOL, "process_escape", PROPERTY_HINT_NONE, "Escape special characters such as \\n, \\r, \\t, ', \", and \\ to make the model process them"), "set_escape", "get_escape");
 
       ADD_SUBGROUP("Output", "");
       ClassDB::bind_method(D_METHOD("get_output_bos"), &LlamaGD::get_output_bos);
