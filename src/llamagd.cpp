@@ -61,7 +61,7 @@ namespace godot
    void LlamaGD::log(std::string msg)
    {
       if (verbose)
-         UtilityFunctions::print(msg.c_str());
+         UtilityFunctions::print(("[LLAMA_GD] " + msg).c_str());
    }
    void LlamaGD::init_backend()
    {
