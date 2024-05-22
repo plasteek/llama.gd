@@ -256,7 +256,6 @@ namespace godot
 
       // Free up generation if this uses mutex
       generation_mutex->unlock();
-
       call_deferred("emit_signal", "generation_completed", completion_result);
       return completion_result;
    }
@@ -310,16 +309,19 @@ namespace godot
          return "";
       }
 
+      log("Preparing worker");
+      prepare_worker();
       String prediction_result = "";
+
       try
       {
-         log("Converting GD Array to Vector");
+         log("Converting GDArray to vector");
          std::vector<llama_token> payload = gd_arr_to_int_vec(tokens);
 
-         log("Preparing worker");
-         prepare_worker();
+         log("Starting prediction");
          std::string result = worker->predict(payload);
          prediction_result = string_std_to_gd(result);
+         log("Prediction completed");
       }
       catch (std::runtime_error err)
       {
@@ -329,11 +331,13 @@ namespace godot
          UtilityFunctions::push_error(normalized_msg);
          call_deferred("emit_signal", "generation_failed", normalized_msg);
       }
+
       log("Cleaning up worker");
       delete worker;
 
       // Ensure we cleanup mutex if we used a thread
       generation_mutex->unlock();
+      call_deferred("emit_signal", "generation_completed", prediction_result);
       return prediction_result;
    }
 
