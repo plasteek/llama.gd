@@ -65,7 +65,7 @@ namespace godot
    }
    void LlamaGD::init_backend()
    {
-      log("Initializing Llama.cpp Backend");
+      log("Initializing Llama.cpp backend");
       if (backend_initialized)
       {
          log("Backend has been initialized. Aborting.");
