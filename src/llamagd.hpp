@@ -39,6 +39,7 @@ namespace godot
       bool should_block_setting_param();
       void log(std::string msg);
       LlamaWorker *prepare_worker();
+      void await_generation_thread();
       void release_worker();
 
    protected:
@@ -63,7 +64,6 @@ namespace godot
       String predict_sequence(Array tokens);
       void predict_sequence_async(Array tokens);
       Array tokenize(const String prompt);
-      void await_generation_thread();
 
       void _exit_tree() override;
 
