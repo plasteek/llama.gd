@@ -95,15 +95,15 @@ namespace godot
 
       // We lock but do not wait if mutex waits for another call
       // we force the cleanup
-      log("Shutting down threads");
       function_call_mutex->try_lock();
       cleanup_threads();
 
       // Because this means complete release, we want to completely
       // cleanup backend and assume we will never use it again
-      log("Freeing backend and model");
-      unload_model();
       cleanup_backend();
+      unload_model();
+
+      log("Cleanup Completed");
    }
    void LlamaGD::_exit_tree()
    {
@@ -112,12 +112,12 @@ namespace godot
       log("LlamaGD node left the tree");
 
       function_call_mutex->lock();
-      log("Shutting down threads");
       cleanup_threads();
       function_call_mutex->unlock();
    }
    void LlamaGD::cleanup_threads()
    {
+      log("Shutting down threads");
       if (worker != nullptr || !generation_mutex->try_lock())
       {
          log("A running worker detected. Stopping work forcefully");
@@ -135,6 +135,7 @@ namespace godot
    }
    void LlamaGD::cleanup_backend()
    {
+      log("Freeing backend");
       if (backend_initialized)
          llama_backend_free();
    }
