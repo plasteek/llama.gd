@@ -224,6 +224,17 @@ namespace godot
       return false;
    }
 
+   void LlamaGD::stop_generation()
+   {
+      if (worker == nullptr)
+      {
+         UtilityFunctions::push_error("No generation process has been started");
+         return;
+      }
+      // Let the calling function handle the cleanup
+      worker->stop();
+   }
+
    void LlamaGD::create_completion_async(const String prompt)
    {
       await_generation_thread();

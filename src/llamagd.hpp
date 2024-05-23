@@ -63,6 +63,7 @@ namespace godot
       void create_completion_async(const String prompt);
       String predict_sequence(const Array tokens);
       void predict_sequence_async(const Array tokens);
+      void stop_generation();
 
       Array tokenize(const String prompt);
       String decode(const Array tokens);
