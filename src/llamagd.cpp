@@ -380,7 +380,7 @@ namespace godot
    }
    int LlamaGD::get_model_eos_id()
    {
-      if (!!is_model_loaded())
+      if (!is_model_loaded())
       {
 
          UtilityFunctions::push_error("Cannot get EOS Id. Model has not been loaded");
