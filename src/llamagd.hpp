@@ -143,6 +143,9 @@ namespace godot
 
       bool get_verbose() const;
       void set_verbose(const bool enabled);
+
+      bool get_busy() const;
+      void set_busy(const bool is_busy);
    };
 }
 

@@ -48,6 +48,11 @@ namespace godot
       ClassDB::bind_method(D_METHOD("is_model_loaded"), &LlamaGD::is_model_loaded);
 
       _bind_panel_attributes();
+
+      // Internal attributes
+      ClassDB::bind_method(D_METHOD("get_busy"), &LlamaGD::get_busy);
+      ClassDB::bind_method(D_METHOD("set_busy"), &LlamaGD::set_busy);
+      ADD_PROPERTY(PropertyInfo(Variant::BOOL, "busy", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_READ_ONLY), "set_busy", "get_busy");
    }
 
    LlamaGD::LlamaGD()
@@ -814,5 +819,14 @@ namespace godot
    void LlamaGD::set_verbose(bool enabled)
    {
       verbose = enabled;
+   }
+
+   bool LlamaGD::get_busy() const
+   {
+      return worker != nullptr;
+   }
+   void LlamaGD::set_busy(const bool is_busy)
+   {
+      UtilityFunctions::push_error("Cannot set read only property of `busy`");
    }
 }
