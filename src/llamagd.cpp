@@ -38,6 +38,7 @@ namespace godot
 
       ClassDB::bind_method(D_METHOD("create_completion", "prompt"), &LlamaGD::create_completion);
       ClassDB::bind_method(D_METHOD("create_completion_async", "prompt"), &LlamaGD::create_completion_async);
+      ClassDB::bind_method(D_METHOD("stop_generation"), &LlamaGD::stop_generation);
 
       ClassDB::bind_method(D_METHOD("predict_sequence", "tokens"), &LlamaGD::predict_sequence);
       ClassDB::bind_method(D_METHOD("predict_sequence_async", "tokens"), &LlamaGD::predict_sequence_async);
