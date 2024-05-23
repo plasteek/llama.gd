@@ -442,7 +442,7 @@ namespace godot
       // This describes the attributes panel (and the attributes itself)
       ClassDB::bind_method(D_METHOD("get_model_path"), &LlamaGD::get_model_path);
       ClassDB::bind_method(D_METHOD("set_model_path"), &LlamaGD::set_model_path);
-      ADD_PROPERTY(PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE, "`.gguf` path to model"), "set_model_path", "get_model_path");
+      ADD_PROPERTY(PropertyInfo(Variant::STRING, "model_path", PROPERTY_HINT_FILE, "*.gguf"), "set_model_path", "get_model_path");
 
       ADD_GROUP("Preprocessing", "");
       ClassDB::bind_method(D_METHOD("get_input_prefix"), &LlamaGD::get_input_prefix);
