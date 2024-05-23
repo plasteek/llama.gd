@@ -11,8 +11,7 @@ cmake .. `
    -DLLAMA_NATIVE=OFF `
    -DCMAKE_EXPORT_COMPILE_COMMANDS=1 `
    -DCMAKE_BUILD_TYPE=Release `
-   -DLLAMA_VULKAN=ON `
-   -DLLAMA_CUDA=1
+   -DLLAMA_VULKAN=ON 
 ninja 
 ninja install 
 cd ..
