@@ -1,6 +1,7 @@
 #include "conversion.hpp"
 #include "llamagd.hpp"
 #include "llama_worker.hpp"
+#include "llama_state.hpp"
 #include "gd_throw.hpp"
 
 #include <godot_cpp/classes/mutex.hpp>

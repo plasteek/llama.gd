@@ -1,6 +1,7 @@
 #ifndef LLAMA_TYPES
 #define LLAMA_TYPES
 
+#include "llama_state.hpp"
 #include "llama_worker.hpp"
 
 #include <godot_cpp/classes/node.hpp>

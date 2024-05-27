@@ -1,8 +1,6 @@
 #ifndef LLAMA_WORKER_TYPES
 #define LLAMA_WORKER_TYPES
 
-#include "llama_state.hpp"
-
 #include <string>
 #include <functional>
 #include <common.h>
