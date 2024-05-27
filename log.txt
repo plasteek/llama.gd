@@ -1,0 +1,882 @@
+-- Could NOT find Vulkan (missing: Vulkan_LIBRARY Vulkan_INCLUDE_DIR) (found version "")
+-- ccache found, compilation results will be cached. Disable with LLAMA_CCACHE=OFF.
+-- CMAKE_SYSTEM_PROCESSOR: AMD64
+-- CMAKE_GENERATOR_PLATFORM: 
+-- x86 detected
+-- Configuring done (0.8s)
+-- Generating done (0.2s)
+-- Build files have been written to: D:/university shit/FYP Project Folder/GDExtensions/llama.gd/build
+[0/2] Re-checking globbed directories...
+[1/5] Building CXX object CMakeFiles\libllama.gd.windows.release.amd64.dir\src\llama_state.cpp.obj
+FAILED: CMakeFiles/libllama.gd.windows.release.amd64.dir/src/llama_state.cpp.obj 
+ccache C:\PROGRA~2\MICROS~2\2022\BUILDT~1\VC\Tools\Llvm\x64\bin\clang-cl.exe  /nologo -TP -Dlibllama_gd_windows_release_amd64_EXPORTS -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\common\." -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\." -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\gdextension" /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MT -D_CRT_SECURE_NO_WARNINGS /vmg /vmv -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-double-promotion -Wno-old-style-cast -Wno-implicit-float-conversion -Wno-unsafe-buffer-usage -Wno-unused-command-line-argument -Wno-newline-eof -Wno-float-equal -Wno-unknown-argument -Wno-shorten-64-to-32 -Wno-sign-conversion -Wno-float-conversion -Wno-cast-align -Wno-cast-qual -Wno-extra-semi-stmt -Wno-cast-function-type-strict -Wno-implicit-int-conversion -Wno-missing-prototypes -Wno-switch-default -Wno-exit-time-destructors -Wno-covered-switch-default -Wno-global-constructors /showIncludes /FoCMakeFiles\libllama.gd.windows.release.amd64.dir\src\llama_state.cpp.obj /FdCMakeFiles\libllama.gd.windows.release.amd64.dir\ -c -- "D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp"
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(20,18): error: unknown type name 'LlamaWorkerState'
+   20 |       LlamaState(LlamaWorkerState *state);
+      |                  ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(24,7): error: unknown type name 'LlamaWorkerState'
+   24 |       LlamaWorkerState *worker_state;
+      |       ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(226,5): note: expanded from macro 'GDCLASS'
+  226 |                                 cls->_notification(p_what);                                                                                                                                            \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(238,12): note: expanded from macro 'GDCLASS'
+  238 |                                 return cls->_set(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<const ::godot::Variant *>(p_value));                                        \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(249,12): note: expanded from macro 'GDCLASS'
+  249 |                                 return cls->_get(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(269,3): note: expanded from macro 'GDCLASS'
+  269 |                 cls->_get_property_list(&plist_cpp);                                                                                                                                           \
+      |                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(285,12): note: expanded from macro 'GDCLASS'
+  285 |                                 return cls->_property_can_revert(*reinterpret_cast<const ::godot::StringName *>(p_name));                                                                              \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(296,12): note: expanded from macro 'GDCLASS'
+  296 |                                 return cls->_property_get_revert(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(310,5): note: expanded from macro 'GDCLASS'
+  310 |                                 cls->_validate_property(info);                                                                                                                                         \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(322,51): note: expanded from macro 'GDCLASS'
+  322 |                                 *reinterpret_cast<::godot::String *>(r_out) = cls->_to_string();                                                                                                       \
+      |                                                                               ^~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp(26,16): error: out-of-line definition of 'LlamaState' does not match any declaration in 'godot::LlamaState'
+   26 |    LlamaState::LlamaState(LlamaWorkerState *initial_state)
+      |                ^~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp(77,18): error: no matching constructor for initialization of 'LlamaState'
+   77 |       return new LlamaState(state);
+      |                  ^          ~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(15,10): note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'LlamaWorkerState *' to 'const LlamaState' for 1st argument
+   15 |    class LlamaState : public RefCounted
+      |          ^~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp(30,16): note: candidate constructor not viable: requires 2 arguments, but 1 was provided
+   30 |    LlamaState::LlamaState(llama_model *model, gpt_params *params)
+      |                ^          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp:9:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include\godot_cpp/classes/ref_counted.hpp:39:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(284,21): error: no matching function for call to 'create_static_method_bind'
+  284 |         MethodBind *bind = create_static_method_bind(p_method);
+      |                            ^~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp(19,16): note: in instantiation of function template specialization 'godot::ClassDB::bind_static_method<godot::LlamaState *(*)(godot::String), const char *>' requested here
+   19 |       ClassDB::bind_static_method("read", &LlamaState::read, "source");
+      |                ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/method_bind.hpp(658,13): note: candidate template ignored: could not match 'void (P...)' against 'const char'
+  658 | MethodBind *create_static_method_bind(void (*p_method)(P...)) {
+      |             ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/method_bind.hpp(728,13): note: candidate template ignored: could not match 'R (P...)' against 'const char'
+  728 | MethodBind *create_static_method_bind(R (*p_method)(P...)) {
+      |             ^
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp:9:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include\godot_cpp/classes/ref_counted.hpp:39:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(286,32): error: reference to type 'const MethodDefinition' could not bind to an lvalue of type 'godot::LlamaState *(*)(godot::String)'
+  286 |         return bind_methodfi(0, bind, p_method_name, sizeof...(p_args) == 0 ? nullptr : (const void **)argptrs, sizeof...(p_args));
+      |                                       ^~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(108,97): note: passing argument to parameter 'method_name' here
+  108 |         static MethodBind *bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const MethodDefinition &method_name, const void **p_defs, int p_defcount);
+      |                                                                                                        ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(284,21): error: no matching function for call to 'create_static_method_bind'
+  284 |         MethodBind *bind = create_static_method_bind(p_method);
+      |                            ^~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp(20,16): note: in instantiation of function template specialization 'godot::ClassDB::bind_static_method<void (*)(godot::String, godot::LlamaState *), const char *, const char *>' requested here
+   20 |       ClassDB::bind_static_method("write", &LlamaState::write, "destination", "state");
+      |                ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/method_bind.hpp(658,13): note: candidate template ignored: could not match 'void (P...)' against 'const char'
+  658 | MethodBind *create_static_method_bind(void (*p_method)(P...)) {
+      |             ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/method_bind.hpp(728,13): note: candidate template ignored: could not match 'R (P...)' against 'const char'
+  728 | MethodBind *create_static_method_bind(R (*p_method)(P...)) {
+      |             ^
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp:9:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include\godot_cpp/classes/ref_counted.hpp:39:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(286,32): error: reference to type 'const MethodDefinition' could not bind to an lvalue of type 'void (*)(godot::String, godot::LlamaState *)'
+  286 |         return bind_methodfi(0, bind, p_method_name, sizeof...(p_args) == 0 ? nullptr : (const void **)argptrs, sizeof...(p_args));
+      |                                       ^~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(108,97): note: passing argument to parameter 'method_name' here
+  108 |         static MethodBind *bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const MethodDefinition &method_name, const void **p_defs, int p_defcount);
+      |                                                                                                        ^
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp:7:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\common\.\common.h:7:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\common\./sampling.h:5:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\common\./grammar-parser.h:14:
+In file included from C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\vector:12:
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\xmemory(727,76): error: cannot initialize a new value of type 'int' with an lvalue of type 'int *'
+  727 |         ::new (const_cast<void*>(static_cast<const volatile void*>(_Ptr))) _Objty(_STD forward<_Types>(_Args)...);
+      |                                                                            ^      ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\vector(798,27): note: in instantiation of function template specialization 'std::_Default_allocator_traits<std::allocator<int>>::construct<int, int *&>' requested here
+  798 |             _Alty_traits::construct(_Getal(), _Unfancy(_Mylast), _STD forward<_Valty>(_Val)...);
+      |                           ^
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\vector(780,20): note: in instantiation of function template specialization 'std::vector<int>::_Emplace_back_with_unused_capacity<int *&>' requested here
+  780 |             return _Emplace_back_with_unused_capacity(_STD forward<_Valty>(_Val)...);
+      |                    ^
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\vector(862,24): note: in instantiation of function template specialization 'std::vector<int>::_Emplace_one_at_back<int *&>' requested here
+  862 |         _Ty& _Result = _Emplace_one_at_back(_STD forward<_Valty>(_Val)...);
+      |                        ^
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\vector(834,23): error: no matching member function for call to 'construct'
+  834 |         _Alty_traits::construct(_Al, _Unfancy(_Newvec + _Whereoff), _STD forward<_Valty>(_Val)...);
+      |         ~~~~~~~~~~~~~~^~~~~~~~~
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\vector(783,17): note: in instantiation of function template specialization 'std::vector<int>::_Emplace_reallocate<int *&>' requested here
+  783 |         return *_Emplace_reallocate(_Mylast, _STD forward<_Valty>(_Val)...);
+      |                 ^
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\vector(862,24): note: in instantiation of function template specialization 'std::vector<int>::_Emplace_one_at_back<int *&>' requested here
+  862 |         _Ty& _Result = _Emplace_one_at_back(_STD forward<_Valty>(_Val)...);
+      |                        ^
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\xmemory(723,30): note: candidate template ignored: substitution failure [with _Objty = int, _Types = <int *&>]
+  723 |     static _CONSTEXPR20 void construct(_Alloc&, _Objty* const _Ptr, _Types&&... _Args) {
+      |                              ^
+18 errors generated.
+[2/5] Building CXX object CMakeFiles\libllama.gd.windows.release.amd64.dir\src\register_types.cpp.obj
+FAILED: CMakeFiles/libllama.gd.windows.release.amd64.dir/src/register_types.cpp.obj 
+ccache C:\PROGRA~2\MICROS~2\2022\BUILDT~1\VC\Tools\Llvm\x64\bin\clang-cl.exe  /nologo -TP -Dlibllama_gd_windows_release_amd64_EXPORTS -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\common\." -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\." -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\gdextension" /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MT -D_CRT_SECURE_NO_WARNINGS /vmg /vmv -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-double-promotion -Wno-old-style-cast -Wno-implicit-float-conversion -Wno-unsafe-buffer-usage -Wno-unused-command-line-argument -Wno-newline-eof -Wno-float-equal -Wno-unknown-argument -Wno-shorten-64-to-32 -Wno-sign-conversion -Wno-float-conversion -Wno-cast-align -Wno-cast-qual -Wno-extra-semi-stmt -Wno-cast-function-type-strict -Wno-implicit-int-conversion -Wno-missing-prototypes -Wno-switch-default -Wno-exit-time-destructors -Wno-covered-switch-default -Wno-global-constructors /showIncludes /FoCMakeFiles\libllama.gd.windows.release.amd64.dir\src\register_types.cpp.obj /FdCMakeFiles\libllama.gd.windows.release.amd64.dir\ -c -- "D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp"
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(20,18): error: unknown type name 'LlamaWorkerState'
+   20 |       LlamaState(LlamaWorkerState *state);
+      |                  ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(24,7): error: unknown type name 'LlamaWorkerState'
+   24 |       LlamaWorkerState *worker_state;
+      |       ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(226,5): note: expanded from macro 'GDCLASS'
+  226 |                                 cls->_notification(p_what);                                                                                                                                            \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(238,12): note: expanded from macro 'GDCLASS'
+  238 |                                 return cls->_set(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<const ::godot::Variant *>(p_value));                                        \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(249,12): note: expanded from macro 'GDCLASS'
+  249 |                                 return cls->_get(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(269,3): note: expanded from macro 'GDCLASS'
+  269 |                 cls->_get_property_list(&plist_cpp);                                                                                                                                           \
+      |                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(285,12): note: expanded from macro 'GDCLASS'
+  285 |                                 return cls->_property_can_revert(*reinterpret_cast<const ::godot::StringName *>(p_name));                                                                              \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(296,12): note: expanded from macro 'GDCLASS'
+  296 |                                 return cls->_property_get_revert(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(310,5): note: expanded from macro 'GDCLASS'
+  310 |                                 cls->_validate_property(info);                                                                                                                                         \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(322,51): note: expanded from macro 'GDCLASS'
+  322 |                                 *reinterpret_cast<::godot::String *>(r_out) = cls->_to_string();                                                                                                       \
+      |                                                                               ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp:9:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include\godot_cpp/classes/ref_counted.hpp:39:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(118,27): error: no matching constructor for initialization of 'godot::LlamaState'
+  118 |                         T *new_object = memnew(T);
+      |                                                ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(232,4): note: in instantiation of function template specialization 'godot::ClassDB::_create_instance_func<godot::LlamaState>' requested here
+  232 |                 &_create_instance_func<T>, // GDExtensionClassCreateInstance create_instance_func; /* this one is mandatory */
+      |                  ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(253,11): note: in instantiation of function template specialization 'godot::ClassDB::_register_class<godot::LlamaState, false>' requested here
+  253 |         ClassDB::_register_class<T, false>(p_virtual);
+      |                  ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp(20,16): note: in instantiation of function template specialization 'godot::ClassDB::register_class<godot::LlamaState>' requested here
+   20 |       ClassDB::register_class<LlamaState>();
+      |                ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(15,10): note: candidate constructor (the implicit copy constructor) not viable: requires 1 argument, but 0 were provided
+   15 |    class LlamaState : public RefCounted
+      |          ^~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(21,7): note: candidate constructor not viable: requires 2 arguments, but 0 were provided
+   21 |       LlamaState(llama_model *model, gpt_params *params);
+      |       ^          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+11 errors generated.
+[3/5] Building CXX object CMakeFiles\libllama.gd.windows.release.amd64.dir\src\llamagd.cpp.obj
+FAILED: CMakeFiles/libllama.gd.windows.release.amd64.dir/src/llamagd.cpp.obj 
+ccache C:\PROGRA~2\MICROS~2\2022\BUILDT~1\VC\Tools\Llvm\x64\bin\clang-cl.exe  /nologo -TP -Dlibllama_gd_windows_release_amd64_EXPORTS -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\common\." -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\." -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\gdextension" /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MT -D_CRT_SECURE_NO_WARNINGS /vmg /vmv -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-double-promotion -Wno-old-style-cast -Wno-implicit-float-conversion -Wno-unsafe-buffer-usage -Wno-unused-command-line-argument -Wno-newline-eof -Wno-float-equal -Wno-unknown-argument -Wno-shorten-64-to-32 -Wno-sign-conversion -Wno-float-conversion -Wno-cast-align -Wno-cast-qual -Wno-extra-semi-stmt -Wno-cast-function-type-strict -Wno-implicit-int-conversion -Wno-missing-prototypes -Wno-switch-default -Wno-exit-time-destructors -Wno-covered-switch-default -Wno-global-constructors /showIncludes /FoCMakeFiles\libllama.gd.windows.release.amd64.dir\src\llamagd.cpp.obj /FdCMakeFiles\libllama.gd.windows.release.amd64.dir\ -c -- "D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp"
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(20,18): error: unknown type name 'LlamaWorkerState'
+   20 |       LlamaState(LlamaWorkerState *state);
+      |                  ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(24,7): error: unknown type name 'LlamaWorkerState'
+   24 |       LlamaWorkerState *worker_state;
+      |       ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(226,5): note: expanded from macro 'GDCLASS'
+  226 |                                 cls->_notification(p_what);                                                                                                                                            \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(238,12): note: expanded from macro 'GDCLASS'
+  238 |                                 return cls->_set(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<const ::godot::Variant *>(p_value));                                        \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(249,12): note: expanded from macro 'GDCLASS'
+  249 |                                 return cls->_get(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(269,3): note: expanded from macro 'GDCLASS'
+  269 |                 cls->_get_property_list(&plist_cpp);                                                                                                                                           \
+      |                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(285,12): note: expanded from macro 'GDCLASS'
+  285 |                                 return cls->_property_can_revert(*reinterpret_cast<const ::godot::StringName *>(p_name));                                                                              \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(296,12): note: expanded from macro 'GDCLASS'
+  296 |                                 return cls->_property_get_revert(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(310,5): note: expanded from macro 'GDCLASS'
+  310 |                                 cls->_validate_property(info);                                                                                                                                         \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(322,51): note: expanded from macro 'GDCLASS'
+  322 |                                 *reinterpret_cast<::godot::String *>(r_out) = cls->_to_string();                                                                                                       \
+      |                                                                               ^~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp(404,18): error: no matching constructor for initialization of 'LlamaState'
+  404 |       return new LlamaState(state);
+      |                  ^          ~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(15,10): note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'LlamaWorkerState *' to 'const LlamaState' for 1st argument
+   15 |    class LlamaState : public RefCounted
+      |          ^~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(21,7): note: candidate constructor not viable: requires 2 arguments, but 1 was provided
+   21 |       LlamaState(llama_model *model, gpt_params *params);
+      |       ^          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+11 errors generated.
+[4/5] Building CXX object CMakeFiles\libllama.gd.windows.release.amd64.dir\src\llama_worker.cpp.obj
+FAILED: CMakeFiles/libllama.gd.windows.release.amd64.dir/src/llama_worker.cpp.obj 
+ccache C:\PROGRA~2\MICROS~2\2022\BUILDT~1\VC\Tools\Llvm\x64\bin\clang-cl.exe  /nologo -TP -Dlibllama_gd_windows_release_amd64_EXPORTS -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\common\." -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\." -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\gdextension" /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MT -D_CRT_SECURE_NO_WARNINGS /vmg /vmv -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-double-promotion -Wno-old-style-cast -Wno-implicit-float-conversion -Wno-unsafe-buffer-usage -Wno-unused-command-line-argument -Wno-newline-eof -Wno-float-equal -Wno-unknown-argument -Wno-shorten-64-to-32 -Wno-sign-conversion -Wno-float-conversion -Wno-cast-align -Wno-cast-qual -Wno-extra-semi-stmt -Wno-cast-function-type-strict -Wno-implicit-int-conversion -Wno-missing-prototypes -Wno-switch-default -Wno-exit-time-destructors -Wno-covered-switch-default -Wno-global-constructors /showIncludes /FoCMakeFiles\libllama.gd.windows.release.amd64.dir\src\llama_worker.cpp.obj /FdCMakeFiles\libllama.gd.windows.release.amd64.dir\ -c -- "D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp"
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(20,18): error: unknown type name 'LlamaWorkerState'
+   20 |       LlamaState(LlamaWorkerState *state);
+      |                  ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(24,7): error: unknown type name 'LlamaWorkerState'
+   24 |       LlamaWorkerState *worker_state;
+      |       ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(226,5): note: expanded from macro 'GDCLASS'
+  226 |                                 cls->_notification(p_what);                                                                                                                                            \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(238,12): note: expanded from macro 'GDCLASS'
+  238 |                                 return cls->_set(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<const ::godot::Variant *>(p_value));                                        \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(249,12): note: expanded from macro 'GDCLASS'
+  249 |                                 return cls->_get(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(269,3): note: expanded from macro 'GDCLASS'
+  269 |                 cls->_get_property_list(&plist_cpp);                                                                                                                                           \
+      |                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(285,12): note: expanded from macro 'GDCLASS'
+  285 |                                 return cls->_property_can_revert(*reinterpret_cast<const ::godot::StringName *>(p_name));                                                                              \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(296,12): note: expanded from macro 'GDCLASS'
+  296 |                                 return cls->_property_get_revert(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(310,5): note: expanded from macro 'GDCLASS'
+  310 |                                 cls->_validate_property(info);                                                                                                                                         \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(322,51): note: expanded from macro 'GDCLASS'
+  322 |                                 *reinterpret_cast<::godot::String *>(r_out) = cls->_to_string();                                                                                                       \
+      |                                                                               ^~~
+10 errors generated.
+ninja: build stopped: subcommand failed.
+[0/2] Re-checking globbed directories...
+[1/6] Building CXX object CMakeFiles\libllama.gd.windows.release.amd64.dir\src\llama_state.cpp.obj
+FAILED: CMakeFiles/libllama.gd.windows.release.amd64.dir/src/llama_state.cpp.obj 
+ccache C:\PROGRA~2\MICROS~2\2022\BUILDT~1\VC\Tools\Llvm\x64\bin\clang-cl.exe  /nologo -TP -Dlibllama_gd_windows_release_amd64_EXPORTS -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\common\." -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\." -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\gdextension" /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MT -D_CRT_SECURE_NO_WARNINGS /vmg /vmv -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-double-promotion -Wno-old-style-cast -Wno-implicit-float-conversion -Wno-unsafe-buffer-usage -Wno-unused-command-line-argument -Wno-newline-eof -Wno-float-equal -Wno-unknown-argument -Wno-shorten-64-to-32 -Wno-sign-conversion -Wno-float-conversion -Wno-cast-align -Wno-cast-qual -Wno-extra-semi-stmt -Wno-cast-function-type-strict -Wno-implicit-int-conversion -Wno-missing-prototypes -Wno-switch-default -Wno-exit-time-destructors -Wno-covered-switch-default -Wno-global-constructors /showIncludes /FoCMakeFiles\libllama.gd.windows.release.amd64.dir\src\llama_state.cpp.obj /FdCMakeFiles\libllama.gd.windows.release.amd64.dir\ -c -- "D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp"
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(20,18): error: unknown type name 'LlamaWorkerState'
+   20 |       LlamaState(LlamaWorkerState *state);
+      |                  ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(24,7): error: unknown type name 'LlamaWorkerState'
+   24 |       LlamaWorkerState *worker_state;
+      |       ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(226,5): note: expanded from macro 'GDCLASS'
+  226 |                                 cls->_notification(p_what);                                                                                                                                            \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(238,12): note: expanded from macro 'GDCLASS'
+  238 |                                 return cls->_set(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<const ::godot::Variant *>(p_value));                                        \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(249,12): note: expanded from macro 'GDCLASS'
+  249 |                                 return cls->_get(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(269,3): note: expanded from macro 'GDCLASS'
+  269 |                 cls->_get_property_list(&plist_cpp);                                                                                                                                           \
+      |                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(285,12): note: expanded from macro 'GDCLASS'
+  285 |                                 return cls->_property_can_revert(*reinterpret_cast<const ::godot::StringName *>(p_name));                                                                              \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(296,12): note: expanded from macro 'GDCLASS'
+  296 |                                 return cls->_property_get_revert(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(310,5): note: expanded from macro 'GDCLASS'
+  310 |                                 cls->_validate_property(info);                                                                                                                                         \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(322,51): note: expanded from macro 'GDCLASS'
+  322 |                                 *reinterpret_cast<::godot::String *>(r_out) = cls->_to_string();                                                                                                       \
+      |                                                                               ^~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp(26,16): error: out-of-line definition of 'LlamaState' does not match any declaration in 'godot::LlamaState'
+   26 |    LlamaState::LlamaState(LlamaWorkerState *initial_state)
+      |                ^~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp(77,18): error: no matching constructor for initialization of 'LlamaState'
+   77 |       return new LlamaState(state);
+      |                  ^          ~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(15,10): note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'LlamaWorkerState *' to 'const LlamaState' for 1st argument
+   15 |    class LlamaState : public RefCounted
+      |          ^~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp(30,16): note: candidate constructor not viable: requires 2 arguments, but 1 was provided
+   30 |    LlamaState::LlamaState(llama_model *model, gpt_params *params)
+      |                ^          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp:9:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include\godot_cpp/classes/ref_counted.hpp:39:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(284,21): error: no matching function for call to 'create_static_method_bind'
+  284 |         MethodBind *bind = create_static_method_bind(p_method);
+      |                            ^~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp(19,16): note: in instantiation of function template specialization 'godot::ClassDB::bind_static_method<godot::LlamaState *(*)(godot::String), const char *>' requested here
+   19 |       ClassDB::bind_static_method("read", &LlamaState::read, "source");
+      |                ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/method_bind.hpp(658,13): note: candidate template ignored: could not match 'void (P...)' against 'const char'
+  658 | MethodBind *create_static_method_bind(void (*p_method)(P...)) {
+      |             ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/method_bind.hpp(728,13): note: candidate template ignored: could not match 'R (P...)' against 'const char'
+  728 | MethodBind *create_static_method_bind(R (*p_method)(P...)) {
+      |             ^
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp:9:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include\godot_cpp/classes/ref_counted.hpp:39:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(286,32): error: reference to type 'const MethodDefinition' could not bind to an lvalue of type 'godot::LlamaState *(*)(godot::String)'
+  286 |         return bind_methodfi(0, bind, p_method_name, sizeof...(p_args) == 0 ? nullptr : (const void **)argptrs, sizeof...(p_args));
+      |                                       ^~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(108,97): note: passing argument to parameter 'method_name' here
+  108 |         static MethodBind *bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const MethodDefinition &method_name, const void **p_defs, int p_defcount);
+      |                                                                                                        ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(284,21): error: no matching function for call to 'create_static_method_bind'
+  284 |         MethodBind *bind = create_static_method_bind(p_method);
+      |                            ^~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp(20,16): note: in instantiation of function template specialization 'godot::ClassDB::bind_static_method<void (*)(godot::String, godot::LlamaState *), const char *, const char *>' requested here
+   20 |       ClassDB::bind_static_method("write", &LlamaState::write, "destination", "state");
+      |                ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/method_bind.hpp(658,13): note: candidate template ignored: could not match 'void (P...)' against 'const char'
+  658 | MethodBind *create_static_method_bind(void (*p_method)(P...)) {
+      |             ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/method_bind.hpp(728,13): note: candidate template ignored: could not match 'R (P...)' against 'const char'
+  728 | MethodBind *create_static_method_bind(R (*p_method)(P...)) {
+      |             ^
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp:9:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include\godot_cpp/classes/ref_counted.hpp:39:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(286,32): error: reference to type 'const MethodDefinition' could not bind to an lvalue of type 'void (*)(godot::String, godot::LlamaState *)'
+  286 |         return bind_methodfi(0, bind, p_method_name, sizeof...(p_args) == 0 ? nullptr : (const void **)argptrs, sizeof...(p_args));
+      |                                       ^~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(108,97): note: passing argument to parameter 'method_name' here
+  108 |         static MethodBind *bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const MethodDefinition &method_name, const void **p_defs, int p_defcount);
+      |                                                                                                        ^
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_state.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp:7:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\common\.\common.h:7:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\common\./sampling.h:5:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\common\./grammar-parser.h:14:
+In file included from C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\vector:12:
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\xmemory(727,76): error: cannot initialize a new value of type 'int' with an lvalue of type 'int *'
+  727 |         ::new (const_cast<void*>(static_cast<const volatile void*>(_Ptr))) _Objty(_STD forward<_Types>(_Args)...);
+      |                                                                            ^      ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\vector(798,27): note: in instantiation of function template specialization 'std::_Default_allocator_traits<std::allocator<int>>::construct<int, int *&>' requested here
+  798 |             _Alty_traits::construct(_Getal(), _Unfancy(_Mylast), _STD forward<_Valty>(_Val)...);
+      |                           ^
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\vector(780,20): note: in instantiation of function template specialization 'std::vector<int>::_Emplace_back_with_unused_capacity<int *&>' requested here
+  780 |             return _Emplace_back_with_unused_capacity(_STD forward<_Valty>(_Val)...);
+      |                    ^
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\vector(862,24): note: in instantiation of function template specialization 'std::vector<int>::_Emplace_one_at_back<int *&>' requested here
+  862 |         _Ty& _Result = _Emplace_one_at_back(_STD forward<_Valty>(_Val)...);
+      |                        ^
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\vector(834,23): error: no matching member function for call to 'construct'
+  834 |         _Alty_traits::construct(_Al, _Unfancy(_Newvec + _Whereoff), _STD forward<_Valty>(_Val)...);
+      |         ~~~~~~~~~~~~~~^~~~~~~~~
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\vector(783,17): note: in instantiation of function template specialization 'std::vector<int>::_Emplace_reallocate<int *&>' requested here
+  783 |         return *_Emplace_reallocate(_Mylast, _STD forward<_Valty>(_Val)...);
+      |                 ^
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\vector(862,24): note: in instantiation of function template specialization 'std::vector<int>::_Emplace_one_at_back<int *&>' requested here
+  862 |         _Ty& _Result = _Emplace_one_at_back(_STD forward<_Valty>(_Val)...);
+      |                        ^
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.39.33519\include\xmemory(723,30): note: candidate template ignored: substitution failure [with _Objty = int, _Types = <int *&>]
+  723 |     static _CONSTEXPR20 void construct(_Alloc&, _Objty* const _Ptr, _Types&&... _Args) {
+      |                              ^
+18 errors generated.
+[2/6] Building CXX object CMakeFiles\libllama.gd.windows.release.amd64.dir\src\register_types.cpp.obj
+FAILED: CMakeFiles/libllama.gd.windows.release.amd64.dir/src/register_types.cpp.obj 
+ccache C:\PROGRA~2\MICROS~2\2022\BUILDT~1\VC\Tools\Llvm\x64\bin\clang-cl.exe  /nologo -TP -Dlibllama_gd_windows_release_amd64_EXPORTS -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\common\." -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\." -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\gdextension" /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MT -D_CRT_SECURE_NO_WARNINGS /vmg /vmv -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-double-promotion -Wno-old-style-cast -Wno-implicit-float-conversion -Wno-unsafe-buffer-usage -Wno-unused-command-line-argument -Wno-newline-eof -Wno-float-equal -Wno-unknown-argument -Wno-shorten-64-to-32 -Wno-sign-conversion -Wno-float-conversion -Wno-cast-align -Wno-cast-qual -Wno-extra-semi-stmt -Wno-cast-function-type-strict -Wno-implicit-int-conversion -Wno-missing-prototypes -Wno-switch-default -Wno-exit-time-destructors -Wno-covered-switch-default -Wno-global-constructors /showIncludes /FoCMakeFiles\libllama.gd.windows.release.amd64.dir\src\register_types.cpp.obj /FdCMakeFiles\libllama.gd.windows.release.amd64.dir\ -c -- "D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp"
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(20,18): error: unknown type name 'LlamaWorkerState'
+   20 |       LlamaState(LlamaWorkerState *state);
+      |                  ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(24,7): error: unknown type name 'LlamaWorkerState'
+   24 |       LlamaWorkerState *worker_state;
+      |       ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(226,5): note: expanded from macro 'GDCLASS'
+  226 |                                 cls->_notification(p_what);                                                                                                                                            \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(238,12): note: expanded from macro 'GDCLASS'
+  238 |                                 return cls->_set(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<const ::godot::Variant *>(p_value));                                        \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(249,12): note: expanded from macro 'GDCLASS'
+  249 |                                 return cls->_get(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(269,3): note: expanded from macro 'GDCLASS'
+  269 |                 cls->_get_property_list(&plist_cpp);                                                                                                                                           \
+      |                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(285,12): note: expanded from macro 'GDCLASS'
+  285 |                                 return cls->_property_can_revert(*reinterpret_cast<const ::godot::StringName *>(p_name));                                                                              \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(296,12): note: expanded from macro 'GDCLASS'
+  296 |                                 return cls->_property_get_revert(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(310,5): note: expanded from macro 'GDCLASS'
+  310 |                                 cls->_validate_property(info);                                                                                                                                         \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(322,51): note: expanded from macro 'GDCLASS'
+  322 |                                 *reinterpret_cast<::godot::String *>(r_out) = cls->_to_string();                                                                                                       \
+      |                                                                               ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp:9:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include\godot_cpp/classes/ref_counted.hpp:39:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(118,27): error: no matching constructor for initialization of 'godot::LlamaState'
+  118 |                         T *new_object = memnew(T);
+      |                                                ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(232,4): note: in instantiation of function template specialization 'godot::ClassDB::_create_instance_func<godot::LlamaState>' requested here
+  232 |                 &_create_instance_func<T>, // GDExtensionClassCreateInstance create_instance_func; /* this one is mandatory */
+      |                  ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/core/class_db.hpp(253,11): note: in instantiation of function template specialization 'godot::ClassDB::_register_class<godot::LlamaState, false>' requested here
+  253 |         ClassDB::_register_class<T, false>(p_virtual);
+      |                  ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\register_types.cpp(20,16): note: in instantiation of function template specialization 'godot::ClassDB::register_class<godot::LlamaState>' requested here
+   20 |       ClassDB::register_class<LlamaState>();
+      |                ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(15,10): note: candidate constructor (the implicit copy constructor) not viable: requires 1 argument, but 0 were provided
+   15 |    class LlamaState : public RefCounted
+      |          ^~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(21,7): note: candidate constructor not viable: requires 2 arguments, but 0 were provided
+   21 |       LlamaState(llama_model *model, gpt_params *params);
+      |       ^          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+11 errors generated.
+[3/6] Building CXX object CMakeFiles\libllama.gd.windows.release.amd64.dir\src\llamagd.cpp.obj
+FAILED: CMakeFiles/libllama.gd.windows.release.amd64.dir/src/llamagd.cpp.obj 
+ccache C:\PROGRA~2\MICROS~2\2022\BUILDT~1\VC\Tools\Llvm\x64\bin\clang-cl.exe  /nologo -TP -Dlibllama_gd_windows_release_amd64_EXPORTS -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\common\." -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\." -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\gdextension" /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MT -D_CRT_SECURE_NO_WARNINGS /vmg /vmv -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-double-promotion -Wno-old-style-cast -Wno-implicit-float-conversion -Wno-unsafe-buffer-usage -Wno-unused-command-line-argument -Wno-newline-eof -Wno-float-equal -Wno-unknown-argument -Wno-shorten-64-to-32 -Wno-sign-conversion -Wno-float-conversion -Wno-cast-align -Wno-cast-qual -Wno-extra-semi-stmt -Wno-cast-function-type-strict -Wno-implicit-int-conversion -Wno-missing-prototypes -Wno-switch-default -Wno-exit-time-destructors -Wno-covered-switch-default -Wno-global-constructors /showIncludes /FoCMakeFiles\libllama.gd.windows.release.amd64.dir\src\llamagd.cpp.obj /FdCMakeFiles\libllama.gd.windows.release.amd64.dir\ -c -- "D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp"
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(20,18): error: unknown type name 'LlamaWorkerState'
+   20 |       LlamaState(LlamaWorkerState *state);
+      |                  ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(24,7): error: unknown type name 'LlamaWorkerState'
+   24 |       LlamaWorkerState *worker_state;
+      |       ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(226,5): note: expanded from macro 'GDCLASS'
+  226 |                                 cls->_notification(p_what);                                                                                                                                            \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(238,12): note: expanded from macro 'GDCLASS'
+  238 |                                 return cls->_set(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<const ::godot::Variant *>(p_value));                                        \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(249,12): note: expanded from macro 'GDCLASS'
+  249 |                                 return cls->_get(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(269,3): note: expanded from macro 'GDCLASS'
+  269 |                 cls->_get_property_list(&plist_cpp);                                                                                                                                           \
+      |                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(285,12): note: expanded from macro 'GDCLASS'
+  285 |                                 return cls->_property_can_revert(*reinterpret_cast<const ::godot::StringName *>(p_name));                                                                              \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(296,12): note: expanded from macro 'GDCLASS'
+  296 |                                 return cls->_property_get_revert(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(310,5): note: expanded from macro 'GDCLASS'
+  310 |                                 cls->_validate_property(info);                                                                                                                                         \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp:2:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llamagd.hpp:4:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(322,51): note: expanded from macro 'GDCLASS'
+  322 |                                 *reinterpret_cast<::godot::String *>(r_out) = cls->_to_string();                                                                                                       \
+      |                                                                               ^~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llamagd.cpp(404,18): error: no matching constructor for initialization of 'LlamaState'
+  404 |       return new LlamaState(state);
+      |                  ^          ~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(15,10): note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'LlamaWorkerState *' to 'const LlamaState' for 1st argument
+   15 |    class LlamaState : public RefCounted
+      |          ^~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(21,7): note: candidate constructor not viable: requires 2 arguments, but 1 was provided
+   21 |       LlamaState(llama_model *model, gpt_params *params);
+      |       ^          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+11 errors generated.
+[4/6] Building CXX object CMakeFiles\libllama.gd.windows.release.amd64.dir\src\llama_worker.cpp.obj
+FAILED: CMakeFiles/libllama.gd.windows.release.amd64.dir/src/llama_worker.cpp.obj 
+ccache C:\PROGRA~2\MICROS~2\2022\BUILDT~1\VC\Tools\Llvm\x64\bin\clang-cl.exe  /nologo -TP -Dlibllama_gd_windows_release_amd64_EXPORTS -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\common\." -I"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\llama.cpp\." -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\build\godot-cpp\gen\include" -imsvc"D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\gdextension" /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++17 -MT -D_CRT_SECURE_NO_WARNINGS /vmg /vmv -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-double-promotion -Wno-old-style-cast -Wno-implicit-float-conversion -Wno-unsafe-buffer-usage -Wno-unused-command-line-argument -Wno-newline-eof -Wno-float-equal -Wno-unknown-argument -Wno-shorten-64-to-32 -Wno-sign-conversion -Wno-float-conversion -Wno-cast-align -Wno-cast-qual -Wno-extra-semi-stmt -Wno-cast-function-type-strict -Wno-implicit-int-conversion -Wno-missing-prototypes -Wno-switch-default -Wno-exit-time-destructors -Wno-covered-switch-default -Wno-global-constructors /showIncludes /FoCMakeFiles\libllama.gd.windows.release.amd64.dir\src\llama_worker.cpp.obj /FdCMakeFiles\libllama.gd.windows.release.amd64.dir\ -c -- "D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp"
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(20,18): error: unknown type name 'LlamaWorkerState'
+   20 |       LlamaState(LlamaWorkerState *state);
+      |                  ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(24,7): error: unknown type name 'LlamaWorkerState'
+   24 |       LlamaWorkerState *worker_state;
+      |       ^
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(226,5): note: expanded from macro 'GDCLASS'
+  226 |                                 cls->_notification(p_what);                                                                                                                                            \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(238,12): note: expanded from macro 'GDCLASS'
+  238 |                                 return cls->_set(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<const ::godot::Variant *>(p_value));                                        \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(249,12): note: expanded from macro 'GDCLASS'
+  249 |                                 return cls->_get(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(269,3): note: expanded from macro 'GDCLASS'
+  269 |                 cls->_get_property_list(&plist_cpp);                                                                                                                                           \
+      |                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(285,12): note: expanded from macro 'GDCLASS'
+  285 |                                 return cls->_property_can_revert(*reinterpret_cast<const ::godot::StringName *>(p_name));                                                                              \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(296,12): note: expanded from macro 'GDCLASS'
+  296 |                                 return cls->_property_get_revert(*reinterpret_cast<const ::godot::StringName *>(p_name), *reinterpret_cast<::godot::Variant *>(r_ret));                                \
+      |                                        ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(310,5): note: expanded from macro 'GDCLASS'
+  310 |                                 cls->_validate_property(info);                                                                                                                                         \
+      |                                 ^~~
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src\llama_worker.cpp:1:
+In file included from D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_worker.hpp:4:
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\src/llama_state.hpp(17,7): error: cannot initialize object parameter of type 'const godot::Wrapped' with an expression of type 'LlamaState'
+   17 |       GDCLASS(LlamaState, RefCounted)
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:\university shit\FYP Project Folder\GDExtensions\llama.gd\godot-cpp\include\godot_cpp/classes/wrapped.hpp(322,51): note: expanded from macro 'GDCLASS'
+  322 |                                 *reinterpret_cast<::godot::String *>(r_out) = cls->_to_string();                                                                                                       \
+      |                                                                               ^~~
+10 errors generated.
+ninja: build stopped: subcommand failed.

@@ -96,8 +96,7 @@ void LlamaWorker::use_state(const LlamaWorkerState *new_state)
         delete state;
 
     // Copy the state to ensure immutability
-    state = (LlamaWorkerState *)malloc(sizeof(new_state));
-    memcpy(state, new_state, sizeof(new_state));
+    state = new LlamaWorkerState(*new_state);
 }
 
 // This long function is direct implementation from the main.cpp
