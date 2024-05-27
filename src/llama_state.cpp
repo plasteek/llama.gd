@@ -24,20 +24,20 @@ namespace godot
    }
    LlamaState::LlamaState(LlamaWorkerState *initial_state)
    {
-      state = initial_state;
+      worker_state = initial_state;
    }
    LlamaState::LlamaState(llama_model *model, gpt_params *params)
    {
-      state = new LlamaWorkerState(model, params);
+      worker_state = new LlamaWorkerState(model, params);
    }
    LlamaState::~LlamaState()
    {
-      delete state;
+      delete worker_state;
    }
 
    void LlamaState::write(String dest, LlamaState *target)
    {
-      LlamaWorkerState *state = target->state;
+      LlamaWorkerState *state = target->worker_state;
       llama_state_save_file(
           state->ctx,
           string_gd_to_std(dest).c_str(),
@@ -78,7 +78,7 @@ namespace godot
 
    Array LlamaState::get_tokens() const
    {
-      return int_vec_to_gd_arr(state->tokens);
+      return int_vec_to_gd_arr(worker_state->tokens);
    }
    void LlamaState::set_tokens(const Array tokens)
    {

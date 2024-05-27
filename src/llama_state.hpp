@@ -19,7 +19,7 @@ namespace godot
       LlamaState(llama_model *model, gpt_params *params);
       ~LlamaState();
 
-      LlamaWorkerState *state;
+      LlamaWorkerState *worker_state;
 
       static void write(String destination, LlamaState *state);
       static LlamaState *read(String source);
