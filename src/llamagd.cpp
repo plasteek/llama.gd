@@ -63,7 +63,6 @@ namespace godot
       backend_initialized = false;
       verbose = false;
 
-      ctx = nullptr;
       model = nullptr;
       worker = nullptr;
 
@@ -177,7 +176,10 @@ namespace godot
       // What the hell?
       // dedicate one sequence to the system prompt
       params.n_parallel += 1;
-      std::tie(model, ctx) = llama_init_from_gpt_params(params);
+
+      auto mparams = llama_model_default_params();
+      model = llama_load_model_from_file(params.model.c_str(), mparams);
+
       // but be sneaky about it
       params.n_parallel -= 1;
 
@@ -207,7 +209,6 @@ namespace godot
 
       log("Freeing model and context");
       llama_free_model(model);
-      llama_free(ctx);
 
       function_call_mutex->unlock();
    }
@@ -310,7 +311,6 @@ namespace godot
       log("Setting up new worker");
       worker = new LlamaWorker(
           model,
-          ctx,
           &params);
 
       worker->output_eos = output_eos;
@@ -365,8 +365,13 @@ namespace godot
             return result;
          };
 
+         auto cparams = llama_context_params_from_gpt_params(params);
+         llama_context *ctx = llama_new_context_with_model(model, cparams);
+
          std::string decoded = llama_token_to_piece(ctx, token, !params.conversation);
          result += string_std_to_gd(decoded);
+
+         std::free(ctx);
       }
       return result;
    }
@@ -376,14 +381,26 @@ namespace godot
       auto token_id = get_model_bos_id();
       if (token_id == -1)
          return "";
-      return string_std_to_gd(llama_token_to_piece(ctx, token_id, !params.conversation));
+
+      auto cparams = llama_context_params_from_gpt_params(params);
+      llama_context *ctx = llama_new_context_with_model(model, cparams);
+
+      String bos = string_std_to_gd(llama_token_to_piece(ctx, token_id, !params.conversation));
+      std::free(ctx);
+      return bos;
    }
    String LlamaGD::get_model_eos()
    {
       auto token_id = get_model_eos_id();
       if (token_id == -1)
          return "";
-      return string_std_to_gd(llama_token_to_piece(ctx, token_id, !params.conversation));
+
+      auto cparams = llama_context_params_from_gpt_params(params);
+      llama_context *ctx = llama_new_context_with_model(model, cparams);
+
+      String eos = string_std_to_gd(llama_token_to_piece(ctx, token_id, !params.conversation));
+      std::free(ctx);
+      return eos;
    }
 
    int LlamaGD::get_model_bos_id()

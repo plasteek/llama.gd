@@ -23,7 +23,6 @@ namespace godot
       Ref<Thread> text_generation_thread;
       Ref<Thread> model_loader_thread;
       gpt_params params;
-      llama_context *ctx;
       llama_model *model;
       LlamaWorker *worker;
 

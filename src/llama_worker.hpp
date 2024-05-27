@@ -30,7 +30,6 @@ public:
    // Only allow the params to be the exact same as the params
    LlamaWorker(
        llama_model *loaded_model,
-       llama_context *loaded_ctx,
        gpt_params *locked_params);
    ~LlamaWorker();
    // NOTICE: might throw error
@@ -38,6 +37,10 @@ public:
    // More direct token prediction
    std::string predict(std::vector<llama_token> tokens);
    void stop();
+   // TODO: maybe have a use_state(state here or something)
+   // Not sure what to do with the guidance context tho.
+   // TODO: maybe have a make_state(prompt here or something)
+   // which should return the state object?
 };
 
 #endif
