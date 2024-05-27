@@ -289,7 +289,8 @@ std::string LlamaWorker::predict(std::vector<llama_token> tokens)
     std::vector<int> output_tokens;
     std::ostringstream output_ss;
 
-    std::vector<llama_token> embd = state->tokens;
+    std::vector<llama_token> embd(state->tokens);
+    embd.insert(embd.end(), tokens.begin(), tokens.end());
     std::vector<llama_token> embd_guidance;
 
     // tokenized antiprompts
