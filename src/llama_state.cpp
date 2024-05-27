@@ -15,8 +15,8 @@ namespace godot
    {
       // Export only functions because n_consumed and n_past should only be from
       // the cpp
-      ClassDB::bind_method(D_METHOD("read", "source"), &LlamaState::read);
-      ClassDB::bind_method(D_METHOD("write", "destination", "state"), &LlamaState::write);
+      ClassDB::bind_static_method("read", &LlamaState::read, "source");
+      ClassDB::bind_static_method("write", &LlamaState::write, "destination", "state");
 
       ClassDB::bind_method(D_METHOD("get_tokens"), &LlamaState::get_tokens);
       ClassDB::bind_method(D_METHOD("set_tokens"), &LlamaState::set_tokens);
