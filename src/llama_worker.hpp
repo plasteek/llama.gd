@@ -4,19 +4,39 @@
 #include <string>
 #include <functional>
 #include <common.h>
+#include <llama_state.hpp>
 
 // Runner steps:
 // 1. Setup the runner parameters
 // 2. Call the `.run` function to being generation
 // 3. Cleanup non-parameter variables
 
+// C++ level LlamaWorker State object
+class LlamaWorkerState
+{
+public:
+   LlamaWorkerState();
+   LlamaWorkerState(llama_model *model, gpt_params *params);
+   ~LlamaWorkerState();
+
+   // We can assume that n_consumed is already the same as the embeddings
+   // And the initial past is also the same as n_consumed
+   int n_past;
+   int n_consumed;
+   llama_context *ctx;
+   std::vector<llama_token> tokens;
+};
+
 class LlamaWorker
 {
 private:
    bool should_yield;
    gpt_params *params;
-   llama_context *ctx;
    llama_model *model;
+
+   // It looks weird but we want so that godot can access
+   // the object to be used
+   LlamaWorkerState *state;
 
    bool file_exists(const std::string path);
    bool file_is_empty(const std::string path);
@@ -37,10 +57,9 @@ public:
    // More direct token prediction
    std::string predict(std::vector<llama_token> tokens);
    void stop();
-   // TODO: maybe have a use_state(state here or something)
-   // Not sure what to do with the guidance context tho.
-   // TODO: maybe have a make_state(prompt here or something)
-   // which should return the state object?
+   void use_state(const LlamaWorkerState *state);
+   // Create a state with initial prompt
+   LlamaWorkerState *make_state(const std::string prompt);
 };
 
 #endif

@@ -1,4 +1,5 @@
 #include "llama_worker.hpp"
+#include "llama_state.hpp"
 #include <llama.h>
 #include <common.h>
 #include <fstream>
@@ -22,13 +23,32 @@
 #pragma warning(disable : 4244 4267) // possible loss of data
 #endif
 
+LlamaWorkerState::LlamaWorkerState()
+{
+    n_consumed = 0;
+    n_past = 0;
+}
+LlamaWorkerState::LlamaWorkerState(llama_model *model, gpt_params *params)
+{
+    // Call default overloading
+    LlamaWorkerState();
+    // Initialize default context
+    auto cparams = llama_context_default_params();
+    ctx = llama_new_context_with_model(model, cparams);
+}
+LlamaWorkerState::~LlamaWorkerState()
+{
+    llama_free(ctx);
+}
+
 LlamaWorker::LlamaWorker(
     llama_model *loaded_model,
     gpt_params *locked_params)
 {
-    // ctx = loaded_ctx;
+    // We want to load or create our own context
     model = loaded_model;
     params = locked_params;
+    state = new LlamaWorkerState(model, params);
 
     output_eos = true;
     output_bos = false;
@@ -39,6 +59,8 @@ LlamaWorker::LlamaWorker(
 }
 LlamaWorker::~LlamaWorker()
 {
+    if (state != nullptr)
+        delete state;
 }
 
 bool LlamaWorker::file_exists(const std::string path)
@@ -67,6 +89,16 @@ std::string LlamaWorker::run(std::string prompt)
     return predict(tokens);
 }
 
+void LlamaWorker::use_state(const LlamaWorkerState *new_state)
+{
+    if (state != nullptr)
+        std::free(state);
+
+    // Copy the state to ensure immutability
+    state = (LlamaWorkerState *)malloc(sizeof(new_state));
+    memcpy(state, new_state, sizeof(new_state));
+}
+
 // This long function is direct implementation from the main.cpp
 std::string LlamaWorker::predict(std::vector<llama_token> tokens)
 {
@@ -76,6 +108,7 @@ std::string LlamaWorker::predict(std::vector<llama_token> tokens)
 
     // Needed llama_context
     llama_sampling_params &sparams = (*params).sparams;
+    llama_context *ctx = state->ctx;
     llama_context *ctx_guidance = NULL;
 
 #ifndef LOG_DISABLE_LOGS
@@ -242,14 +275,13 @@ std::string LlamaWorker::predict(std::vector<llama_token> tokens)
     // This is to echo initial or not
     bool display = false;
 
-    // How many tokens have been 'traversed'
-    // This is usually from the beginning
-    int n_past = 0;
+    // How many tokens have been 'traversed' (from prompt beginning)
+    int n_past = state->n_past;
     // Maximum tokens to be predicted
     // Basically sampling budget
     int n_remain = (*params).n_predict;
     // This is the one responsible for "re-building KV cache"
-    int n_consumed = 0;
+    int n_consumed = state->n_consumed;
     // This is basically n_past but for guidance token
     int n_past_guidance = 0;
 
@@ -257,7 +289,7 @@ std::string LlamaWorker::predict(std::vector<llama_token> tokens)
     std::vector<int> output_tokens;
     std::ostringstream output_ss;
 
-    std::vector<llama_token> embd;
+    std::vector<llama_token> embd = state->tokens;
     std::vector<llama_token> embd_guidance;
 
     // tokenized antiprompts
@@ -523,12 +555,39 @@ std::string LlamaWorker::predict(std::vector<llama_token> tokens)
     // Free all the used context here
     // Apart from one provided by the constructor
     llama_print_timings(ctx);
+
+    // Assume that state is handled immutably
+    delete state;
+
     llama_sampling_free(ctx_sampling);
     if (ctx_guidance)
         llama_free(ctx_guidance);
 
     // Reset context if needed (ensure previous prompt does not get carried)
     llama_kv_cache_clear(ctx);
-
     return generated_text;
+}
+
+// Initialize or cache a state for a prompt
+LlamaWorkerState *LlamaWorker::make_state(const std::string prompt)
+{
+    auto state = new LlamaWorkerState(model, params);
+    state->tokens = ::llama_tokenize(model, prompt, true, true);
+    int n_consumed = 0;
+
+    // New context and sampling context
+    llama_context *ctx = state->ctx;
+    std::vector<llama_token> embd_inp = state->tokens;
+    llama_sampling_context *ctx_sampling = llama_sampling_init(params->sparams);
+
+    while ((int)embd_inp.size() > n_consumed)
+    {
+        // push the prompt in the sampling context in order to apply repetition penalties later
+        // for the prompt, we don't apply grammar rules
+        llama_sampling_accept(ctx_sampling, ctx, embd_inp[n_consumed], false);
+        ++n_consumed;
+    }
+
+    state->n_consumed = state->n_past = n_consumed;
+    return state;
 }

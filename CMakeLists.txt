@@ -17,6 +17,10 @@ set(src_files
    "src/llama_worker.cpp"
    "src/llamagd.hpp"
    "src/llamagd.cpp"
+   "src/llama_state.hpp"
+   "src/llama_state.cpp"
+   "src/gd_throw.hpp"
+   "src/gd_throw.cpp"
 )
 
 add_compile_options(-D_CRT_SECURE_NO_WARNINGS)
