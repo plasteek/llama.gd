@@ -23,8 +23,10 @@ namespace godot
       Ref<Thread> text_generation_thread;
       Ref<Thread> model_loader_thread;
       gpt_params params;
+
       llama_model *model;
       LlamaWorker *worker;
+      LlamaState *state;
 
       bool output_bos;
       bool output_eos;
@@ -39,7 +41,7 @@ namespace godot
       void log(const std::string msg);
       LlamaWorker *prepare_worker();
       void await_generation_thread();
-      void release_worker();
+      void cleanup_worker();
 
    protected:
       static void _bind_methods();
@@ -63,6 +65,12 @@ namespace godot
       String predict_sequence(const Array tokens);
       void predict_sequence_async(const Array tokens);
       void stop_generation();
+
+      LlamaState *make_state(const String prompt);
+      void make_state_async(const String prompt);
+
+      void use_state(LlamaState *llama_state);
+      void clear_state();
 
       Array tokenize(const String prompt);
       String decode(const Array tokens);

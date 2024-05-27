@@ -1,5 +1,6 @@
 #include "conversion.hpp"
 #include "llamagd.hpp"
+#include "llama_worker.hpp"
 #include "gd_throw.hpp"
 #include <stdexcept>
 
@@ -27,6 +28,7 @@ namespace godot
       ADD_SIGNAL(MethodInfo("new_token_generated", PropertyInfo(Variant::STRING, "token")));
       ADD_SIGNAL(MethodInfo("generation_completed", PropertyInfo(Variant::STRING, "result")));
       ADD_SIGNAL(MethodInfo("generation_failed", PropertyInfo(Variant::STRING, "msg")));
+      ADD_SIGNAL(MethodInfo("state_created", PropertyInfo(Variant::OBJECT, "state")));
 
       // Primary generation method
       ClassDB::bind_method(D_METHOD("tokenize", "prompt"), &LlamaGD::tokenize);
@@ -66,6 +68,7 @@ namespace godot
 
       model = nullptr;
       worker = nullptr;
+      state = nullptr;
 
       generation_mutex.instantiate();
       function_call_mutex.instantiate();
@@ -298,7 +301,7 @@ namespace godot
       }
 
       log("Completion successful");
-      release_worker();
+      cleanup_worker();
 
       // Free up generation if this uses mutex
       generation_mutex->unlock();
@@ -319,11 +322,16 @@ namespace godot
       {
          call_deferred("emit_signal", "new_token_generated", string_std_to_gd(new_token));
       };
-      log("Worker initialized");
 
+      if (state != nullptr)
+      {
+         worker->use_state(state->state);
+      }
+
+      log("Worker initialized");
       return worker;
    }
-   void LlamaGD::release_worker()
+   void LlamaGD::cleanup_worker()
    {
       log("Releasing worker from memory");
       delete worker;
@@ -374,8 +382,35 @@ namespace godot
       }
       return result;
    }
-   LlamaState *LlamaGD::cache_state()
+
+   void LlamaGD::make_state_async(String prompt)
    {
+      await_generation_thread();
+      text_generation_thread->start(callable_mp(this, &LlamaGD::make_state).bind(prompt));
+   }
+   LlamaState *LlamaGD::make_state(String prompt)
+   {
+      // TODO: how the hell do we inject the state to each prediction????????
+      prepare_worker();
+
+      log("Creating state from prompt");
+      auto state = worker->make_state(string_gd_to_std(prompt));
+
+      log("State created. Releasing worker.");
+      cleanup_worker();
+      generation_mutex->unlock();
+
+      call_deferred("emit_signal", "state_created", state);
+      return new LlamaState(state);
+   }
+
+   void LlamaGD::use_state(LlamaState *llama_state)
+   {
+      state = llama_state;
+   }
+   void LlamaGD::clear_state()
+   {
+      state = nullptr;
    }
 
    String LlamaGD::get_model_bos()
@@ -462,7 +497,7 @@ namespace godot
       }
 
       log("Prediction Completed");
-      release_worker();
+      cleanup_worker();
 
       // Ensure we cleanup mutex if we used a thread
       generation_mutex->unlock();
