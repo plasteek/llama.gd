@@ -17,8 +17,7 @@ namespace godot
       GDCLASS(LlamaState, RefCounted)
 
    public:
-      LlamaState(LlamaWorkerState *state);
-      LlamaState(llama_model *model, gpt_params *params);
+      LlamaState();
       ~LlamaState();
 
       LlamaWorkerState *worker_state;
@@ -28,6 +27,9 @@ namespace godot
 
       Array get_tokens() const;
       void set_tokens(const Array tokens);
+
+      static LlamaState *create_state(LlamaWorkerState *state);
+      static LlamaState *create_state(llama_model *model, gpt_params *params);
 
    protected:
       static void _bind_methods();

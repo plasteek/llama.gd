@@ -402,7 +402,7 @@ namespace godot
       generation_mutex->unlock();
 
       call_deferred("emit_signal", "state_created", state);
-      return new LlamaState(state);
+      return LlamaState::create_state(state);
    }
 
    void LlamaGD::use_state(LlamaState *llama_state)

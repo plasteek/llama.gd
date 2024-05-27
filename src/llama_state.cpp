@@ -23,13 +23,19 @@ namespace godot
       ClassDB::bind_method(D_METHOD("set_tokens"), &LlamaState::set_tokens);
       ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "tokens", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_READ_ONLY), "set_tokens", "get_tokens");
    }
-   LlamaState::LlamaState(LlamaWorkerState *initial_state)
+   LlamaState *LlamaState::create_state(LlamaWorkerState *initial_state)
    {
-      worker_state = initial_state;
+      LlamaState *new_state = new LlamaState();
+      new_state->worker_state = initial_state;
+      return new_state;
    }
-   LlamaState::LlamaState(llama_model *model, gpt_params *params)
+   LlamaState *LlamaState::create_state(llama_model *model, gpt_params *params)
    {
-      worker_state = new LlamaWorkerState(model, params);
+      auto worker_state = new LlamaWorkerState(model, params);
+      LlamaState *new_state = new LlamaState();
+      new_state->worker_state = worker_state;
+
+      return new_state;
    }
    LlamaState::~LlamaState()
    {
@@ -74,7 +80,7 @@ namespace godot
       std::free(token_ptr);
       std::free(token_count);
 
-      return new LlamaState(state);
+      return LlamaState::create_state(state);
    }
 
    Array LlamaState::get_tokens() const
