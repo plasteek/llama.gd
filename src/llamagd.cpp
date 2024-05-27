@@ -470,6 +470,15 @@ namespace godot
       ClassDB::bind_method(D_METHOD("set_input_suffix", "suffix"), &LlamaGD::set_input_suffix);
       ADD_PROPERTY(PropertyInfo(Variant::STRING, "input_suffix", PROPERTY_HINT_MULTILINE_TEXT, "Append to the end of prompt"), "set_input_suffix", "get_input_suffix");
 
+      ADD_GROUP("Classifier-Free Guidance (CFG)", "");
+      ClassDB::bind_method(D_METHOD("get_cfg_scale"), &LlamaGD::get_cfg_scale);
+      ClassDB::bind_method(D_METHOD("set_cfg_scale", "scale"), &LlamaGD::set_cfg_scale);
+      ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "cfg_scale", PROPERTY_HINT_NONE, "How strong is guidance"), "get_cfg_scale", "set_cfg_scale");
+
+      ClassDB::bind_method(D_METHOD("get_negative_prompt"), &LlamaGD::get_cfg_scale);
+      ClassDB::bind_method(D_METHOD("set_negative_prompt", "prompt"), &LlamaGD::set_cfg_scale);
+      ADD_PROPERTY(PropertyInfo(Variant::STRING, "negative_prompt", PROPERTY_HINT_MULTILINE_TEXT, "Guidance prompt"), "get_negative_prompt", "set_negative_prompt");
+
       ADD_GROUP("Generation", "");
       ClassDB::bind_method(D_METHOD("get_n_ctx"), &LlamaGD::get_n_ctx);
       ClassDB::bind_method(D_METHOD("set_n_ctx", "context_size"), &LlamaGD::set_n_ctx);
@@ -828,5 +837,23 @@ namespace godot
    void LlamaGD::set_busy(const bool is_busy)
    {
       UtilityFunctions::push_error("Cannot set read only property of `busy`");
+   }
+
+   float LlamaGD::get_cfg_scale() const
+   {
+      return params.sparams.cfg_scale;
+   }
+   void LlamaGD::set_cfg_scale(const float scale)
+   {
+      params.sparams.cfg_scale = scale;
+   }
+
+   String LlamaGD::get_negative_prompt() const
+   {
+      return string_std_to_gd(params.sparams.cfg_negative_prompt);
+   }
+   void LlamaGD::set_negative_prompt(const String prompt)
+   {
+      params.sparams.cfg_negative_prompt = string_gd_to_std(prompt);
    }
 }

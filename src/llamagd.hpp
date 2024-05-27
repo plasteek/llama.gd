@@ -146,6 +146,12 @@ namespace godot
 
       bool get_busy() const;
       void set_busy(const bool is_busy);
+
+      float get_cfg_scale() const;
+      void set_cfg_scale(const float scale);
+
+      String get_negative_prompt() const;
+      void set_negative_prompt(const String prompt);
    };
 }
 
