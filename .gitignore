@@ -2,3 +2,4 @@ build
 build_release/
 install/
 demo/
+log.txt
