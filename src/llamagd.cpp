@@ -1,5 +1,6 @@
 #include "conversion.hpp"
 #include "llamagd.hpp"
+#include "gd_throw.hpp"
 #include <stdexcept>
 
 #include <godot_cpp/classes/mutex.hpp>
@@ -292,10 +293,8 @@ namespace godot
       catch (std::runtime_error err)
       {
          log("Error while creating completion. Aborting");
-         std::string msg(err.what());
-         String normalized_msg = string_std_to_gd(msg);
-         UtilityFunctions::push_error(normalized_msg);
-         call_deferred("emit_signal", "generation_failed", normalized_msg);
+         gd_throw_runtime_err(err);
+         call_deferred("emit_signal", "generation_failed", "Cannot create completion");
       }
 
       log("Completion successful");
@@ -455,10 +454,8 @@ namespace godot
       catch (std::runtime_error err)
       {
          log("Error while predicting tokens. Aborting");
-         std::string msg(err.what());
-         String normalized_msg = string_std_to_gd(msg);
-         UtilityFunctions::push_error(normalized_msg);
-         call_deferred("emit_signal", "generation_failed", normalized_msg);
+         gd_throw_runtime_err(err);
+         call_deferred("emit_signal", "generation_failed", "Error predicting tokens");
       }
 
       log("Prediction Completed");
