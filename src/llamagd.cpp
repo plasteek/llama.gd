@@ -370,7 +370,7 @@ namespace godot
          std::string decoded = llama_token_to_piece(ctx, token, !params.conversation);
          result += string_std_to_gd(decoded);
 
-         std::free(ctx);
+         llama_free(ctx);
       }
       return result;
    }
@@ -385,7 +385,7 @@ namespace godot
       llama_context *ctx = llama_new_context_with_model(model, cparams);
 
       String bos = string_std_to_gd(llama_token_to_piece(ctx, token_id, !params.conversation));
-      std::free(ctx);
+      llama_free(ctx);
       return bos;
    }
    String LlamaGD::get_model_eos()
@@ -398,7 +398,7 @@ namespace godot
       llama_context *ctx = llama_new_context_with_model(model, cparams);
 
       String eos = string_std_to_gd(llama_token_to_piece(ctx, token_id, !params.conversation));
-      std::free(ctx);
+      llama_free(ctx);
       return eos;
    }
 
