@@ -1,6 +1,6 @@
-#include "register_types.hpp"
 #include "llamagd.hpp"
 #include "llama_state.hpp"
+#include "register_types.hpp"
 
 #include <gdextension_interface.h>
 #include <godot_cpp/core/defs.hpp>

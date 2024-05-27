@@ -1,13 +1,14 @@
 #ifndef LLAMA_TYPES
 #define LLAMA_TYPES
 
+#include "llama_worker.hpp"
+
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/thread.hpp>
 #include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/variant/string.hpp>
 
 #include <common.h>
-#include "llama_worker.hpp"
 
 namespace godot
 {

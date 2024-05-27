@@ -2,9 +2,11 @@
 #define GD_MODEL_STATE
 
 #include "llama_worker.hpp"
-#include <godot_cpp/classes/ref_counted.hpp>
+
 #include <llama.h>
 #include <common.h>
+
+#include <godot_cpp/classes/ref_counted.hpp>
 
 // Wrapper class for LlamaWorkerState
 

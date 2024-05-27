@@ -1,10 +1,11 @@
 #ifndef LLAMA_WORKER_TYPES
 #define LLAMA_WORKER_TYPES
 
+#include "llama_state.hpp"
+
 #include <string>
 #include <functional>
 #include <common.h>
-#include <llama_state.hpp>
 
 // Runner steps:
 // 1. Setup the runner parameters

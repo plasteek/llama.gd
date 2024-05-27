@@ -2,7 +2,6 @@
 #include "llamagd.hpp"
 #include "llama_worker.hpp"
 #include "gd_throw.hpp"
-#include <stdexcept>
 
 #include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/classes/global_constants.hpp>
@@ -18,6 +17,7 @@
 #include <string>
 #include <common.h>
 #include <vector>
+#include <stdexcept>
 
 namespace godot
 {
@@ -325,7 +325,7 @@ namespace godot
 
       if (state != nullptr)
       {
-         worker->use_state(state->state);
+         worker->use_state(state->worker_state);
       }
 
       log("Worker initialized");
