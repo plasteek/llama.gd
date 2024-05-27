@@ -92,7 +92,7 @@ std::string LlamaWorker::run(std::string prompt)
 void LlamaWorker::use_state(const LlamaWorkerState *new_state)
 {
     if (state != nullptr)
-        std::free(state);
+        delete state;
 
     // Copy the state to ensure immutability
     state = (LlamaWorkerState *)malloc(sizeof(new_state));

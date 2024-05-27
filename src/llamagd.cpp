@@ -374,6 +374,9 @@ namespace godot
       }
       return result;
    }
+   LlamaState *LlamaGD::cache_state()
+   {
+   }
 
    String LlamaGD::get_model_bos()
    {
