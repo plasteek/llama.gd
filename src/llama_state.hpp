@@ -24,6 +24,9 @@ namespace godot
       static void write(String destination, LlamaState *state);
       static LlamaState *read(String source);
 
+      Array get_tokens() const;
+      void set_tokens(const Array tokens);
+
    protected:
       static void _bind_methods();
    };

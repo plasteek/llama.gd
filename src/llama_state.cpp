@@ -17,6 +17,10 @@ namespace godot
       // the cpp
       ClassDB::bind_method(D_METHOD("read", "source"), &LlamaState::read);
       ClassDB::bind_method(D_METHOD("write", "destination", "state"), &LlamaState::write);
+
+      ClassDB::bind_method(D_METHOD("get_tokens"), &LlamaState::get_tokens);
+      ClassDB::bind_method(D_METHOD("set_tokens"), &LlamaState::set_tokens);
+      ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "tokens", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_READ_ONLY), "set_tokens", "get_tokens");
    }
    LlamaState::LlamaState(LlamaWorkerState *initial_state)
    {
@@ -70,5 +74,14 @@ namespace godot
       std::free(token_count);
 
       return new LlamaState(state);
+   }
+
+   Array LlamaState::get_tokens() const
+   {
+      return int_vec_to_gd_arr(state->tokens);
+   }
+   void LlamaState::set_tokens(const Array tokens)
+   {
+      UtilityFunctions::push_error("You may not set token in a state object");
    }
 }
