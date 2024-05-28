@@ -158,7 +158,7 @@ std::string LlamaWorker::predict(std::vector<llama_token> tokens)
     {
         // print system information
         LOG_TEE("\n");
-        LOG_TEE("%s\n", get_system_info((*params)).c_str());
+        LOG_TEE("%s\n", gpt_params_get_system_info((*params)).c_str());
     }
 
     // Does the model require a bos_token for starting generation?
