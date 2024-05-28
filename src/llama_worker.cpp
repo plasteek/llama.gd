@@ -27,10 +27,10 @@ LlamaWorkerState::LlamaWorkerState()
 {
     n_consumed = 0;
     n_past = 0;
+    ctx = nullptr;
 }
 LlamaWorkerState::LlamaWorkerState(llama_model *model, gpt_params *params)
 {
-    // Call default overloading
     LlamaWorkerState();
     // Initialize default context
     auto cparams = llama_context_default_params();

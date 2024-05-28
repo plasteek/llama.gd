@@ -326,6 +326,7 @@ namespace godot
 
       if (state != nullptr)
       {
+         log("Detected a state. Using custom initial state");
          worker->use_state(state->worker_state);
       }
 
