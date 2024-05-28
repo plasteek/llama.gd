@@ -262,7 +262,12 @@ namespace godot
       prompt_payload = params.input_prefix + normalized_prompt + params.input_suffix;
 
       auto tokens = ::llama_tokenize(model, prompt_payload, true, true);
-      return string_std_to_gd(predict_sequence_internal(tokens));
+
+      std::string result = predict_sequence_internal(tokens);
+      String normalized = string_std_to_gd(result);
+      call_deferred("emit_signal", "generation_completed", normalized);
+
+      return normalized;
    }
    // More direct token based approach
    void LlamaGD::predict_sequence_async(const Array tokens)
@@ -277,7 +282,10 @@ namespace godot
          log("Converting GDArray to vector");
          std::vector<llama_token> payload = gd_arr_to_int_vec(tokens);
          std::string result = predict_sequence_internal(payload);
-         return string_std_to_gd(result);
+
+         String normalized = string_std_to_gd(result);
+         call_deferred("emit_signal", "generation_completed", normalized);
+         return normalized;
       }
       catch (std::runtime_error err)
       {
@@ -317,7 +325,6 @@ namespace godot
 
       // Ensure we cleanup mutex if we used a thread
       generation_mutex->unlock();
-      call_deferred("emit_signal", "generation_completed", prediction_result);
       return prediction_result;
    }
 
