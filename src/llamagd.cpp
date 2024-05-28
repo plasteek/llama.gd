@@ -526,11 +526,11 @@ namespace godot
       ADD_GROUP("Classifier-Free Guidance (CFG)", "");
       ClassDB::bind_method(D_METHOD("get_cfg_scale"), &LlamaGD::get_cfg_scale);
       ClassDB::bind_method(D_METHOD("set_cfg_scale", "scale"), &LlamaGD::set_cfg_scale);
-      ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "cfg_scale", PROPERTY_HINT_NONE, "How strong is guidance"), "get_cfg_scale", "set_cfg_scale");
+      ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "cfg_scale", PROPERTY_HINT_NONE, "How strong is guidance"), "set_cfg_scale", "get_cfg_scale");
 
       ClassDB::bind_method(D_METHOD("get_negative_prompt"), &LlamaGD::get_cfg_scale);
       ClassDB::bind_method(D_METHOD("set_negative_prompt", "prompt"), &LlamaGD::set_cfg_scale);
-      ADD_PROPERTY(PropertyInfo(Variant::STRING, "negative_prompt", PROPERTY_HINT_MULTILINE_TEXT, "Guidance prompt"), "get_negative_prompt", "set_negative_prompt");
+      ADD_PROPERTY(PropertyInfo(Variant::STRING, "negative_prompt", PROPERTY_HINT_MULTILINE_TEXT, "Guidance prompt"), "set_negative_prompt", "get_negative_prompt");
 
       ADD_GROUP("Generation", "");
       ClassDB::bind_method(D_METHOD("get_n_ctx"), &LlamaGD::get_n_ctx);
