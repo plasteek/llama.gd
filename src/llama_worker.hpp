@@ -51,10 +51,8 @@ public:
        llama_model *loaded_model,
        gpt_params *locked_params);
    ~LlamaWorker();
-   // NOTICE: might throw error
-   std::string run(std::string prompt);
    // More direct token prediction
-   std::string predict(std::vector<llama_token> tokens);
+   std::string run(std::vector<llama_token> tokens);
    void stop();
    void use_state(const LlamaWorkerState *state);
    // Create a state with initial prompt

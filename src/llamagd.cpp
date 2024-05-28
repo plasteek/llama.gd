@@ -252,6 +252,75 @@ namespace godot
       await_generation_thread();
       text_generation_thread->start(callable_mp(this, &LlamaGD::create_completion).bind(prompt));
    }
+
+   String LlamaGD::create_completion(const String prompt)
+   {
+
+      log("Pre-processing prompt");
+      std::string normalized_prompt = string_gd_to_std(prompt);
+      std::string prompt_payload = normalized_prompt;
+      prompt_payload = params.input_prefix + normalized_prompt + params.input_suffix;
+
+      auto tokens = ::llama_tokenize(model, prompt_payload, true, true);
+      return string_std_to_gd(predict_sequence_internal(tokens));
+   }
+   // More direct token based approach
+   void LlamaGD::predict_sequence_async(const Array tokens)
+   {
+      await_generation_thread();
+      text_generation_thread->start(callable_mp(this, &LlamaGD::predict_sequence).bind(tokens));
+   }
+   String LlamaGD::predict_sequence(const Array tokens)
+   {
+      try
+      {
+         log("Converting GDArray to vector");
+         std::vector<llama_token> payload = gd_arr_to_int_vec(tokens);
+         std::string result = predict_sequence_internal(payload);
+         return string_std_to_gd(result);
+      }
+      catch (std::runtime_error err)
+      {
+         log("Error while predicting tokens. Aborting");
+         gd_throw_runtime_err(err);
+         call_deferred("emit_signal", "generation_failed", "Error predicting tokens");
+      }
+      // If the program throws return nothing
+      return "";
+   }
+
+   std::string LlamaGD::predict_sequence_internal(const std::vector<llama_token> tokens)
+   {
+      if (!is_model_loaded())
+      {
+         log("Model not loaded. Aborting");
+         UtilityFunctions::push_error("Model is not loaded, cannot predict next sequence");
+         return "";
+      }
+
+      prepare_worker();
+      std::string prediction_result = "";
+      try
+      {
+         log("Starting prediction");
+         prediction_result = worker->run(tokens);
+      }
+      catch (std::runtime_error err)
+      {
+         log("Error while predicting tokens. Aborting");
+         gd_throw_runtime_err(err);
+         call_deferred("emit_signal", "generation_failed", "Error predicting tokens");
+      }
+
+      log("Prediction Completed");
+      cleanup_worker();
+
+      // Ensure we cleanup mutex if we used a thread
+      generation_mutex->unlock();
+      call_deferred("emit_signal", "generation_completed", prediction_result);
+      return prediction_result;
+   }
+
    void LlamaGD::await_generation_thread()
    {
       // This guaranteed that one function uses one thread at a time
@@ -268,46 +337,6 @@ namespace godot
       // Make sure that the thread is on idle
       if (text_generation_thread->is_started())
          text_generation_thread->wait_to_finish();
-   }
-   String LlamaGD::create_completion(const String prompt)
-   {
-
-      if (!is_model_loaded())
-      {
-         log("Model not loaded before generating completion. Aborting");
-         UtilityFunctions::push_error("Please load the model before creating completion");
-         return "";
-      }
-
-      log("Start generation process");
-      log("Pre-processing prompt");
-      std::string normalized_prompt = string_gd_to_std(prompt);
-      std::string prompt_payload = normalized_prompt;
-      prompt_payload = params.input_prefix + normalized_prompt + params.input_suffix;
-
-      log("Initializing llama worker");
-      prepare_worker();
-      String completion_result = "";
-      try
-      {
-         log("Running completion");
-         auto completion = worker->run(prompt_payload);
-         completion_result = string_std_to_gd(completion);
-      }
-      catch (std::runtime_error err)
-      {
-         log("Error while creating completion. Aborting");
-         gd_throw_runtime_err(err);
-         call_deferred("emit_signal", "generation_failed", "Cannot create completion");
-      }
-
-      log("Completion successful");
-      cleanup_worker();
-
-      // Free up generation if this uses mutex
-      generation_mutex->unlock();
-      call_deferred("emit_signal", "generation_completed", completion_result);
-      return completion_result;
    }
    LlamaWorker *LlamaGD::prepare_worker()
    {
@@ -461,50 +490,6 @@ namespace godot
          return -1;
       }
       return llama_token_eos(model);
-   }
-
-   // More direct token based approach
-   void LlamaGD::predict_sequence_async(const Array tokens)
-   {
-      await_generation_thread();
-      text_generation_thread->start(callable_mp(this, &LlamaGD::predict_sequence).bind(tokens));
-   }
-   String LlamaGD::predict_sequence(const Array tokens)
-   {
-      log("Starting token prediction");
-
-      if (!is_model_loaded())
-      {
-         log("Model not loaded. Aborting");
-         UtilityFunctions::push_error("Model is not loaded, cannot predict next sequence");
-         return "";
-      }
-
-      prepare_worker();
-      String prediction_result = "";
-      try
-      {
-         log("Converting GDArray to vector");
-         std::vector<llama_token> payload = gd_arr_to_int_vec(tokens);
-
-         log("Starting prediction");
-         std::string result = worker->predict(payload);
-         prediction_result = string_std_to_gd(result);
-      }
-      catch (std::runtime_error err)
-      {
-         log("Error while predicting tokens. Aborting");
-         gd_throw_runtime_err(err);
-         call_deferred("emit_signal", "generation_failed", "Error predicting tokens");
-      }
-
-      log("Prediction Completed");
-      cleanup_worker();
-
-      // Ensure we cleanup mutex if we used a thread
-      generation_mutex->unlock();
-      call_deferred("emit_signal", "generation_completed", prediction_result);
-      return prediction_result;
    }
 
    // Below here are godot getter and setters

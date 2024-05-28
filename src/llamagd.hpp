@@ -45,6 +45,8 @@ namespace godot
       void await_generation_thread();
       void cleanup_worker();
 
+      std::string predict_sequence_internal(const std::vector<llama_token> tokens);
+
    protected:
       static void _bind_methods();
       static void _bind_panel_attributes();

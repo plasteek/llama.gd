@@ -82,13 +82,6 @@ void LlamaWorker::stop()
     should_yield = true;
 }
 
-std::string LlamaWorker::run(std::string prompt)
-{
-    (*params).prompt = prompt;
-    auto tokens = ::llama_tokenize(model, prompt, true, true);
-    return predict(tokens);
-}
-
 void LlamaWorker::use_state(const LlamaWorkerState *new_state)
 {
     if (state != nullptr)
@@ -99,7 +92,7 @@ void LlamaWorker::use_state(const LlamaWorkerState *new_state)
 }
 
 // This long function is direct implementation from the main.cpp
-std::string LlamaWorker::predict(std::vector<llama_token> tokens)
+std::string LlamaWorker::run(std::vector<llama_token> tokens)
 {
     // NOTE: the comments contains my version of what the hell is going on
     // Append the prompt
