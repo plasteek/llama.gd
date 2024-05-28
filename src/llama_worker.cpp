@@ -25,8 +25,8 @@
 
 LlamaWorkerState::LlamaWorkerState()
 {
-    n_consumed = 0;
     n_past = 0;
+    n_consumed = 0;
     ctx = nullptr;
 }
 LlamaWorkerState::LlamaWorkerState(llama_model *model, gpt_params *params)
