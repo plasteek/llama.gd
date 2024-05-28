@@ -51,6 +51,11 @@ namespace godot
       ClassDB::bind_method(D_METHOD("unload_model"), &LlamaGD::unload_model);
       ClassDB::bind_method(D_METHOD("is_model_loaded"), &LlamaGD::is_model_loaded);
 
+      ClassDB::bind_method(D_METHOD("make_state", "prompt"), &LlamaGD::make_state);
+      ClassDB::bind_method(D_METHOD("make_state_async", "prompt"), &LlamaGD::make_state_async);
+      ClassDB::bind_method(D_METHOD("use_state", "state"), &LlamaGD::use_state);
+      ClassDB::bind_method(D_METHOD("clear_state"), &LlamaGD::clear_state);
+
       _bind_panel_attributes();
 
       // Internal attributes

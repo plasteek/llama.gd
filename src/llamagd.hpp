@@ -34,15 +34,18 @@ namespace godot
       bool output_eos;
       bool backend_initialized;
 
+      void log(const std::string msg);
+
       void init_backend();
       void cleanup_backend();
       void cleanup_threads();
       void load_model_impl();
+
       bool is_params_locked();
       bool should_block_setting_param();
-      void log(const std::string msg);
-      LlamaWorker *prepare_worker();
+
       void await_generation_thread();
+      LlamaWorker *prepare_worker();
       void cleanup_worker();
 
       std::string predict_sequence_internal(const std::vector<llama_token> tokens);
