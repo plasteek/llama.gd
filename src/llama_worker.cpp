@@ -105,6 +105,12 @@ std::string LlamaWorker::predict(std::vector<llama_token> tokens)
     // Append the prompt
     std::string generated_text = "";
 
+    // Just in case if state is cleared and wanted to be reused
+    if (state == nullptr)
+    {
+        state = new LlamaWorkerState(model, params);
+    }
+
     // Needed llama_context
     llama_sampling_params &sparams = (*params).sparams;
     llama_context *ctx = state->ctx;
@@ -551,20 +557,26 @@ std::string LlamaWorker::predict(std::vector<llama_token> tokens)
             break;
         }
     }
+    LOG("Exit prediction loop: %d\n", n_remain);
 
     // Free all the used context here
     // Apart from one provided by the constructor
     llama_print_timings(ctx);
 
+    // Reset context if needed (ensure previous prompt does not get carried)
+    // (but this should be handled when deleting state)
+    // TODO: delete this if no longer needed
+    // llama_kv_cache_clear(ctx);
+
     // Assume that state is handled immutably
+    // So we just delete the state
     delete state;
+    state = nullptr;
 
     llama_sampling_free(ctx_sampling);
     if (ctx_guidance)
         llama_free(ctx_guidance);
 
-    // Reset context if needed (ensure previous prompt does not get carried)
-    llama_kv_cache_clear(ctx);
     return generated_text;
 }
 
