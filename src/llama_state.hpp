@@ -22,8 +22,8 @@ namespace godot
 
       LlamaWorkerState *worker_state;
 
-      static void write(String destination, LlamaState *state);
-      static LlamaState *read(String source);
+      static void write_to_file(String destination, LlamaState *state);
+      static LlamaState *read_from_file(String source);
 
       Array get_tokens() const;
       void set_tokens(const Array tokens);

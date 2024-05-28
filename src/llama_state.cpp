@@ -1,5 +1,5 @@
 #include "llama_worker.hpp"
-#include "gd_throw.cpp"
+#include "gd_throw.hpp"
 #include "conversion.hpp"
 #include "llama_state.hpp"
 
@@ -14,10 +14,9 @@ namespace godot
 {
    void LlamaState::_bind_methods()
    {
-      // Export only functions because n_consumed and n_past should only be from
-      // the cpp
-      ClassDB::bind_static_method("read", &LlamaState::read, "source");
-      ClassDB::bind_static_method("write", &LlamaState::write, "destination", "state");
+      // TODO: this may not register properly, need to check
+      ClassDB::bind_static_method(get_class_static(), D_METHOD("read_from_file", "source"), &LlamaState::read_from_file);
+      ClassDB::bind_static_method(get_class_static(), D_METHOD("write_state_to_file", "destination", "target"), &LlamaState::write_to_file);
 
       ClassDB::bind_method(D_METHOD("get_tokens"), &LlamaState::get_tokens);
       ClassDB::bind_method(D_METHOD("set_tokens"), &LlamaState::set_tokens);
@@ -37,21 +36,24 @@ namespace godot
 
       return new_state;
    }
+   LlamaState::LlamaState()
+   {
+   }
    LlamaState::~LlamaState()
    {
       delete worker_state;
    }
 
-   void LlamaState::write(String dest, LlamaState *target)
+   void LlamaState::write_to_file(String dest, LlamaState *target_state)
    {
-      LlamaWorkerState *state = target->worker_state;
+      LlamaWorkerState *state = target_state->worker_state;
       llama_state_save_file(
           state->ctx,
           string_gd_to_std(dest).c_str(),
           state->tokens.data(),
           state->tokens.size());
    }
-   LlamaState *LlamaState::read(String src)
+   LlamaState *LlamaState::read_from_file(String src)
    {
       LlamaWorkerState *state = new LlamaWorkerState();
       llama_token *token_ptr;
@@ -68,11 +70,12 @@ namespace godot
       // Transform the token pointer to array
       auto gd_tokens = Array();
       llama_token *t = token_ptr;
+
       for (int i = 0; i < *token_count; i++)
       {
          auto curr_token = *t;
-         gd_tokens.append(t);
-         state->tokens.emplace_back(t);
+         gd_tokens.append(curr_token);
+         state->tokens.emplace_back(curr_token);
          t += 1;
       }
 
