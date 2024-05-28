@@ -38,6 +38,7 @@ namespace godot
    }
    LlamaState::LlamaState()
    {
+      worker_state = nullptr;
    }
    LlamaState::~LlamaState()
    {
@@ -88,6 +89,8 @@ namespace godot
 
    Array LlamaState::get_tokens() const
    {
+      if (worker_state == nullptr)
+         return Array();
       return int_vec_to_gd_arr(worker_state->tokens);
    }
    void LlamaState::set_tokens(const Array tokens)
