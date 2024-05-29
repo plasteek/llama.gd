@@ -256,7 +256,28 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
     }
     LOG_TEE("\n\n");
 
-    // Prepare sampling state
+    LOG("consuming tokens\n");
+    int n_consumed = state->n_consumed; // Processed prompt according to the state
+
+    LOG("embd_inp.size(): %d, n_consumed: %d\n", (int)embd_inp.size(), n_consumed);
+
+    int n_batch = (*params).n_batch;
+    llama_batch consume_batch = llama_batch_init(n_batch, 0, 1);
+
+    // TODO: working but spits out random shit. This is probably because the context is not initialized propertly, send help
+    for (int i = n_consumed; i < (int)embd_inp.size(); i++)
+    {
+        llama_batch_add(consume_batch, embd_inp[i], i, {0}, false);
+    }
+
+    // llama_decode will output logits only for the last token of the prompt
+    consume_batch.logits[consume_batch.n_tokens - 1] = true;
+    if (llama_decode(ctx, consume_batch))
+    {
+        LOG_TEE("%s : failed to eval\n", __func__);
+        throw std::runtime_error(std::string(__func__) + ": failed to eval");
+    }
+
     LOG("preparing sampling context\n");
     struct llama_sampling_context *ctx_sampling = llama_sampling_init(sparams);
     if (!ctx_sampling)
@@ -264,231 +285,188 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
         fprintf(stderr, "%s: failed to initialize sampling subsystem\n", __func__);
         throw std::runtime_error(std::string(__func__) + ": failed to initialize sampling subsystem");
     }
+    // NOTE: we always push from the beginning because sampling context is never saved
+    // push the prompt in the sampling context in order to apply repetition penalties later
+    // for the prompt, we don't apply grammar rules
+    for (int i = 0; i < (int)embd_inp.size(); i++)
+        llama_sampling_accept(ctx_sampling, ctx, embd_inp[i], false);
 
-    // How many tokens have been 'traversed' (from prompt beginning)
-    int n_past = state->n_past;
-    // Maximum tokens to be predicted
+    // Because we already go as far as the input n_past should be the size of the
+    // last token + 1 (which is equivalent to the size)
+    int n_past = embd_inp.size();
     int n_remain = (*params).n_predict;
-    // This is the one responsible for "re-building KV cache"
-    int n_consumed = state->n_consumed;
-    // This is basically n_past but for guidance token
     int n_past_guidance = 0;
 
     std::vector<llama_token> embd;
-    std::vector<llama_token> embd_guidance;
+    llama_batch predict_batch = llama_batch_init((*params).n_batch, 0, 1); // Should only have 1 at a time
 
-    LOG("consuming tokens\n");
-    LOG("embd_inp.size(): %d, n_consumed: %d\n", (int)embd_inp.size(), n_consumed);
-    while ((int)embd_inp.size() > n_consumed)
-    {
-        embd.push_back(embd_inp[n_consumed]);
-
-        // push the prompt in the sampling context in order to apply repetition penalties later
-        // for the prompt, we don't apply grammar rules
-        llama_sampling_accept(ctx_sampling, ctx, embd_inp[n_consumed], false);
-
-        ++n_consumed;
-        if ((int)embd.size() >= (*params).n_batch)
-        {
-            break;
-        }
-    }
-
-    // Prediction begins here
     LOG("prediction start\n");
     while (!should_yield && (n_remain != 0))
     {
-
-        // Sample the prediction result here
-        // The sampling seems to have error
-        const llama_token id = llama_sampling_sample(ctx_sampling, ctx, ctx_guidance);
-        llama_sampling_accept(ctx_sampling, ctx, id, true);
+        llama_token sampled_id = llama_sampling_sample(ctx_sampling, ctx, ctx_guidance);
+        llama_sampling_accept(ctx_sampling, ctx, sampled_id, true);
+        embd.push_back(sampled_id);
 
         LOG("last: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, ctx_sampling->prev).c_str());
 
-        // Push it back into the prompt/embd
-        embd.push_back(id);
-
-        // decrement remaining sampling budget
         --n_remain;
         LOG("n_remain: %d\n", n_remain);
 
-        // Transform to piece
-        const std::string token_str = llama_token_to_piece(ctx, id, !(*params).conversation);
-        bool is_bos = (id == llama_token_bos(model));
-        bool is_eos = (id == llama_token_eos(model));
-
-        // Output or signal eos or bos when ONLY when the user requested
+        const std::string token_str = llama_token_to_piece(ctx, sampled_id, !(*params).conversation);
+        bool is_bos = (sampled_id == llama_token_bos(model));
+        bool is_eos = (sampled_id == llama_token_eos(model));
         if ((!is_bos || output_bos) && (!is_eos || output_eos))
         {
-            // Override and append godot trigger word
             generated_text.append(token_str);
             on_new_token(token_str);
         }
 
-        // Should generation stop?
-        if (!embd.empty() && llama_token_is_eog(model, embd.back()))
+        if (llama_token_is_eog(model, sampled_id))
         {
             LOG(" [end of text]\n");
             break;
         }
 
-        // We check the context length here
-        if (!embd.empty())
+        // Guidance before evaluation
+        // if (ctx_guidance)
+        // {
+        //     int input_size = 0;
+        //     llama_token *input_buf = NULL;
+        //     std::vector<llama_token> embd_guidance;
+        //     if (n_past_guidance < (int)guidance_inp.size())
+        //     {
+        //         // Guidance context should have the same data with these modifications:
+        //         //
+        //         // * Replace the initial prompt
+        //         // * Shift everything by guidance_offset
+        //         embd_guidance = guidance_inp;
+        //         if (embd.begin() + original_prompt_len < embd.end())
+        //         {
+        //             embd_guidance.insert(
+        //                 embd_guidance.end(),
+        //                 embd.begin() + original_prompt_len,
+        //                 embd.end());
+        //         }
+
+        //         input_buf = embd_guidance.data();
+        //         input_size = embd_guidance.size();
+
+        //         LOG("guidance context: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd_guidance).c_str());
+        //     }
+        //     else
+        //     {
+        //         input_buf = embd.data();
+        //         input_size = embd.size();
+        //     }
+
+        //     llama_batch sampling_batch = llama_batch_init((*params).n_batch, 0, 1);
+        //     for (int i = 0; i < input_size; i += (*params).n_batch)
+        //     {
+        //         llama_batch_add(sampling_batch, *(input_buf + 1), i, {0}, false);
+        //         int n_eval = std::min(input_size - i, (*params).n_batch);
+        //         n_past_guidance += n_eval;
+        //     }
+        //     if (llama_decode(ctx_guidance, sampling_batch))
+        //     {
+        //         LOG_TEE("%s : failed to eval\n", __func__);
+        //         throw std::runtime_error(std::string(__func__) + ": failed to eval");
+        //     }
+        //     embd_guidance.clear();
+        // }
+
+        // Evaluate the sampled token
+        llama_batch_clear(predict_batch);
+        llama_batch_add(predict_batch, sampled_id, n_past, {0}, true);
+        llama_token *sampled_ptr = &sampled_id;
+        // "1" because embd is guaranteed to only have 1
+        if (llama_decode(ctx, predict_batch))
         {
-            // Note: (n_ctx - 4) here is to match the logic for command line prompt handling via
-            // --prompt or --file which uses the same value.
-            int max_embd_size = n_ctx - 4;
-
-            // Ensure the input doesn't exceed the context size by truncating embd if necessary.
-            if ((int)embd.size() > max_embd_size)
-            {
-                const int skipped_tokens = (int)embd.size() - max_embd_size;
-                embd.resize(max_embd_size);
-
-                printf("<<input too long: skipped %d token%s>>", skipped_tokens, skipped_tokens != 1 ? "s" : "");
-                fflush(stdout);
-            }
-
-            // Note: This section probably has something to do with handling the context
-            if (ga_n == 1)
-            {
-                // infinite text generation via context shifting
-                // if we run out of context:
-                // - take the n_keep first tokens from the original prompt (via n_past)
-                // - take half of the last (n_ctx - n_keep) tokens and recompute the logits in batches
-                if (n_past + (int)embd.size() + std::max<int>(0, guidance_offset) >= n_ctx)
-                {
-                    if ((*params).n_predict == -2)
-                    {
-                        LOG_TEE("\n\n%s: context full and n_predict == -%d => stopping\n", __func__, (*params).n_predict);
-                        break;
-                    }
-
-                    const int n_left = n_past - (*params).n_keep;
-                    const int n_discard = n_left / 2;
-
-                    LOG("context full, swapping: n_past = %d, n_left = %d, n_ctx = %d, n_keep = %d, n_discard = %d\n",
-                        n_past, n_left, n_ctx, (*params).n_keep, n_discard);
-
-                    llama_kv_cache_seq_rm(ctx, 0, (*params).n_keep, (*params).n_keep + n_discard);
-                    llama_kv_cache_seq_add(ctx, 0, (*params).n_keep + n_discard, n_past, -n_discard);
-
-                    n_past -= n_discard;
-
-                    if (ctx_guidance)
-                    {
-                        n_past_guidance -= n_discard;
-                    }
-
-                    LOG("after swap: n_past = %d, n_past_guidance = %d\n", n_past, n_past_guidance);
-                    LOG("embd: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd).c_str());
-                }
-            }
-            else
-            {
-                // context extension via Self-Extend
-                while (n_past >= ga_i + ga_w)
-                {
-                    const int ib = (ga_n * ga_i) / ga_w;
-                    const int bd = (ga_w / ga_n) * (ga_n - 1);
-                    const int dd = (ga_w / ga_n) - ib * bd - ga_w;
-
-                    LOG("\n");
-                    LOG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i, n_past, ib * bd, ga_i + ib * bd, n_past + ib * bd);
-                    LOG("div:   [%6d, %6d] / %6d -> [%6d, %6d]\n", ga_i + ib * bd, ga_i + ib * bd + ga_w, ga_n, (ga_i + ib * bd) / ga_n, (ga_i + ib * bd + ga_w) / ga_n);
-                    LOG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i + ib * bd + ga_w, n_past + ib * bd, dd, ga_i + ib * bd + ga_w + dd, n_past + ib * bd + dd);
-
-                    llama_kv_cache_seq_add(ctx, 0, ga_i, n_past, ib * bd);
-                    llama_kv_cache_seq_div(ctx, 0, ga_i + ib * bd, ga_i + ib * bd + ga_w, ga_n);
-                    llama_kv_cache_seq_add(ctx, 0, ga_i + ib * bd + ga_w, n_past + ib * bd, dd);
-
-                    n_past -= bd;
-
-                    ga_i += ga_w / ga_n;
-
-                    LOG("\nn_past_old = %d, n_past = %d, ga_i = %d\n\n", n_past + bd, n_past, ga_i);
-                }
-            }
-
-            // evaluate tokens in batches
-            // embd is typically prepared beforehand to fit within a batch, but not always
-
-            // This is basically to "build" the guidance context if not yet
-            if (ctx_guidance)
-            {
-                int input_size = 0;
-                llama_token *input_buf = NULL;
-
-                if (n_past_guidance < (int)guidance_inp.size())
-                {
-                    // Guidance context should have the same data with these modifications:
-                    //
-                    // * Replace the initial prompt
-                    // * Shift everything by guidance_offset
-                    embd_guidance = guidance_inp;
-                    if (embd.begin() + original_prompt_len < embd.end())
-                    {
-                        embd_guidance.insert(
-                            embd_guidance.end(),
-                            embd.begin() + original_prompt_len,
-                            embd.end());
-                    }
-
-                    input_buf = embd_guidance.data();
-                    input_size = embd_guidance.size();
-
-                    LOG("guidance context: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd_guidance).c_str());
-                }
-                else
-                {
-                    input_buf = embd.data();
-                    input_size = embd.size();
-                }
-
-                for (int i = 0; i < input_size; i += (*params).n_batch)
-                {
-                    int n_eval = std::min(input_size - i, (*params).n_batch);
-                    if (llama_decode(ctx_guidance, llama_batch_get_one(input_buf + i, n_eval, n_past_guidance, 0)))
-                    {
-                        LOG_TEE("%s : failed to eval\n", __func__);
-                        throw std::runtime_error(std::string(__func__) + ": failed to eval");
-                    }
-
-                    n_past_guidance += n_eval;
-                }
-            }
-
-            // Not sure what this does, but it seems to check all the batched decoded result
-            for (int i = 0; i < (int)embd.size(); i += (*params).n_batch)
-            {
-                int n_eval = (int)embd.size() - i;
-                if (n_eval > (*params).n_batch)
-                {
-                    n_eval = (*params).n_batch;
-                }
-
-                LOG("eval: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd).c_str());
-
-                if (llama_decode(ctx, llama_batch_get_one(&embd[i], n_eval, n_past, 0)))
-                {
-                    LOG_TEE("%s : failed to eval\n", __func__);
-                    throw std::runtime_error(std::string(__func__) + ": failed to eval");
-                }
-
-                n_past += n_eval;
-
-                LOG("n_past = %d\n", n_past);
-                // Display total tokens alongside total time
-                if ((*params).n_print > 0 && n_past % (*params).n_print == 0)
-                {
-                    LOG_TEE("\n\033[31mTokens consumed so far = %d / %d \033[0m\n", n_past, n_ctx);
-                }
-            }
+            LOG_TEE("%s : failed to eval\n", __func__);
+            throw std::runtime_error(std::string(__func__) + ": failed to eval");
         }
+        LOG("n_past = %d\n", n_past);
+        // Display total tokens alongside total time
+        if ((*params).n_print > 0 && n_past % (*params).n_print == 0)
+        {
+            LOG_TEE("\n\033[31mTokens consumed so far = %d / %d \033[0m\n", n_past, n_ctx);
+        }
+        n_past++; // We evaluated 1 token so we move on to the next n-th token
 
+        // // Note: (n_ctx - 4) here is to match the logic for command line prompt handling via
+        // // --prompt or --file which uses the same value.
+        // int max_embd_size = n_ctx - 4;
+        // // Ensure the input doesn't exceed the context size by truncating embd if necessary.
+        // if ((int)embd.size() > max_embd_size)
+        // {
+        //     const int skipped_tokens = (int)embd.size() - max_embd_size;
+        //     embd.resize(max_embd_size);
+
+        //     printf("<<input too long: skipped %d token%s>>", skipped_tokens, skipped_tokens != 1 ? "s" : "");
+        // }
+
+        // // Handling context extension or over
+        // if (ga_n == 1)
+        // {
+        //     // infinite text generation via context shifting
+        //     // if we run out of context:
+        //     // - take the n_keep first tokens from the original prompt (via n_past)
+        //     // - take half of the last (n_ctx - n_keep) tokens and recompute the logits in batches
+        //     if (n_past + (int)embd.size() + std::max<int>(0, guidance_offset) >= n_ctx)
+        //     {
+        //         if ((*params).n_predict == -2)
+        //         {
+        //             LOG_TEE("\n\n%s: context full and n_predict == -%d => stopping\n", __func__, (*params).n_predict);
+        //             break;
+        //         }
+
+        //         const int n_left = n_past - (*params).n_keep;
+        //         const int n_discard = n_left / 2;
+
+        //         LOG("context full, swapping: n_past = %d, n_left = %d, n_ctx = %d, n_keep = %d, n_discard = %d\n",
+        //             n_past, n_left, n_ctx, (*params).n_keep, n_discard);
+
+        //         llama_kv_cache_seq_rm(ctx, 0, (*params).n_keep, (*params).n_keep + n_discard);
+        //         llama_kv_cache_seq_add(ctx, 0, (*params).n_keep + n_discard, n_past, -n_discard);
+
+        //         n_past -= n_discard;
+
+        //         if (ctx_guidance)
+        //         {
+        //             n_past_guidance -= n_discard;
+        //         }
+
+        //         LOG("after swap: n_past = %d, n_past_guidance = %d\n", n_past, n_past_guidance);
+        //         LOG("embd: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd).c_str());
+        //     }
+        // }
+        // else
+        // {
+        //     // context extension via Self-Extend
+        //     while (n_past >= ga_i + ga_w)
+        //     {
+        //         const int ib = (ga_n * ga_i) / ga_w;
+        //         const int bd = (ga_w / ga_n) * (ga_n - 1);
+        //         const int dd = (ga_w / ga_n) - ib * bd - ga_w;
+
+        //         LOG("\n");
+        //         LOG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i, n_past, ib * bd, ga_i + ib * bd, n_past + ib * bd);
+        //         LOG("div:   [%6d, %6d] / %6d -> [%6d, %6d]\n", ga_i + ib * bd, ga_i + ib * bd + ga_w, ga_n, (ga_i + ib * bd) / ga_n, (ga_i + ib * bd + ga_w) / ga_n);
+        //         LOG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i + ib * bd + ga_w, n_past + ib * bd, dd, ga_i + ib * bd + ga_w + dd, n_past + ib * bd + dd);
+
+        //         llama_kv_cache_seq_add(ctx, 0, ga_i, n_past, ib * bd);
+        //         llama_kv_cache_seq_div(ctx, 0, ga_i + ib * bd, ga_i + ib * bd + ga_w, ga_n);
+        //         llama_kv_cache_seq_add(ctx, 0, ga_i + ib * bd + ga_w, n_past + ib * bd, dd);
+
+        //         n_past -= bd;
+
+        //         ga_i += ga_w / ga_n;
+
+        //         LOG("\nn_past_old = %d, n_past = %d, ga_i = %d\n\n", n_past + bd, n_past, ga_i);
+        //     }
+        // }
+
+        // Re-clear embedding for next session
         embd.clear();
-        embd_guidance.clear();
     }
 
     LOG("prediction completed with %d tokens remaining\n", n_remain);
