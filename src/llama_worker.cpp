@@ -91,6 +91,14 @@ void LlamaWorker::use_state(const LlamaWorkerState *new_state)
     state = new LlamaWorkerState(*new_state);
 }
 
+void LlamaWorker::insert_without_bos(std::vector<llama_token> *embd, std::vector<llama_token> *tokens, llama_token bos)
+{
+    auto new_token_start = tokens->begin();
+    if (tokens->front() == llama_token_bos(model))
+        ++new_token_start;
+    embd->insert(embd->end(), new_token_start, tokens->end());
+}
+
 // This long function is direct implementation from the main.cpp
 std::string LlamaWorker::run(std::vector<llama_token> tokens)
 {
@@ -166,17 +174,7 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
     LOG("add_bos: %d\n", add_bos);
 
     // Tokenize the prompt
-    std::vector<llama_token> embd_inp = state->tokens;
-
-    // Forward by 1 if the "tokens" has a BOS at the first element
-    auto new_token_start = tokens.begin();
-    if (tokens.front() == llama_token_bos(model))
-        ++new_token_start;
-    embd_inp.insert(embd_inp.end(), new_token_start, tokens.end());
-
-    // TODO: because the prompt is optional and we only have token
-    // LOG("prompt: \"%s\"\n", log_tostr((*params).prompt));
-    LOG("tokens: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd_inp).c_str());
+    std::vector<llama_token> embd_inp;
 
     // If the prompt is empty, add starting token
     if (embd_inp.empty())
@@ -184,6 +182,18 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
         embd_inp.push_back(llama_token_bos(model));
         LOG("embd_inp was considered empty and bos was added: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd_inp).c_str());
     }
+
+    if (!state->tokens.empty())
+    {
+        LOG("Detected state token. Embedding into the prompt\n");
+        auto state_tokens = state->tokens;
+        insert_without_bos(&embd_inp, &state_tokens, llama_token_bos(model));
+    }
+
+    insert_without_bos(&embd_inp, &tokens, llama_token_bos(model));
+
+    // LOG("prompt: \"%s\"\n", log_tostr((*params).prompt));
+    LOG("tokens: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd_inp).c_str());
 
     // Tokenize negative prompt
     std::vector<llama_token> guidance_inp;
@@ -196,7 +206,7 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
         guidance_inp = ::llama_tokenize(ctx_guidance, sparams.cfg_negative_prompt, true, true);
         LOG("guidance_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_guidance, guidance_inp).c_str());
 
-        std::vector<llama_token> original_inp(embd_inp);
+        std::vector<llama_token> original_inp = embd_inp;
         LOG("original_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, original_inp).c_str());
 
         original_prompt_len = original_inp.size();
@@ -470,12 +480,14 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
             }
         }
 
+        LOG("I RUN!");
         embd.clear();
         embd_guidance.clear();
 
         if ((int)embd_inp.size() <= n_consumed)
         {
             // Sample the prediction result here
+            // The sampling seems to have error
             const llama_token id = llama_sampling_sample(ctx_sampling, ctx, ctx_guidance);
             llama_sampling_accept(ctx_sampling, ctx, id, true);
 

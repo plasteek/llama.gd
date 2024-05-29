@@ -39,6 +39,7 @@ private:
 
    bool file_exists(const std::string path);
    bool file_is_empty(const std::string path);
+   void insert_without_bos(std::vector<llama_token> *embd, std::vector<llama_token> *tokens, llama_token bos);
 
 public:
    bool output_bos;
