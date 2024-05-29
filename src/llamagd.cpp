@@ -451,7 +451,6 @@ namespace godot
    void LlamaGD::use_state(Ref<LlamaState> llama_state)
    {
       auto worker_state = llama_state->worker_state;
-      UtilityFunctions::print("Result Print", worker_state->tokens.size());
       state = llama_state;
    }
    void LlamaGD::clear_state()
