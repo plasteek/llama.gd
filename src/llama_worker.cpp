@@ -29,11 +29,10 @@ LlamaWorkerState::LlamaWorkerState()
     n_consumed = 0;
     ctx = nullptr;
 }
-LlamaWorkerState::LlamaWorkerState(llama_model *model, gpt_params *params)
+LlamaWorkerState::LlamaWorkerState(llama_model *model, gpt_params *params) : LlamaWorkerState()
 {
-    LlamaWorkerState();
     // Initialize default context
-    auto cparams = llama_context_default_params();
+    auto cparams = llama_context_params_from_gpt_params(*params);
     ctx = llama_new_context_with_model(model, cparams);
 }
 LlamaWorkerState::~LlamaWorkerState()
@@ -102,6 +101,10 @@ void LlamaWorker::insert_without_bos(std::vector<llama_token> *embd, std::vector
 // This long function is direct implementation from the main.cpp
 std::string LlamaWorker::run(std::vector<llama_token> tokens)
 {
+#ifndef LOG_DISABLE_LOGS
+    LOG_TEE("Log start\n");
+#endif // LOG_DISABLE_LOGS
+
     // NOTE: the comments contains my version of what the hell is going on
     // Append the prompt
     std::string generated_text = "";
@@ -109,17 +112,21 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
     // Just in case if state is cleared and wanted to be reused
     if (state == nullptr)
     {
+        LOG("No initial state provided, creating a blank");
         state = new LlamaWorkerState(model, params);
+    }
+
+    if (state->ctx == nullptr)
+    {
+        LOG("State does not have a context. Aborting.");
+        throw std::runtime_error("State does not have a context initialized");
+        return "";
     }
 
     // Needed llama_context
     llama_sampling_params &sparams = (*params).sparams;
     llama_context *ctx = state->ctx;
     llama_context *ctx_guidance = NULL;
-
-#ifndef LOG_DISABLE_LOGS
-    LOG_TEE("Log start\n");
-#endif // LOG_DISABLE_LOGS
 
     // If some parameters are not supposed to be defined
     if ((*params).logits_all)
@@ -162,34 +169,31 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
             "%s: warning: model was trained on only %d context tokens (%d specified)\n",
             __func__, n_ctx_train, n_ctx);
 
-    {
-        // print system information
-        LOG_TEE("\n");
-        LOG_TEE("%s\n", gpt_params_get_system_info((*params)).c_str());
-    }
+    // print system information
+    LOG_TEE("\n");
+    LOG_TEE("%s\n", gpt_params_get_system_info((*params)).c_str());
 
     // Does the model require a bos_token for starting generation?
     const bool add_bos = llama_should_add_bos_token(model);
     GGML_ASSERT(llama_add_eos_token(model) != 1);
     LOG("add_bos: %d\n", add_bos);
 
-    // Tokenize the prompt
+    // Construct the prompt tokens
     std::vector<llama_token> embd_inp;
-
     // If the prompt is empty, add starting token
     if (embd_inp.empty())
     {
         embd_inp.push_back(llama_token_bos(model));
         LOG("embd_inp was considered empty and bos was added: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd_inp).c_str());
     }
-
+    // Append the state tokens if exist
     if (!state->tokens.empty())
     {
         LOG("Detected state token. Embedding into the prompt\n");
         auto state_tokens = state->tokens;
         insert_without_bos(&embd_inp, &state_tokens, llama_token_bos(model));
     }
-
+    // Append the actual user tokens
     insert_without_bos(&embd_inp, &tokens, llama_token_bos(model));
 
     // LOG("prompt: \"%s\"\n", log_tostr((*params).prompt));
@@ -199,6 +203,7 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
     std::vector<llama_token> guidance_inp;
     int guidance_offset = 0;
     int original_prompt_len = 0;
+
     if (ctx_guidance)
     {
         LOG("cfg_negative_prompt: \"%s\"\n", log_tostr(sparams.cfg_negative_prompt));
@@ -215,6 +220,7 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
         LOG("guidance_offset:     %s", log_tostr(guidance_offset));
     }
 
+    // Check negative prompt
     if ((int)embd_inp.size() > n_ctx - 4)
     {
         LOG_TEE("%s: error: prompt is too long (%d tokens, max %d)\n", __func__, (int)embd_inp.size(), n_ctx - 4);
@@ -231,51 +237,15 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
         (*params).n_keep += add_bos; // always keep the BOS token
     }
 
-    // Verbose prompt logging I assume.
-    if ((*params).verbose_prompt)
-    {
-        LOG_TEE("\n");
-        // LOG_TEE("%s: prompt: '%s'\n", __func__, (*params).prompt.c_str());
-        LOG_TEE("%s: number of tokens in prompt = %zu\n", __func__, embd_inp.size());
-        for (int i = 0; i < (int)embd_inp.size(); i++)
-        {
-            LOG_TEE("%6d -> '%s'\n", embd_inp[i], llama_token_to_piece(ctx, embd_inp[i]).c_str());
-        }
-
-        if (ctx_guidance)
-        {
-            LOG_TEE("\n");
-            LOG_TEE("%s: negative prompt: '%s'\n", __func__, sparams.cfg_negative_prompt.c_str());
-            LOG_TEE("%s: number of tokens in negative prompt = %zu\n", __func__, guidance_inp.size());
-            for (int i = 0; i < (int)guidance_inp.size(); i++)
-            {
-                LOG_TEE("%6d -> '%s'\n", guidance_inp[i], llama_token_to_piece(ctx, guidance_inp[i]).c_str());
-            }
-        }
-
-        if ((*params).n_keep > add_bos)
-        {
-            LOG_TEE("%s: static prompt based on n_keep: '", __func__);
-            for (int i = 0; i < (*params).n_keep; i++)
-            {
-                LOG_TEE("%s", llama_token_to_piece(ctx, embd_inp[i]).c_str());
-            }
-            LOG_TEE("'\n");
-        }
-        LOG_TEE("\n");
-    }
-
     LOG_TEE("sampling: \n%s\n", llama_sampling_print(sparams).c_str());
     LOG_TEE("sampling order: \n%s\n", llama_sampling_order_print(sparams).c_str());
     LOG_TEE("generate: n_ctx = %d, n_batch = %d, n_predict = %d, n_keep = %d\n", n_ctx, (*params).n_batch, (*params).n_predict, (*params).n_keep);
 
-    // "Black magic" grouping attention state
     // group-attention state
     // number of grouped KV tokens so far (used only if (*params).grp_attn_n > 1)
     int ga_i = 0;
     const int ga_n = (*params).grp_attn_n;
     const int ga_w = (*params).grp_attn_w;
-
     if (ga_n != 1)
     {
         GGML_ASSERT(ga_n > 0 && "grp_attn_n must be positive");                         // NOLINT
@@ -286,36 +256,8 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
     }
     LOG_TEE("\n\n");
 
-    // This is to echo initial or not
-    bool display = false;
-
-    // How many tokens have been 'traversed' (from prompt beginning)
-    int n_past = state->n_past;
-    // Maximum tokens to be predicted
-    // Basically sampling budget
-    int n_remain = (*params).n_predict;
-    // This is the one responsible for "re-building KV cache"
-    int n_consumed = state->n_consumed;
-    // This is basically n_past but for guidance token
-    int n_past_guidance = 0;
-
-    std::vector<int> input_tokens;
-    std::vector<int> output_tokens;
-    std::ostringstream output_ss;
-
-    std::vector<llama_token> embd;
-    std::vector<llama_token> embd_guidance;
-
-    // tokenized antiprompts
-    std::vector<std::vector<llama_token>> antiprompt_ids;
-
-    antiprompt_ids.reserve((*params).antiprompt.size());
-    for (const std::string &antiprompt : (*params).antiprompt)
-    {
-        antiprompt_ids.emplace_back(::llama_tokenize(ctx, antiprompt, false, true));
-    }
-
-    // Create sampling prompts
+    // Prepare sampling state
+    LOG("preparing sampling context\n");
     struct llama_sampling_context *ctx_sampling = llama_sampling_init(sparams);
     if (!ctx_sampling)
     {
@@ -323,10 +265,75 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
         throw std::runtime_error(std::string(__func__) + ": failed to initialize sampling subsystem");
     }
 
-    // prediction loop
+    // How many tokens have been 'traversed' (from prompt beginning)
+    int n_past = state->n_past;
+    // Maximum tokens to be predicted
+    int n_remain = (*params).n_predict;
+    // This is the one responsible for "re-building KV cache"
+    int n_consumed = state->n_consumed;
+    // This is basically n_past but for guidance token
+    int n_past_guidance = 0;
+
+    std::vector<llama_token> embd;
+    std::vector<llama_token> embd_guidance;
+
+    LOG("consuming tokens\n");
+    LOG("embd_inp.size(): %d, n_consumed: %d\n", (int)embd_inp.size(), n_consumed);
+    while ((int)embd_inp.size() > n_consumed)
+    {
+        embd.push_back(embd_inp[n_consumed]);
+
+        // push the prompt in the sampling context in order to apply repetition penalties later
+        // for the prompt, we don't apply grammar rules
+        llama_sampling_accept(ctx_sampling, ctx, embd_inp[n_consumed], false);
+
+        ++n_consumed;
+        if ((int)embd.size() >= (*params).n_batch)
+        {
+            break;
+        }
+    }
+
+    // Prediction begins here
+    LOG("prediction start\n");
     while (!should_yield && (n_remain != 0))
     {
-        // Probably initialization
+
+        // Sample the prediction result here
+        // The sampling seems to have error
+        const llama_token id = llama_sampling_sample(ctx_sampling, ctx, ctx_guidance);
+        llama_sampling_accept(ctx_sampling, ctx, id, true);
+
+        LOG("last: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, ctx_sampling->prev).c_str());
+
+        // Push it back into the prompt/embd
+        embd.push_back(id);
+
+        // decrement remaining sampling budget
+        --n_remain;
+        LOG("n_remain: %d\n", n_remain);
+
+        // Transform to piece
+        const std::string token_str = llama_token_to_piece(ctx, id, !(*params).conversation);
+        bool is_bos = (id == llama_token_bos(model));
+        bool is_eos = (id == llama_token_eos(model));
+
+        // Output or signal eos or bos when ONLY when the user requested
+        if ((!is_bos || output_bos) && (!is_eos || output_eos))
+        {
+            // Override and append godot trigger word
+            generated_text.append(token_str);
+            on_new_token(token_str);
+        }
+
+        // Should generation stop?
+        if (!embd.empty() && llama_token_is_eog(model, embd.back()))
+        {
+            LOG(" [end of text]\n");
+            break;
+        }
+
+        // We check the context length here
         if (!embd.empty())
         {
             // Note: (n_ctx - 4) here is to match the logic for command line prompt handling via
@@ -480,106 +487,15 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
             }
         }
 
-        LOG("I RUN!");
         embd.clear();
         embd_guidance.clear();
-
-        if ((int)embd_inp.size() <= n_consumed)
-        {
-            // Sample the prediction result here
-            // The sampling seems to have error
-            const llama_token id = llama_sampling_sample(ctx_sampling, ctx, ctx_guidance);
-            llama_sampling_accept(ctx_sampling, ctx, id, true);
-
-            LOG("last: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, ctx_sampling->prev).c_str());
-
-            // Push it back into the prompt/embd
-            embd.push_back(id);
-
-            // echo this to console
-            display = true;
-
-            // decrement remaining sampling budget
-            --n_remain;
-
-            LOG("n_remain: %d\n", n_remain);
-        }
-        else
-        {
-            // NOTE:
-            // So this is what they mean by forwarding, this is the rebuilding part I think
-
-            // some user input remains from prompt or interaction, forward it to processing
-            LOG("embd_inp.size(): %d, n_consumed: %d\n", (int)embd_inp.size(), n_consumed);
-            while ((int)embd_inp.size() > n_consumed)
-            {
-                embd.push_back(embd_inp[n_consumed]);
-
-                // push the prompt in the sampling context in order to apply repetition penalties later
-                // for the prompt, we don't apply grammar rules
-                llama_sampling_accept(ctx_sampling, ctx, embd_inp[n_consumed], false);
-
-                ++n_consumed;
-                if ((int)embd.size() >= (*params).n_batch)
-                {
-                    break;
-                }
-            }
-        }
-
-        // We do this to bypass initial prompt
-        // If the embd is empty, the if statement would pretty much tokenize
-        // the prompt and push it back into the embeddings. Once it do that, then
-        // we want to enable this
-        if (display)
-        {
-            for (auto id : embd)
-            {
-                const std::string token_str = llama_token_to_piece(ctx, id, !(*params).conversation);
-                bool is_bos = (id == llama_token_bos(model));
-                bool is_eos = (id == llama_token_eos(model));
-
-                // Output or signal eos or bos when ONLY when the user requested
-                if ((!is_bos || output_bos) && (!is_eos || output_eos))
-                {
-                    // Override and append godot trigger word
-                    generated_text.append(token_str);
-                    on_new_token(token_str);
-                }
-
-                if (embd.size() > 1)
-                {
-                    input_tokens.push_back(id);
-                }
-                else
-                {
-                    output_tokens.push_back(id);
-                    output_ss << token_str;
-                }
-            }
-            fflush(stdout);
-        }
-
-        // end of generation
-        if (!embd.empty() && llama_token_is_eog(model, embd.back()))
-        {
-            LOG(" [end of text]\n");
-            break;
-        }
     }
-    LOG("Exit prediction loop: %d\n", n_remain);
 
-    // Free all the used context here
-    // Apart from one provided by the constructor
+    LOG("prediction completed with %d tokens remaining\n", n_remain);
     llama_print_timings(ctx);
 
-    // Reset context if needed (ensure previous prompt does not get carried)
-    // (but this should be handled when deleting state)
-    // TODO: delete this if no longer needed
-    // llama_kv_cache_clear(ctx);
-
+    // Free all the used context here
     // Assume that state is handled immutably
-    // So we just delete the state
     delete state;
     state = nullptr;
 
