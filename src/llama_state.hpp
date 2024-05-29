@@ -7,6 +7,7 @@
 #include <common.h>
 
 #include <godot_cpp/classes/ref_counted.hpp>
+#include <godot_cpp/classes/ref.hpp>
 
 // Wrapper class for LlamaWorkerState
 
@@ -22,14 +23,14 @@ namespace godot
 
       LlamaWorkerState *worker_state;
 
-      static void write_to_file(String destination, LlamaState *state);
-      static LlamaState *read_from_file(String source);
+      static void write_to_file(String destination, Ref<LlamaState> state);
+      static Ref<LlamaState> read_from_file(String source);
 
       Array get_tokens() const;
       void set_tokens(const Array tokens);
 
-      static LlamaState *create_state(LlamaWorkerState *state);
-      static LlamaState *create_state(llama_model *model, gpt_params *params);
+      static Ref<LlamaState> create_state(LlamaWorkerState *state);
+      static Ref<LlamaState> create_state(llama_model *model, gpt_params *params);
 
    protected:
       static void _bind_methods();

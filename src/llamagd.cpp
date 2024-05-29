@@ -74,7 +74,6 @@ namespace godot
 
       model = nullptr;
       worker = nullptr;
-      state = nullptr;
 
       generation_mutex.instantiate();
       function_call_mutex.instantiate();
@@ -368,7 +367,8 @@ namespace godot
       if (state != nullptr)
       {
          log("Detected a state. Using custom initial state");
-         worker->use_state(state->worker_state);
+         auto worker_state = state->worker_state;
+         worker->use_state(worker_state);
       }
 
       log("Worker initialized");
@@ -431,7 +431,7 @@ namespace godot
       await_generation_thread();
       text_generation_thread->start(callable_mp(this, &LlamaGD::make_state).bind(prompt));
    }
-   LlamaState *LlamaGD::make_state(String prompt)
+   Ref<LlamaState> LlamaGD::make_state(String prompt)
    {
       // TODO: how the hell do we inject the state to each prediction????????
       prepare_worker();
@@ -448,13 +448,15 @@ namespace godot
       return new_state;
    }
 
-   void LlamaGD::use_state(LlamaState *llama_state)
+   void LlamaGD::use_state(Ref<LlamaState> llama_state)
    {
+      auto worker_state = llama_state->worker_state;
+      UtilityFunctions::print("Result Print", worker_state->tokens.size());
       state = llama_state;
    }
    void LlamaGD::clear_state()
    {
-      state = nullptr;
+      state.unref();
    }
 
    String LlamaGD::get_model_bos()

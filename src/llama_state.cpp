@@ -9,6 +9,8 @@
 
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/core/memory.hpp>
 
 namespace godot
 {
@@ -22,18 +24,17 @@ namespace godot
       ClassDB::bind_method(D_METHOD("set_tokens"), &LlamaState::set_tokens);
       ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "tokens", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_READ_ONLY), "set_tokens", "get_tokens");
    }
-   LlamaState *LlamaState::create_state(LlamaWorkerState *initial_state)
+   Ref<LlamaState> LlamaState::create_state(LlamaWorkerState *initial_state)
    {
-      LlamaState *new_state = new LlamaState();
+      Ref<LlamaState> new_state(memnew(LlamaState));
       new_state->worker_state = initial_state;
       return new_state;
    }
-   LlamaState *LlamaState::create_state(llama_model *model, gpt_params *params)
+   Ref<LlamaState> LlamaState::create_state(llama_model *model, gpt_params *params)
    {
+      Ref<LlamaState> new_state(memnew(LlamaState));
       auto worker_state = new LlamaWorkerState(model, params);
-      LlamaState *new_state = new LlamaState();
       new_state->worker_state = worker_state;
-
       return new_state;
    }
    LlamaState::LlamaState()
@@ -45,16 +46,16 @@ namespace godot
       delete worker_state;
    }
 
-   void LlamaState::write_to_file(String dest, LlamaState *target_state)
+   void LlamaState::write_to_file(String dest, Ref<LlamaState> target_state)
    {
-      LlamaWorkerState *state = target_state->worker_state;
+      auto *state = target_state->worker_state;
       llama_state_save_file(
           state->ctx,
           string_gd_to_std(dest).c_str(),
           state->tokens.data(),
           state->tokens.size());
    }
-   LlamaState *LlamaState::read_from_file(String src)
+   Ref<LlamaState> LlamaState::read_from_file(String src)
    {
       LlamaWorkerState *state = new LlamaWorkerState();
       llama_token *token_ptr;

@@ -9,6 +9,8 @@
 #include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/variant/string.hpp>
 
+#include <godot_cpp/classes/ref.hpp>
+
 #include <common.h>
 
 namespace godot
@@ -28,7 +30,7 @@ namespace godot
 
       llama_model *model;
       LlamaWorker *worker;
-      LlamaState *state;
+      Ref<LlamaState> state;
 
       bool output_bos;
       bool output_eos;
@@ -73,10 +75,10 @@ namespace godot
       void predict_sequence_async(const Array tokens);
       void stop_generation();
 
-      LlamaState *make_state(const String prompt);
+      Ref<LlamaState> make_state(const String prompt);
       void make_state_async(const String prompt);
 
-      void use_state(LlamaState *llama_state);
+      void use_state(Ref<LlamaState> llama_state);
       void clear_state();
 
       Array tokenize(const String prompt);
