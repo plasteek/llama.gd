@@ -166,7 +166,13 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
     LOG("add_bos: %d\n", add_bos);
 
     // Tokenize the prompt
-    std::vector<llama_token> embd_inp = tokens;
+    std::vector<llama_token> embd_inp = state->tokens;
+
+    // Forward by 1 if the "tokens" has a BOS at the first element
+    auto new_token_start = tokens.begin();
+    if (tokens.front() == llama_token_bos(model))
+        ++new_token_start;
+    embd_inp.insert(embd_inp.end(), new_token_start, tokens.end());
 
     // TODO: because the prompt is optional and we only have token
     // LOG("prompt: \"%s\"\n", log_tostr((*params).prompt));
@@ -190,7 +196,7 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
         guidance_inp = ::llama_tokenize(ctx_guidance, sparams.cfg_negative_prompt, true, true);
         LOG("guidance_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_guidance, guidance_inp).c_str());
 
-        std::vector<llama_token> original_inp = tokens;
+        std::vector<llama_token> original_inp(embd_inp);
         LOG("original_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, original_inp).c_str());
 
         original_prompt_len = original_inp.size();
@@ -287,8 +293,7 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
     std::vector<int> output_tokens;
     std::ostringstream output_ss;
 
-    std::vector<llama_token> embd(state->tokens);
-    embd.insert(embd.end(), tokens.begin(), tokens.end());
+    std::vector<llama_token> embd;
     std::vector<llama_token> embd_guidance;
 
     // tokenized antiprompts
