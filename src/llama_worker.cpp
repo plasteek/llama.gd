@@ -201,27 +201,6 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     // LOG("prompt: \"%s\"\n", log_tostr((*params).prompt));
     LOG("tokens: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, token_list).c_str());
 
-    // Tokenize negative prompt
-    std::vector<llama_token> guidance_tokens;
-    int guidance_offset = 0;
-    int original_prompt_len = 0;
-
-    if (ctx_guidance)
-    {
-        LOG("cfg_negative_prompt: \"%s\"\n", log_tostr(sparams.cfg_negative_prompt));
-
-        guidance_tokens = ::llama_tokenize(ctx_guidance, sparams.cfg_negative_prompt, true, true);
-        LOG("guidance_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_guidance, guidance_tokens).c_str());
-
-        std::vector<llama_token> input_tokens = token_list;
-        LOG("original_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, input_tokens).c_str());
-
-        original_prompt_len = input_tokens.size();
-        guidance_offset = (int)guidance_tokens.size() - original_prompt_len;
-        LOG("original_prompt_len: %s", log_tostr(original_prompt_len));
-        LOG("guidance_offset:     %s", log_tostr(guidance_offset));
-    }
-
     if ((int)token_list.size() > n_ctx - 4)
     {
         LOG_TEE("%s: error: prompt is too long (%d tokens, max %d)\n", __func__, (int)token_list.size(), n_ctx - 4);
@@ -303,10 +282,60 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
             token_index);
     }
 
+    // Prepare for Guidance (if enabled)
+    if (ctx_guidance)
+    {
+        std::vector<llama_token> guidance_tokens;
+        guidance_tokens = ::llama_tokenize(ctx_guidance, sparams.cfg_negative_prompt, true, true);
+
+        int prompt_size = token_list.size();
+        int guidance_offset = guidance_tokens.size() - prompt_size;
+
+        LOG("cfg_negative_prompt: \"%s\"\n", log_tostr(sparams.cfg_negative_prompt));
+        LOG("guidance_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_guidance, guidance_tokens).c_str());
+        LOG("original_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, input_tokens).c_str());
+        LOG("original_prompt_len: %s", log_tostr(prompt_size));
+        LOG("guidance_offset:     %s", log_tostr(guidance_offset));
+
+        int input_size = 0;
+        llama_token *input_buf = NULL;
+
+        // Guidance context should have the same data with these modifications:
+        //
+        // * Replace the initial prompt
+        // * Shift everything by guidance_offset
+        if (token_list.begin() + prompt_size < token_list.end())
+        {
+            guidance_tokens.insert(
+                guidance_tokens.end(),
+                token_list.begin() + prompt_size,
+                token_list.end());
+        }
+
+        input_buf = guidance_tokens.data();
+        input_size = guidance_tokens.size();
+
+        LOG("guidance context: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, guidance_tokens).c_str());
+
+        // TODO: Batching is not quite right please fix
+        llama_batch guidance_batch = llama_batch_init(n_batch, 0, 1);
+        for (int i = 0; i < input_size; i += n_batch)
+        {
+            llama_batch_add(guidance_batch, *(input_buf + 1), i, {0}, false);
+            int n_eval = std::min(input_size - i, n_batch);
+        }
+        if (llama_decode(ctx_guidance, guidance_batch))
+        {
+            LOG_TEE("%s : failed to eval\n", __func__);
+            throw std::runtime_error(std::string(__func__) + ": failed to eval");
+        }
+        guidance_tokens.clear();
+    }
+
     int last_evaluated_token = token_list.size() - 1;
     int last_token_pos = last_evaluated_token;
     int remaining = (*params).n_predict;
-    // int guidance_token_pos = 0;
+    int guidance_token_pos = 0;
 
     // prediction start
     llama_batch predict_batch = llama_batch_init((*params).n_batch, 0, 1); // Should only have 1 at a time
@@ -355,53 +384,6 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
         {
             LOG_TEE("\n\033[31mTokens consumed so far = %d / %d \033[0m\n", token_pos, n_ctx);
         }
-
-        // Guidance before evaluation
-        // if (ctx_guidance)
-        // {
-        //     int input_size = 0;
-        //     llama_token *input_buf = NULL;
-        //     std::vector<llama_token> embd_guidance;
-        //     if (n_past_guidance < (int)guidance_inp.size())
-        //     {
-        //         // Guidance context should have the same data with these modifications:
-        //         //
-        //         // * Replace the initial prompt
-        //         // * Shift everything by guidance_offset
-        //         embd_guidance = guidance_inp;
-        //         if (embd.begin() + original_prompt_len < embd.end())
-        //         {
-        //             embd_guidance.insert(
-        //                 embd_guidance.end(),
-        //                 embd.begin() + original_prompt_len,
-        //                 embd.end());
-        //         }
-
-        //         input_buf = embd_guidance.data();
-        //         input_size = embd_guidance.size();
-
-        //         LOG("guidance context: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd_guidance).c_str());
-        //     }
-        //     else
-        //     {
-        //         input_buf = embd.data();
-        //         input_size = embd.size();
-        //     }
-
-        //     llama_batch sampling_batch = llama_batch_init((*params).n_batch, 0, 1);
-        //     for (int i = 0; i < input_size; i += (*params).n_batch)
-        //     {
-        //         llama_batch_add(sampling_batch, *(input_buf + 1), i, {0}, false);
-        //         int n_eval = std::min(input_size - i, (*params).n_batch);
-        //         n_past_guidance += n_eval;
-        //     }
-        //     if (llama_decode(ctx_guidance, sampling_batch))
-        //     {
-        //         LOG_TEE("%s : failed to eval\n", __func__);
-        //         throw std::runtime_error(std::string(__func__) + ": failed to eval");
-        //     }
-        //     embd_guidance.clear();
-        // }
 
         // // Note: (n_ctx - 4) here is to match the logic for command line prompt handling via
         // // --prompt or --file which uses the same value.
