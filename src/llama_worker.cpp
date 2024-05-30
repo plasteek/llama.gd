@@ -26,18 +26,23 @@
 
 LlamaWorkerState::LlamaWorkerState()
 {
+    initialized = false;
     ctx = nullptr;
     last_decoded_token_index = 0;
 }
 LlamaWorkerState::LlamaWorkerState(llama_model *model, gpt_params *params) : LlamaWorkerState()
 {
-    // Initialize default context
-    auto cparams = llama_context_params_from_gpt_params(*params);
-    ctx = llama_new_context_with_model(model, cparams);
+    init(model, params);
 }
 LlamaWorkerState::~LlamaWorkerState()
 {
     llama_free(ctx);
+}
+void LlamaWorkerState::init(llama_model *model, gpt_params *params)
+{
+    initialized = true;
+    auto cparams = llama_context_params_from_gpt_params(*params);
+    ctx = llama_new_context_with_model(model, cparams);
 }
 
 LlamaWorker::LlamaWorker(
@@ -109,13 +114,16 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     // Append the prompt
     std::string generated_text = "";
 
-    // Just in case if state is cleared and wanted to be reused
+    // Check state
     if (state == nullptr)
     {
         LOG("No initial state provided, creating a blank");
         state = new LlamaWorkerState(model, params);
     }
-
+    if (!state->initialized)
+    {
+        state->init(model, params);
+    }
     if (state->ctx == nullptr)
     {
         LOG("State does not have a context. Aborting.");

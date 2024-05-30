@@ -20,9 +20,12 @@ public:
 
    // We can assume that n_consumed is already the same as the embeddings
    // And the initial past is also the same as n_consumed
+   bool initialized;
    llama_context *ctx;
    int last_decoded_token_index;
    std::vector<llama_token> tokens;
+
+   void init(llama_model *model, gpt_params *locked_params);
 };
 
 class LlamaWorker
