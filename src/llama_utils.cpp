@@ -10,7 +10,7 @@ void batch_decode_tokens(
 {
    int token_size = tokens.size();
    // Edge case if all the batch "has been" evaluated
-   if (start_index > token_size)
+   if (start_index > token_size - 1)
       return;
 
    llama_batch batch = llama_batch_init(batch_size, 0, 1);
