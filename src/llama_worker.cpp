@@ -1,4 +1,5 @@
 #include "llama_worker.hpp"
+#include "llama_utils.hpp"
 
 #include <llama.h>
 #include <common.h>
@@ -253,26 +254,11 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     int consumed_index = state->n_consumed;
     LOG("embd_inp.size(): %d, n_consumed: %d\n", (int)token_list.size(), consumed_index);
 
-    // TODO: make the batch process the batch until the tokens are fully consumed
     int n_batch = (*params).n_batch;
-    llama_batch initial_batch = llama_batch_init(n_batch, 0, 1);
-    for (int i = consumed_index; i < token_list.size(); i++)
-    {
-        auto token = token_list[i];
-        llama_batch_add(initial_batch, token, i, {0}, false);
-        LOG_TEE(
-            "build: main context batch '%s' at %d\n",
-            llama_token_to_piece(ctx_main, token).c_str(),
-            i);
-    }
-
-    int last_el = initial_batch.n_tokens - 1;
-    initial_batch.logits[last_el] = true;
-    if (llama_decode(ctx_main, initial_batch) != 0)
-    {
-        LOG_TEE("%s : failed to eval\n", __func__);
-        throw std::runtime_error(std::string(__func__) + ": failed to eval");
-    }
+    batch_decode_tokens(
+        n_batch,
+        ctx_main,
+        token_list);
 
     struct llama_sampling_context *ctx_sampling = llama_sampling_init(sparams);
     if (!ctx_sampling)
@@ -323,23 +309,12 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
                 token_list.end());
         }
 
-        input_buf = guidance_tokens.data();
-        input_size = guidance_tokens.size();
-
         LOG("guidance context: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, guidance_tokens).c_str());
 
-        // TODO: Batching is not quite right please fix
-        llama_batch guidance_batch = llama_batch_init(n_batch, 0, 1);
-        for (int i = 0; i < input_size; i += n_batch)
-        {
-            llama_batch_add(guidance_batch, *(input_buf + 1), i, {0}, false);
-            int n_eval = std::min(input_size - i, n_batch);
-        }
-        if (llama_decode(ctx_guidance, guidance_batch))
-        {
-            LOG_TEE("%s : failed to eval\n", __func__);
-            throw std::runtime_error(std::string(__func__) + ": failed to eval");
-        }
+        batch_decode_tokens(
+            n_batch,
+            ctx_guidance,
+            guidance_tokens);
         guidance_tokens.clear();
     }
 
