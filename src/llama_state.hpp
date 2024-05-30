@@ -5,14 +5,14 @@
 
 #include <llama.h>
 #include <common.h>
-
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/classes/ref.hpp>
 
-// Wrapper class for LlamaWorkerState
+class LlamaGD;
 
 namespace godot
 {
+   // Wrapper class for LlamaWorkerState
    class LlamaState : public RefCounted
    {
       GDCLASS(LlamaState, RefCounted)
@@ -22,9 +22,6 @@ namespace godot
       ~LlamaState();
 
       LlamaWorkerState *worker_state;
-
-      static void write_to_file(String destination, Ref<LlamaState> state);
-      static Ref<LlamaState> read_from_file(String source);
 
       Array get_tokens() const;
       void set_tokens(const Array tokens);

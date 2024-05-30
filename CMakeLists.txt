@@ -19,6 +19,8 @@ set(src_files
    "src/llamagd.cpp"
    "src/llama_state.hpp"
    "src/llama_state.cpp"
+   "src/llama_state_file.hpp"
+   "src/llama_state_file.cpp"
    "src/llama_utils.hpp"
    "src/llama_utils.cpp"
    "src/gd_throw.hpp"

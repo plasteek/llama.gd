@@ -64,6 +64,9 @@ namespace godot
       void unload_model();
       bool is_model_loaded();
 
+      llama_model *get_model();
+      gpt_params *get_params();
+
       int get_model_eos_id();
       int get_model_bos_id();
       String get_model_eos();

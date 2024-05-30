@@ -1,8 +1,8 @@
+#include "gd_throw.hpp"
 #include "conversion.hpp"
 #include "llamagd.hpp"
 #include "llama_worker.hpp"
 #include "llama_state.hpp"
-#include "gd_throw.hpp"
 
 #include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/classes/global_constants.hpp>
@@ -621,6 +621,15 @@ namespace godot
       ClassDB::bind_method(D_METHOD("get_verbose"), &LlamaGD::get_verbose);
       ClassDB::bind_method(D_METHOD("set_verbose", "new_n_ubatch"), &LlamaGD::set_verbose);
       ADD_PROPERTY(PropertyInfo(Variant::BOOL, "verbose", PROPERTY_HINT_NONE, "Logs internal plugin processes"), "set_verbose", "get_verbose");
+   }
+
+   llama_model *LlamaGD::get_model()
+   {
+      return model;
+   }
+   gpt_params *LlamaGD::get_params()
+   {
+      return &params;
    }
 
    String LlamaGD::get_model_path() const

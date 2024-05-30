@@ -1,7 +1,8 @@
-#include "llama_worker.hpp"
 #include "gd_throw.hpp"
 #include "conversion.hpp"
 #include "llama_state.hpp"
+#include "llama_worker.hpp"
+#include "llamagd.hpp"
 
 #include <llama.h>
 #include <common.h>
@@ -16,10 +17,6 @@ namespace godot
 {
    void LlamaState::_bind_methods()
    {
-      // TODO: this may not register properly, need to check
-      ClassDB::bind_static_method(get_class_static(), D_METHOD("read_from_file", "source"), &LlamaState::read_from_file);
-      ClassDB::bind_static_method(get_class_static(), D_METHOD("write_state_to_file", "destination", "target"), &LlamaState::write_to_file);
-
       ClassDB::bind_method(D_METHOD("get_tokens"), &LlamaState::get_tokens);
       ClassDB::bind_method(D_METHOD("set_tokens"), &LlamaState::set_tokens);
       ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "tokens", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_READ_ONLY), "set_tokens", "get_tokens");
@@ -44,48 +41,6 @@ namespace godot
    LlamaState::~LlamaState()
    {
       delete worker_state;
-   }
-
-   void LlamaState::write_to_file(String dest, Ref<LlamaState> target_state)
-   {
-      auto *state = target_state->worker_state;
-      llama_state_save_file(
-          state->ctx,
-          string_gd_to_std(dest).c_str(),
-          state->tokens.data(),
-          state->tokens.size());
-   }
-   Ref<LlamaState> LlamaState::read_from_file(String src)
-   {
-      LlamaWorkerState *state = new LlamaWorkerState();
-      llama_token *token_ptr;
-      size_t *token_count;
-
-      llama_state_load_file(
-          state->ctx,
-          string_gd_to_std(src).c_str(),
-          token_ptr,
-          // Just read as much as possible because we don't really have a limit
-          INT_MAX,
-          token_count);
-
-      // Transform the token pointer to array
-      auto gd_tokens = Array();
-      llama_token *t = token_ptr;
-
-      for (int i = 0; i < *token_count; i++)
-      {
-         auto curr_token = *t;
-         gd_tokens.append(curr_token);
-         state->tokens.emplace_back(curr_token);
-         t += 1;
-      }
-
-      state->last_decoded_token_index = *token_count;
-      std::free(token_ptr);
-      std::free(token_count);
-
-      return LlamaState::create_state(state);
    }
 
    Array LlamaState::get_tokens() const
