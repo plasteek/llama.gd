@@ -81,7 +81,7 @@ namespace godot
          t += 1;
       }
 
-      state->last_evaluated_token_index = *token_count;
+      state->last_decoded_token_index = *token_count;
       std::free(token_ptr);
       std::free(token_count);
 
