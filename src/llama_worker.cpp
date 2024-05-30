@@ -315,7 +315,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
         // clear for next prediction
         llama_batch_clear(predict_batch);
 
-        llama_token sampled_id = llama_sampling_sample(ctx_sampling, ctx_main, ctx_guidance);
+        const llama_token sampled_id = llama_sampling_sample(ctx_sampling, ctx_main, ctx_guidance);
         llama_sampling_accept(ctx_sampling, ctx_main, sampled_id, true);
         LOG("last: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, ctx_sampling->prev).c_str());
 
