@@ -1,5 +1,6 @@
 #include "llamagd.hpp"
 #include "llama_state.hpp"
+#include "llama_state_file.hpp"
 #include "register_types.hpp"
 
 #include <gdextension_interface.h>
@@ -18,6 +19,7 @@ namespace godot
 
       ClassDB::register_class<LlamaGD>();
       ClassDB::register_class<LlamaState>();
+      ClassDB::register_class<LlamaStateFile>();
    }
 
    void cleanup_llm_module(ModuleInitializationLevel p_level)
