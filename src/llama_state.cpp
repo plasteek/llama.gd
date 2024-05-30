@@ -81,7 +81,7 @@ namespace godot
          t += 1;
       }
 
-      state->n_consumed = *token_count;
+      state->last_consumed_token_index = *token_count;
       std::free(token_ptr);
       std::free(token_count);
 

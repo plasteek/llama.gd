@@ -26,7 +26,7 @@
 
 LlamaWorkerState::LlamaWorkerState()
 {
-    n_consumed = 0;
+    last_consumed_token_index = 0;
     ctx = nullptr;
 }
 LlamaWorkerState::LlamaWorkerState(llama_model *model, gpt_params *params) : LlamaWorkerState()
@@ -250,14 +250,15 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     LOG_TEE("\n\n");
 
     // evaluate initial prompt
-    int consumed_index = state->n_consumed;
+    int consumed_index = state->last_consumed_token_index;
     LOG("embd_inp.size(): %d, n_consumed: %d\n", (int)token_list.size(), consumed_index);
 
     int n_batch = (*params).n_batch;
     batch_decode_tokens(
         n_batch,
         ctx_main,
-        token_list);
+        token_list,
+        state->last_consumed_token_index);
 
     struct llama_sampling_context *ctx_sampling = llama_sampling_init(sparams);
     if (!ctx_sampling)
@@ -445,7 +446,8 @@ LlamaWorkerState *LlamaWorker::make_state(const std::string prompt)
 {
     auto state = new LlamaWorkerState(model, params);
     state->tokens = ::llama_tokenize(model, prompt, true, true);
-    state->n_consumed = state->tokens.size(); // Tokens should be consumed completely after
+    // Assume we will have evaluated basically the whole prompt
+    state->last_consumed_token_index = state->tokens.size() - 1;
 
     // New context and sampling context
     llama_context *ctx = state->ctx;
