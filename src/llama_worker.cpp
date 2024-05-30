@@ -99,7 +99,7 @@ void LlamaWorker::insert_without_bos(std::vector<llama_token> *embd, std::vector
 }
 
 // This long function is direct implementation from the main.cpp
-std::string LlamaWorker::run(std::vector<llama_token> tokens)
+std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
 {
 #ifndef LOG_DISABLE_LOGS
     LOG_TEE("Log start\n");
@@ -125,7 +125,7 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
 
     // Needed llama_context
     llama_sampling_params &sparams = (*params).sparams;
-    llama_context *ctx = state->ctx;
+    llama_context *ctx_main = state->ctx;
     llama_context *ctx_guidance = NULL;
 
     // If some parameters are not supposed to be defined
@@ -161,7 +161,7 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
     }
 
     const int n_ctx_train = llama_n_ctx_train(model);
-    const int n_ctx = llama_n_ctx(ctx);
+    const int n_ctx = llama_n_ctx(ctx_main);
     LOG("n_ctx: %d\n", n_ctx);
 
     if (n_ctx > n_ctx_train)
@@ -179,28 +179,30 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
     LOG("add_bos: %d\n", add_bos);
 
     // Construct the prompt tokens
-    std::vector<llama_token> embd_inp;
+    std::vector<llama_token> token_list;
+    auto cached_tokens = state->tokens;
+
     // If the prompt is empty, add starting token
-    if (embd_inp.empty())
+    if (token_list.empty())
     {
-        embd_inp.push_back(llama_token_bos(model));
-        LOG("embd_inp was considered empty and bos was added: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd_inp).c_str());
+        token_list.emplace_back(llama_token_bos(model));
+        LOG("embd_inp was considered empty and bos was added: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, token_list).c_str());
     }
     // Append the state tokens if exist
-    if (!state->tokens.empty())
+    if (!cached_tokens.empty())
     {
         LOG("Detected state token. Embedding into the prompt\n");
         auto state_tokens = state->tokens;
-        insert_without_bos(&embd_inp, &state_tokens, llama_token_bos(model));
+        insert_without_bos(&token_list, &state_tokens, llama_token_bos(model));
     }
     // Append the actual user tokens
-    insert_without_bos(&embd_inp, &tokens, llama_token_bos(model));
+    insert_without_bos(&token_list, &input_tokens, llama_token_bos(model));
 
     // LOG("prompt: \"%s\"\n", log_tostr((*params).prompt));
-    LOG("tokens: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd_inp).c_str());
+    LOG("tokens: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, token_list).c_str());
 
     // Tokenize negative prompt
-    std::vector<llama_token> guidance_inp;
+    std::vector<llama_token> guidance_tokens;
     int guidance_offset = 0;
     int original_prompt_len = 0;
 
@@ -208,33 +210,34 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
     {
         LOG("cfg_negative_prompt: \"%s\"\n", log_tostr(sparams.cfg_negative_prompt));
 
-        guidance_inp = ::llama_tokenize(ctx_guidance, sparams.cfg_negative_prompt, true, true);
-        LOG("guidance_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_guidance, guidance_inp).c_str());
+        guidance_tokens = ::llama_tokenize(ctx_guidance, sparams.cfg_negative_prompt, true, true);
+        LOG("guidance_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_guidance, guidance_tokens).c_str());
 
-        std::vector<llama_token> original_inp = embd_inp;
-        LOG("original_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, original_inp).c_str());
+        std::vector<llama_token> input_tokens = token_list;
+        LOG("original_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, input_tokens).c_str());
 
-        original_prompt_len = original_inp.size();
-        guidance_offset = (int)guidance_inp.size() - original_prompt_len;
+        original_prompt_len = input_tokens.size();
+        guidance_offset = (int)guidance_tokens.size() - original_prompt_len;
         LOG("original_prompt_len: %s", log_tostr(original_prompt_len));
         LOG("guidance_offset:     %s", log_tostr(guidance_offset));
     }
 
-    // Check negative prompt
-    if ((int)embd_inp.size() > n_ctx - 4)
+    if ((int)token_list.size() > n_ctx - 4)
     {
-        LOG_TEE("%s: error: prompt is too long (%d tokens, max %d)\n", __func__, (int)embd_inp.size(), n_ctx - 4);
-        throw std::runtime_error(std::string(__func__) + ": error: prompt is too long (" + std::to_string((int)embd_inp.size()) + " tokens, max " + std::to_string(n_ctx - 4) + ")");
+        LOG_TEE("%s: error: prompt is too long (%d tokens, max %d)\n", __func__, (int)token_list.size(), n_ctx - 4);
+        throw std::runtime_error(std::string(__func__) + ": error: prompt is too long (" + std::to_string((int)token_list.size()) + " tokens, max " + std::to_string(n_ctx - 4) + ")");
     }
 
     // Number of tokens to keep when resetting context
-    if ((*params).n_keep < 0 || (*params).n_keep > (int)embd_inp.size())
+    int n_keep = (*params).n_keep;
+    if (n_keep < 0 || n_keep > (int)token_list.size())
     {
-        (*params).n_keep = (int)embd_inp.size();
+        n_keep = (int)token_list.size();
     }
     else
     {
-        (*params).n_keep += add_bos; // always keep the BOS token
+        // always keep the BOS token
+        n_keep += add_bos;
     }
 
     LOG_TEE("sampling: \n%s\n", llama_sampling_print(sparams).c_str());
@@ -256,63 +259,71 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
     }
     LOG_TEE("\n\n");
 
-    LOG("consuming tokens\n");
-    int n_consumed = state->n_consumed; // Processed prompt according to the state
+    // Evaluate initial prompt
+    int consumed_index = state->n_consumed;
+    LOG("embd_inp.size(): %d, n_consumed: %d\n", (int)token_list.size(), consumed_index);
 
-    LOG("embd_inp.size(): %d, n_consumed: %d\n", (int)embd_inp.size(), n_consumed);
-
+    // TODO: make the batch process the batch until the tokens are fully consumed
     int n_batch = (*params).n_batch;
-    llama_batch consume_batch = llama_batch_init(n_batch, 0, 1);
-
-    // TODO: working but spits out random shit. This is probably because the context is not initialized propertly, send help
-    for (int i = n_consumed; i < (int)embd_inp.size(); i++)
+    llama_batch initial_batch = llama_batch_init(n_batch, 0, 1);
+    for (int i = consumed_index; i < token_list.size(); i++)
     {
-        llama_batch_add(consume_batch, embd_inp[i], i, {0}, false);
+        auto token = token_list[i];
+        llama_batch_add(initial_batch, token, i, {0}, false);
+        LOG_TEE(
+            "build: main context batch '%s' at %d\n",
+            llama_token_to_piece(ctx_main, token).c_str(),
+            i);
     }
 
-    // llama_decode will output logits only for the last token of the prompt
-    consume_batch.logits[consume_batch.n_tokens - 1] = true;
-    if (llama_decode(ctx, consume_batch))
+    int last_el = initial_batch.n_tokens - 1;
+    initial_batch.logits[last_el] = true;
+    if (llama_decode(ctx_main, initial_batch) != 0)
     {
         LOG_TEE("%s : failed to eval\n", __func__);
         throw std::runtime_error(std::string(__func__) + ": failed to eval");
     }
 
-    LOG("preparing sampling context\n");
     struct llama_sampling_context *ctx_sampling = llama_sampling_init(sparams);
     if (!ctx_sampling)
     {
         fprintf(stderr, "%s: failed to initialize sampling subsystem\n", __func__);
         throw std::runtime_error(std::string(__func__) + ": failed to initialize sampling subsystem");
     }
-    // NOTE: we always push from the beginning because sampling context is never saved
     // push the prompt in the sampling context in order to apply repetition penalties later
     // for the prompt, we don't apply grammar rules
-    for (int i = 0; i < (int)embd_inp.size(); i++)
-        llama_sampling_accept(ctx_sampling, ctx, embd_inp[i], false);
-
-    // Because we already go as far as the input n_past should be the size of the
-    // last token + 1 (which is equivalent to the size)
-    int n_past = embd_inp.size();
-    int n_remain = (*params).n_predict;
-    int n_past_guidance = 0;
-
-    std::vector<llama_token> embd;
-    llama_batch predict_batch = llama_batch_init((*params).n_batch, 0, 1); // Should only have 1 at a time
-
-    LOG("prediction start\n");
-    while (!should_yield && (n_remain != 0))
+    for (int token_index = 0; token_index < token_list.size(); token_index++)
     {
-        llama_token sampled_id = llama_sampling_sample(ctx_sampling, ctx, ctx_guidance);
-        llama_sampling_accept(ctx_sampling, ctx, sampled_id, true);
-        embd.push_back(sampled_id);
+        auto token = token_list[token_index];
+        // should accept from the context. But we're not applying grammar so it's fine
+        llama_sampling_accept(ctx_sampling, ctx_main, token, false);
+        LOG_TEE(
+            "build: sampling context accept '%s' at %d\n",
+            llama_token_to_piece(ctx_main, token).c_str(),
+            token_index);
+    }
 
-        LOG("last: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, ctx_sampling->prev).c_str());
+    int last_evaluated_token = token_list.size() - 1;
+    int last_token_pos = last_evaluated_token;
+    int remaining = (*params).n_predict;
+    // int guidance_token_pos = 0;
 
-        --n_remain;
-        LOG("n_remain: %d\n", n_remain);
+    // prediction start
+    llama_batch predict_batch = llama_batch_init((*params).n_batch, 0, 1); // Should only have 1 at a time
+    while (!should_yield && (remaining > 0))
+    {
+        // clear for next prediction
+        llama_batch_clear(predict_batch);
 
-        const std::string token_str = llama_token_to_piece(ctx, sampled_id, !(*params).conversation);
+        llama_token sampled_id = llama_sampling_sample(ctx_sampling, ctx_main, ctx_guidance);
+        llama_sampling_accept(ctx_sampling, ctx_main, sampled_id, true);
+        LOG("last: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, ctx_sampling->prev).c_str());
+
+        --remaining;
+        LOG("n_remain: %d\n", remaining);
+
+        // "decode" and process the sampled token
+        const std::string token_str = llama_token_to_piece(ctx_main, sampled_id, !(*params).conversation);
         bool is_bos = (sampled_id == llama_token_bos(model));
         bool is_eos = (sampled_id == llama_token_eos(model));
         if ((!is_bos || output_bos) && (!is_eos || output_eos))
@@ -321,10 +332,28 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
             on_new_token(token_str);
         }
 
+        // if generation finished, no need fo further decode for next iteration
         if (llama_token_is_eog(model, sampled_id))
         {
             LOG(" [end of text]\n");
             break;
+        }
+
+        // prepare the next logit for sampling
+        int token_pos = last_token_pos + 1; // one more than last token
+        last_token_pos = token_pos;
+        // Decode logit for next sampling
+        llama_batch_add(predict_batch, sampled_id, token_pos, {0}, true);
+        if (llama_decode(ctx_main, predict_batch))
+        {
+            LOG_TEE("%s : failed to eval\n", __func__);
+            throw std::runtime_error(std::string(__func__) + ": failed to eval");
+        }
+
+        LOG("n_past = %d\n", token_pos);
+        if ((*params).n_print > 0 && token_pos % (*params).n_print == 0)
+        {
+            LOG_TEE("\n\033[31mTokens consumed so far = %d / %d \033[0m\n", token_pos, n_ctx);
         }
 
         // Guidance before evaluation
@@ -373,24 +402,6 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
         //     }
         //     embd_guidance.clear();
         // }
-
-        // Evaluate the sampled token
-        llama_batch_clear(predict_batch);
-        llama_batch_add(predict_batch, sampled_id, n_past, {0}, true);
-        llama_token *sampled_ptr = &sampled_id;
-        // "1" because embd is guaranteed to only have 1
-        if (llama_decode(ctx, predict_batch))
-        {
-            LOG_TEE("%s : failed to eval\n", __func__);
-            throw std::runtime_error(std::string(__func__) + ": failed to eval");
-        }
-        LOG("n_past = %d\n", n_past);
-        // Display total tokens alongside total time
-        if ((*params).n_print > 0 && n_past % (*params).n_print == 0)
-        {
-            LOG_TEE("\n\033[31mTokens consumed so far = %d / %d \033[0m\n", n_past, n_ctx);
-        }
-        n_past++; // We evaluated 1 token so we move on to the next n-th token
 
         // // Note: (n_ctx - 4) here is to match the logic for command line prompt handling via
         // // --prompt or --file which uses the same value.
@@ -464,13 +475,10 @@ std::string LlamaWorker::run(std::vector<llama_token> tokens)
         //         LOG("\nn_past_old = %d, n_past = %d, ga_i = %d\n\n", n_past + bd, n_past, ga_i);
         //     }
         // }
-
-        // Re-clear embedding for next session
-        embd.clear();
     }
 
-    LOG("prediction completed with %d tokens remaining\n", n_remain);
-    llama_print_timings(ctx);
+    LOG("prediction completed with %d tokens remaining\n", remaining);
+    llama_print_timings(ctx_main);
 
     // Free all the used context here
     // Assume that state is handled immutably
