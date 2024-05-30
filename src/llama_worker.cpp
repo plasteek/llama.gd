@@ -173,12 +173,12 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     LOG_TEE("\n");
     LOG_TEE("%s\n", gpt_params_get_system_info((*params)).c_str());
 
-    // Does the model require a bos_token for starting generation?
+    // does the model require a bos_token for starting generation?
     const bool add_bos = llama_should_add_bos_token(model);
     GGML_ASSERT(llama_add_eos_token(model) != 1);
     LOG("add_bos: %d\n", add_bos);
 
-    // Construct the prompt tokens
+    // construct the prompt tokens
     std::vector<llama_token> token_list;
     auto cached_tokens = state->tokens;
 
@@ -188,15 +188,26 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
         token_list.emplace_back(llama_token_bos(model));
         LOG("embd_inp was considered empty and bos was added: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, token_list).c_str());
     }
-    // Append the state tokens if exist
+    // append the state tokens if exist
     if (!cached_tokens.empty())
     {
         LOG("Detected state token. Embedding into the prompt\n");
         auto state_tokens = state->tokens;
         insert_without_bos(&token_list, &state_tokens, llama_token_bos(model));
     }
-    // Append the actual user tokens
+    // append the actual user tokens
     insert_without_bos(&token_list, &input_tokens, llama_token_bos(model));
+
+    // Note: (n_ctx - 4) here is to match the logic for command line prompt handling via
+    // --prompt or --file which uses the same value.
+    int max_token_size = n_ctx - 4;
+    // Ensure the input doesn't exceed the context size by truncating embd if necessary.
+    if (token_list.size() > max_token_size)
+    {
+        const int skipped_tokens = token_list.size() - max_token_size;
+        token_list.resize(max_token_size);
+        LOG("<<input too long: skipped %d token%s>>", skipped_tokens, skipped_tokens != 1 ? "s" : "");
+    }
 
     // LOG("prompt: \"%s\"\n", log_tostr((*params).prompt));
     LOG("tokens: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, token_list).c_str());
@@ -207,7 +218,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
         throw std::runtime_error(std::string(__func__) + ": error: prompt is too long (" + std::to_string((int)token_list.size()) + " tokens, max " + std::to_string(n_ctx - 4) + ")");
     }
 
-    // Number of tokens to keep when resetting context
+    // number of tokens to keep when resetting context
     int n_keep = (*params).n_keep;
     if (n_keep < 0 || n_keep > (int)token_list.size())
     {
@@ -238,7 +249,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     }
     LOG_TEE("\n\n");
 
-    // Evaluate initial prompt
+    // evaluate initial prompt
     int consumed_index = state->n_consumed;
     LOG("embd_inp.size(): %d, n_consumed: %d\n", (int)token_list.size(), consumed_index);
 
@@ -282,14 +293,14 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
             token_index);
     }
 
-    // Prepare for Guidance (if enabled)
+    // prepare for Guidance (if enabled)
+    int guidance_offset; // Needed for shifting context
     if (ctx_guidance)
     {
+        int prompt_size = token_list.size();
         std::vector<llama_token> guidance_tokens;
         guidance_tokens = ::llama_tokenize(ctx_guidance, sparams.cfg_negative_prompt, true, true);
-
-        int prompt_size = token_list.size();
-        int guidance_offset = guidance_tokens.size() - prompt_size;
+        guidance_offset = guidance_tokens.size() - prompt_size;
 
         LOG("cfg_negative_prompt: \"%s\"\n", log_tostr(sparams.cfg_negative_prompt));
         LOG("guidance_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_guidance, guidance_tokens).c_str());
@@ -385,78 +396,59 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
             LOG_TEE("\n\033[31mTokens consumed so far = %d / %d \033[0m\n", token_pos, n_ctx);
         }
 
-        // // Note: (n_ctx - 4) here is to match the logic for command line prompt handling via
-        // // --prompt or --file which uses the same value.
-        // int max_embd_size = n_ctx - 4;
-        // // Ensure the input doesn't exceed the context size by truncating embd if necessary.
-        // if ((int)embd.size() > max_embd_size)
-        // {
-        //     const int skipped_tokens = (int)embd.size() - max_embd_size;
-        //     embd.resize(max_embd_size);
+        // Handle context extension here
+        if (ga_n == 1)
+        {
+            // infinite text generation via context shifting
+            // if we run out of context:
+            // - take the n_keep first tokens from the original prompt (via n_past)
+            // - take half of the last (n_ctx - n_keep) tokens and recompute the logits in batches
+            if (token_pos + token_list.size() + std::max<int>(0, guidance_offset) >= n_ctx)
+            {
+                if ((*params).n_predict == -2)
+                {
+                    LOG_TEE("\n\n%s: context full and n_predict == -%d => stopping\n", __func__, (*params).n_predict);
+                    break;
+                }
 
-        //     printf("<<input too long: skipped %d token%s>>", skipped_tokens, skipped_tokens != 1 ? "s" : "");
-        // }
+                const int n_left = token_pos - n_keep;
+                const int n_discard = n_left / 2;
 
-        // // Handling context extension or over
-        // if (ga_n == 1)
-        // {
-        //     // infinite text generation via context shifting
-        //     // if we run out of context:
-        //     // - take the n_keep first tokens from the original prompt (via n_past)
-        //     // - take half of the last (n_ctx - n_keep) tokens and recompute the logits in batches
-        //     if (n_past + (int)embd.size() + std::max<int>(0, guidance_offset) >= n_ctx)
-        //     {
-        //         if ((*params).n_predict == -2)
-        //         {
-        //             LOG_TEE("\n\n%s: context full and n_predict == -%d => stopping\n", __func__, (*params).n_predict);
-        //             break;
-        //         }
+                LOG("context full, swapping: n_past = %d, n_left = %d, n_ctx = %d, n_keep = %d, n_discard = %d\n",
+                    token_pos, n_left, n_ctx, n_keep, n_discard);
 
-        //         const int n_left = n_past - (*params).n_keep;
-        //         const int n_discard = n_left / 2;
+                llama_kv_cache_seq_rm(ctx_main, 0, n_keep, n_keep + n_discard);
+                llama_kv_cache_seq_add(ctx_main, 0, n_keep + n_discard, token_pos, -n_discard);
 
-        //         LOG("context full, swapping: n_past = %d, n_left = %d, n_ctx = %d, n_keep = %d, n_discard = %d\n",
-        //             n_past, n_left, n_ctx, (*params).n_keep, n_discard);
+                token_pos -= n_discard; // NOTE: guidance offset used to be affected
 
-        //         llama_kv_cache_seq_rm(ctx, 0, (*params).n_keep, (*params).n_keep + n_discard);
-        //         llama_kv_cache_seq_add(ctx, 0, (*params).n_keep + n_discard, n_past, -n_discard);
+                // LOG("after swap: n_past = %d, n_past_guidance = %d\n", n_past, n_past_guidance);
+                LOG("embd: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, token_list).c_str());
+            }
+        }
+        else
+        {
+            // context extension via Self-Extend
+            while (token_pos >= ga_i + ga_w)
+            {
+                const int ib = (ga_n * ga_i) / ga_w;
+                const int bd = (ga_w / ga_n) * (ga_n - 1);
+                const int dd = (ga_w / ga_n) - ib * bd - ga_w;
 
-        //         n_past -= n_discard;
+                LOG("\n");
+                LOG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i, token_pos, ib * bd, ga_i + ib * bd, token_pos + ib * bd);
+                LOG("div:   [%6d, %6d] / %6d -> [%6d, %6d]\n", ga_i + ib * bd, ga_i + ib * bd + ga_w, ga_n, (ga_i + ib * bd) / ga_n, (ga_i + ib * bd + ga_w) / ga_n);
+                LOG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i + ib * bd + ga_w, token_pos + ib * bd, dd, ga_i + ib * bd + ga_w + dd, token_pos + ib * bd + dd);
 
-        //         if (ctx_guidance)
-        //         {
-        //             n_past_guidance -= n_discard;
-        //         }
+                llama_kv_cache_seq_add(ctx_main, 0, ga_i, token_pos, ib * bd);
+                llama_kv_cache_seq_div(ctx_main, 0, ga_i + ib * bd, ga_i + ib * bd + ga_w, ga_n);
+                llama_kv_cache_seq_add(ctx_main, 0, ga_i + ib * bd + ga_w, token_pos + ib * bd, dd);
 
-        //         LOG("after swap: n_past = %d, n_past_guidance = %d\n", n_past, n_past_guidance);
-        //         LOG("embd: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd).c_str());
-        //     }
-        // }
-        // else
-        // {
-        //     // context extension via Self-Extend
-        //     while (n_past >= ga_i + ga_w)
-        //     {
-        //         const int ib = (ga_n * ga_i) / ga_w;
-        //         const int bd = (ga_w / ga_n) * (ga_n - 1);
-        //         const int dd = (ga_w / ga_n) - ib * bd - ga_w;
-
-        //         LOG("\n");
-        //         LOG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i, n_past, ib * bd, ga_i + ib * bd, n_past + ib * bd);
-        //         LOG("div:   [%6d, %6d] / %6d -> [%6d, %6d]\n", ga_i + ib * bd, ga_i + ib * bd + ga_w, ga_n, (ga_i + ib * bd) / ga_n, (ga_i + ib * bd + ga_w) / ga_n);
-        //         LOG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i + ib * bd + ga_w, n_past + ib * bd, dd, ga_i + ib * bd + ga_w + dd, n_past + ib * bd + dd);
-
-        //         llama_kv_cache_seq_add(ctx, 0, ga_i, n_past, ib * bd);
-        //         llama_kv_cache_seq_div(ctx, 0, ga_i + ib * bd, ga_i + ib * bd + ga_w, ga_n);
-        //         llama_kv_cache_seq_add(ctx, 0, ga_i + ib * bd + ga_w, n_past + ib * bd, dd);
-
-        //         n_past -= bd;
-
-        //         ga_i += ga_w / ga_n;
-
-        //         LOG("\nn_past_old = %d, n_past = %d, ga_i = %d\n\n", n_past + bd, n_past, ga_i);
-        //     }
-        // }
+                token_pos -= bd;
+                ga_i += ga_w / ga_n;
+                LOG("\nn_past_old = %d, n_past = %d, ga_i = %d\n\n", token_pos + bd, token_pos, ga_i);
+            }
+        }
     }
 
     LOG("prediction completed with %d tokens remaining\n", remaining);
