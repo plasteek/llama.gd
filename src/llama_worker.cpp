@@ -26,7 +26,6 @@
 
 LlamaWorkerState::LlamaWorkerState()
 {
-    n_past = 0;
     n_consumed = 0;
     ctx = nullptr;
 }
@@ -446,21 +445,24 @@ LlamaWorkerState *LlamaWorker::make_state(const std::string prompt)
 {
     auto state = new LlamaWorkerState(model, params);
     state->tokens = ::llama_tokenize(model, prompt, true, true);
-    int n_consumed = 0;
+    state->n_consumed = state->tokens.size(); // Tokens should be consumed completely after
 
     // New context and sampling context
     llama_context *ctx = state->ctx;
-    std::vector<llama_token> embd_inp = state->tokens;
-    llama_sampling_context *ctx_sampling = llama_sampling_init(params->sparams);
+    std::vector<llama_token> token_list = state->tokens;
 
-    while ((int)embd_inp.size() > n_consumed)
+    // Initialize sampling context
+    llama_sampling_context *ctx_sampling = llama_sampling_init(params->sparams);
+    for (int token_index = 0; token_index < token_list.size(); token_index++)
     {
-        // push the prompt in the sampling context in order to apply repetition penalties later
-        // for the prompt, we don't apply grammar rules
-        llama_sampling_accept(ctx_sampling, ctx, embd_inp[n_consumed], false);
-        ++n_consumed;
+        auto token = token_list[token_index];
+        llama_sampling_accept(ctx_sampling, ctx, token, false);
     }
 
-    state->n_consumed = state->n_past = n_consumed;
+    // Begin decoding
+    batch_decode_tokens(
+        params->n_batch,
+        ctx,
+        token_list);
     return state;
 }

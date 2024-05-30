@@ -20,7 +20,6 @@ public:
 
    // We can assume that n_consumed is already the same as the embeddings
    // And the initial past is also the same as n_consumed
-   int n_past;
    int n_consumed;
    llama_context *ctx;
    std::vector<llama_token> tokens;
