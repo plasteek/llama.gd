@@ -8,8 +8,6 @@
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/classes/ref.hpp>
 
-class LlamaGD;
-
 namespace godot
 {
    // Wrapper class for LlamaWorkerState

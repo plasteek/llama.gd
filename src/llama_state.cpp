@@ -2,7 +2,6 @@
 #include "conversion.hpp"
 #include "llama_state.hpp"
 #include "llama_worker.hpp"
-#include "llamagd.hpp"
 
 #include <llama.h>
 #include <common.h>
