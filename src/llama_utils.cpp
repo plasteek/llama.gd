@@ -8,9 +8,12 @@ void batch_decode_tokens(
     std::vector<llama_token> tokens,
     int start_index)
 {
-   llama_batch batch = llama_batch_init(batch_size, 0, 1);
    int token_size = tokens.size();
+   // Edge case if all the batch "has been" evaluated
+   if (start_index > token_size)
+      return;
 
+   llama_batch batch = llama_batch_init(batch_size, 0, 1);
    for (int batch_start = start_index; batch_start < token_size; batch_start += batch_size)
    {
       int remaining = token_size - batch_start;
