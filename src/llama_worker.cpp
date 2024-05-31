@@ -79,6 +79,7 @@ void LlamaWorker::use_state(const LlamaWorkerState *new_state)
 
     // Copy the state to ensure immutability
     state = new LlamaWorkerState(*new_state);
+    LOG("embd_inp was considered empty and bos was added: %s\n", LOG_TOKENS_TOSTR_PRETTY(new_state->ctx, new_state->tokens).c_str());
 }
 
 void LlamaWorker::insert_without_bos(std::vector<llama_token> *embd, std::vector<llama_token> *tokens, llama_token bos)
@@ -103,12 +104,12 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     // Check state
     if (state == nullptr)
     {
-        LOG("No initial state provided, creating a blank");
+        LOG("No initial state provided, creating a blank\n");
         state = new LlamaWorkerState(model, params);
     }
     else
     {
-        LOG("Initial state provided. Using state");
+        LOG("Initial state provided. Using state\n");
     }
     if (!state->initialized)
     {
@@ -116,8 +117,8 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     }
     if (state->ctx == nullptr)
     {
-        LOG("State does not have a context. Aborting.");
-        throw std::runtime_error("State does not have a context initialized");
+        LOG("State does not have a context. Aborting\n");
+        throw std::runtime_error("State does not have a context initialized\n");
         return "";
     }
 
