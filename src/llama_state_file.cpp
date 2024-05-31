@@ -1,8 +1,11 @@
+#include "llamagd.hpp"
 #include "llama_state_file.hpp"
 #include "llama_worker.hpp"
+#include "llama_utils.hpp"
+#include "gd_throw.hpp"
 #include "conversion.hpp"
-#include "llamagd.hpp"
 
+#include <stdexcept>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/classes/ref.hpp>
 
@@ -25,6 +28,7 @@ namespace godot
    }
    Ref<LlamaState> LlamaStateFile::read_from_file(String src, LlamaGD *llama_node)
    {
+
       LlamaWorkerState *state = new LlamaWorkerState();
       llama_token *tokens;
       size_t token_count;
@@ -35,14 +39,27 @@ namespace godot
          return LlamaState::create_state(state);
       }
 
+      std::string src_path = string_gd_to_std(src);
+      if (!file_exists(src_path))
+      {
+         UtilityFunctions::push_error("State file does not exist");
+         return LlamaState::create_state(state);
+      }
+
+      // TODO: change init function name
       state->init(llama_node->get_model(), llama_node->get_params());
-      llama_state_load_file(
-          state->ctx,
-          string_gd_to_std(src).c_str(),
-          tokens,
-          // Just read as much as possible because we don't really have a limit
-          INT_MAX,
-          &token_count);
+      llama_context *ctx = state->ctx;
+
+      try
+      {
+         // Just read as much as possible because we don't really have a limit
+         llama_state_load_file(ctx, src_path.c_str(), tokens, INT_MAX, &token_count);
+      }
+      catch (std::runtime_error err)
+      {
+         gd_throw_runtime_err(err);
+         return LlamaState::create_state(state);
+      }
 
       // Transform the token pointer to array
       auto gd_tokens = Array();
