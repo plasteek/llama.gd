@@ -28,43 +28,39 @@ set(src_files
    "src/gd_throw.cpp"
 )
 
-add_compile_options(-D_CRT_SECURE_NO_WARNINGS)
 
 #  Not sure what these does
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    add_compile_options(-D_CRT_SECURE_NO_WARNINGS)
     add_compile_options(
-      /vmg
-      /vmv
-      -Wno-c++98-compat
-      -Wno-c++98-compat-pedantic
-      -Wno-double-promotion
-      -Wno-old-style-cast
-      -Wno-implicit-float-conversion
-      -Wno-unsafe-buffer-usage
-      -Wno-unused-command-line-argument
-      -Wno-newline-eof
-      -Wno-float-equal
-      -Wno-unknown-argument
-      -Wno-shorten-64-to-32
-      -Wno-sign-conversion
-      -Wno-float-conversion
-      -Wno-cast-align
-      -Wno-cast-qual
-      -Wno-extra-semi-stmt
-      -Wno-cast-function-type-strict
-      -Wno-implicit-int-conversion
-      -Wno-missing-prototypes
-      -Wno-switch-default
-      -Wno-exit-time-destructors
-      -Wno-covered-switch-default
-      -Wno-global-constructors
-      # "$<$<CONFIG:Debug>:-fstandalone-debug>"
+      $<$<COMPILE_LANGUAGE:CXX>:/vmg>
+      $<$<COMPILE_LANGUAGE:CXX>:/vmv>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-c++98-compat>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-c++98-compat-pedantic>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-double-promotion>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-old-style-cast>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-implicit-float-conversion>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-unsafe-buffer-usage>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-command-line-argument>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-newline-eof>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-float-equal>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-unknown-argument>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-shorten-64-to-32>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-sign-conversion>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-float-conversion>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-cast-align>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-cast-qual>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-extra-semi-stmt>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-cast-function-type-strict>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-implicit-int-conversion>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-prototypes>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-switch-default>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-exit-time-destructors>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-covered-switch-default>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wno-global-constructors>
     )
   endif()
-endif()
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  add_compile_options(-fPIC)
 endif()
 
 add_subdirectory(godot-cpp)
