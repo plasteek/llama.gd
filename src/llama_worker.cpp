@@ -38,11 +38,37 @@ LlamaWorkerState::~LlamaWorkerState()
 {
     llama_free(ctx);
 }
+
+void LlamaWorkerState::init_ctx(llama_context *ctx)
+{
+    initialized = true;
+    this->ctx = ctx;
+}
 void LlamaWorkerState::init_ctx(llama_model *model, gpt_params *params)
 {
     initialized = true;
     auto cparams = llama_context_params_from_gpt_params(*params);
     ctx = llama_new_context_with_model(model, cparams);
+}
+LlamaWorkerState *LlamaWorkerState::clone(const LlamaWorkerState *source)
+{
+    llama_context *ctx_source = source->ctx;
+    size_t source_context_size = sizeof(ctx_source);
+
+    // Copy context (so it can be reused)
+    llama_context *ctx_target = (llama_context *)malloc(source_context_size);
+    memcpy(ctx_target, ctx_source, source_context_size);
+
+    // Copy tokens
+    std::vector<llama_token> cloned_tokens(source->tokens);
+    LOG("cloned tokens: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_source, cloned_tokens).c_str());
+
+    // Create the new object
+    LlamaWorkerState *cloned = new LlamaWorkerState();
+    cloned->init_ctx(ctx_target);
+    cloned->tokens = cloned_tokens;
+    cloned->last_decoded_token_index = source->last_decoded_token_index;
+    return cloned;
 }
 
 LlamaWorker::LlamaWorker(
@@ -79,9 +105,7 @@ void LlamaWorker::use_state(const LlamaWorkerState *new_state)
         delete state;
         state = nullptr;
     }
-
-    // Copy the state to ensure immutability
-    state = new LlamaWorkerState(*new_state);
+    state = LlamaWorkerState::clone(new_state);
 }
 
 void LlamaWorker::insert_without_bos(std::vector<llama_token> *embd, std::vector<llama_token> *tokens, llama_token bos)
