@@ -61,12 +61,10 @@ namespace godot
          return LlamaState::create_state(state);
       }
 
-      // Transform the token pointer to array
-      auto gd_tokens = Array();
+      // Append read tokens into the state
       for (int i = 0; i < token_count; i++)
       {
          auto token = tokens[i];
-         gd_tokens.append(token);
          state->tokens.emplace_back(token);
       }
 
