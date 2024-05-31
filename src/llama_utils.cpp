@@ -1,6 +1,7 @@
 #include "llama_utils.hpp"
 #include <llama.h>
 #include <common.h>
+#include <fstream>
 
 void batch_decode_tokens(
     int batch_size,
@@ -46,4 +47,18 @@ void batch_decode_tokens(
          throw std::runtime_error(std::string(__func__) + ": failed to eval");
       }
    }
+}
+
+bool file_exists(const std::string path)
+{
+   std::ifstream f(path.c_str());
+   return f.good();
+}
+
+bool file_is_empty(const std::string path)
+{
+   std::ifstream f;
+   f.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+   f.open(path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
+   return f.tellg() == 0;
 }

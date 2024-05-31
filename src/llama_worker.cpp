@@ -67,20 +67,6 @@ LlamaWorker::~LlamaWorker()
         delete state;
 }
 
-bool LlamaWorker::file_exists(const std::string path)
-{
-    std::ifstream f(path.c_str());
-    return f.good();
-}
-
-bool LlamaWorker::file_is_empty(const std::string path)
-{
-    std::ifstream f;
-    f.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    f.open(path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
-    return f.tellg() == 0;
-}
-
 void LlamaWorker::stop()
 {
     should_yield = true;
