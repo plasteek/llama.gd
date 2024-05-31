@@ -2,7 +2,6 @@
 #include "gd_throw.hpp"
 
 #include <stdexcept>
-
 #include <godot_cpp/variant/utility_functions.hpp>
 
 namespace godot
