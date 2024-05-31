@@ -29,10 +29,14 @@ set(src_files
 )
 
 
-#  Not sure what these does
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
-    add_compile_options(-D_CRT_SECURE_NO_WARNINGS)
+    # Disable MSVC fopen warning
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    # Fix debug build iterator bound check bug https://stackoverflow.com/questions/74748276/visual-studio-no-displays-the-correct-length-of-stdvector
+    add_definitions(-D_ITERATOR_DEBUG_LEVEL=0)
+
+    # Disable warnings
     add_compile_options(
       $<$<COMPILE_LANGUAGE:CXX>:/vmg>
       $<$<COMPILE_LANGUAGE:CXX>:/vmv>
@@ -64,7 +68,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 add_subdirectory(godot-cpp)
-add_subdirectory(llama.cpp)
+add_subdirectory(llama.cpp EXCLUDE_FROM_ALL)
 
 # Lib name I think
 set(LIB_NAME libllama.gd.${CMAKE_SYSTEM_NAME}.${CMAKE_BUILD_TYPE}.${CMAKE_SYSTEM_PROCESSOR})
@@ -80,20 +84,31 @@ target_link_libraries(${LIB_NAME} PRIVATE godot-cpp common llama)
 
 # Install to basically compile the library I'm guessing
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/install)
+
+if (LLAMA_CUDA OR LLAMA_VULKAN OR LLAMA_METAL)
+  set(LLM_LIB_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/install/gpu/addons/llama.gd)
+else()
+  set(LLM_LIB_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/install/cpu/addons/llama.gd)
+endif()
+
 if (WIN32)
   install(TARGETS ${LIB_NAME}
     RUNTIME
-    DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/addons/llama.gd/bin
+    DESTINATION ${LLM_LIB_INSTALL_DIR}/bin
   )
 else()
   install(TARGETS ${LIB_NAME}
     LIBRARY
-    DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/addons/llama.gd/bin
+    DESTINATION ${LLM_LIB_INSTALL_DIR}/bin
   )
 endif()
-install(FILES "extern/llama.gd.gdextension" DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/addons/llama.gd/)
+install(FILES "extern/llama.gd.gdextension" DESTINATION ${LLM_LIB_INSTALL_DIR})
 
 # Automatically install to demo too if exist
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/demo)
-  install(DIRECTORY "install/addons" DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/demo)
+  if(LLAMA_CUDA OR LLAMA_VULKAN OR LLAMA_METAL)
+    install(DIRECTORY "install/gpu/addons" DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/demo)
+  else()
+    install(DIRECTORY "install/cpu/addons" DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/demo)
+  endif()
 endif()
