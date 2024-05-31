@@ -1,17 +1,10 @@
-$buildFolder = "$PSScriptRoot/build"
-if (!(Test-Path $buildFolder -PathType Container)) {
-    New-Item -ItemType Directory -Force -Path $buildFolder
-}
-
-cd $buildFolder
-cmake .. `
-   -GNinja `
+cmake -B build `
+   -G Ninja `
    -DCMAKE_C_COMPILER=clang-cl `
    -DCMAKE_CXX_COMPILER=clang-cl `
-   -DLLAMA_NATIVE=OFF `
-   -DCMAKE_EXPORT_COMPILE_COMMANDS=1 `
+   -DCMAKE_EXPORT_COMPILE_COMMANDS=ON `
    -DCMAKE_BUILD_TYPE=Release `
-   -DLLAMA_VULKAN=ON 
-ninja 
-ninja install 
-cd ..
+   -DLLAMA_NATIVE=OFF
+
+cmake --build build
+cmake --install build

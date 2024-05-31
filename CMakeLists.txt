@@ -5,8 +5,9 @@ project(llama.gd)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 # What this
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+# set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 set(src_files
    "src/register_types.hpp"
@@ -58,7 +59,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
       -Wno-exit-time-destructors
       -Wno-covered-switch-default
       -Wno-global-constructors
-      "$<$<CONFIG:Debug>:-fstandalone-debug>"
+      # "$<$<CONFIG:Debug>:-fstandalone-debug>"
     )
   endif()
 endif()
