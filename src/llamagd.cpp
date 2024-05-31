@@ -443,7 +443,7 @@ namespace godot
       cleanup_worker();
       generation_mutex->unlock();
 
-      auto new_state = LlamaState::create_state(state);
+      auto new_state = LlamaState::create(state);
       call_deferred("emit_signal", "state_created", new_state);
       return new_state;
    }

@@ -24,8 +24,8 @@ namespace godot
       Array get_tokens() const;
       void set_tokens(const Array tokens);
 
-      static Ref<LlamaState> create_state(LlamaWorkerState *state);
-      static Ref<LlamaState> create_state(llama_model *model, gpt_params *params);
+      static Ref<LlamaState> create(LlamaWorkerState *state);
+      static Ref<LlamaState> create(llama_model *model, gpt_params *params);
 
    protected:
       static void _bind_methods();

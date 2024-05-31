@@ -35,14 +35,14 @@ namespace godot
       if (!llama_node->is_model_loaded())
       {
          UtilityFunctions::push_error("Model has not been loaded");
-         return LlamaState::create_state(state);
+         return LlamaState::create(state);
       }
 
       std::string src_path = string_gd_to_std(src);
       if (!file_exists(src_path))
       {
          UtilityFunctions::push_error("State file does not exist");
-         return LlamaState::create_state(state);
+         return LlamaState::create(state);
       }
 
       state->init_ctx(llama_node->get_model(), llama_node->get_params());
@@ -58,12 +58,12 @@ namespace godot
       if (!llama_state_load_file(ctx, src_path.c_str(), tokens->data(), tokens->capacity(), &token_count))
       {
          UtilityFunctions::push_error("Cannot load state file");
-         return LlamaState::create_state(state);
+         return LlamaState::create(state);
       }
       tokens->resize(token_count);
 
       state->last_decoded_token_index = token_count;
-      return LlamaState::create_state(state);
+      return LlamaState::create(state);
    }
 
 }

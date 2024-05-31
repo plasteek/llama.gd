@@ -20,13 +20,13 @@ namespace godot
       ClassDB::bind_method(D_METHOD("set_tokens"), &LlamaState::set_tokens);
       ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "tokens", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_READ_ONLY), "set_tokens", "get_tokens");
    }
-   Ref<LlamaState> LlamaState::create_state(LlamaWorkerState *initial_state)
+   Ref<LlamaState> LlamaState::create(LlamaWorkerState *initial_state)
    {
       Ref<LlamaState> new_state(memnew(LlamaState));
       new_state->worker_state = initial_state;
       return new_state;
    }
-   Ref<LlamaState> LlamaState::create_state(llama_model *model, gpt_params *params)
+   Ref<LlamaState> LlamaState::create(llama_model *model, gpt_params *params)
    {
       Ref<LlamaState> new_state(memnew(LlamaState));
       auto worker_state = new LlamaWorkerState(model, params);
