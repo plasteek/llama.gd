@@ -49,14 +49,10 @@ namespace godot
       state->init_ctx(llama_node->get_model(), llama_node->get_params());
       llama_context *ctx = state->ctx;
 
-      try
+      // Just read as much as possible because we don't really have a limit
+      if (!llama_state_load_file(ctx, src_path.c_str(), tokens, INT_MAX, &token_count))
       {
-         // Just read as much as possible because we don't really have a limit
-         llama_state_load_file(ctx, src_path.c_str(), tokens, INT_MAX, &token_count);
-      }
-      catch (std::runtime_error err)
-      {
-         gd_throw_err(err);
+         UtilityFunctions::push_error("Cannot load state_file");
          return LlamaState::create_state(state);
       }
 
