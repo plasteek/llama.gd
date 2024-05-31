@@ -75,7 +75,10 @@ void LlamaWorker::stop()
 void LlamaWorker::use_state(const LlamaWorkerState *new_state)
 {
     if (state != nullptr)
+    {
         delete state;
+        state = nullptr;
+    }
 
     // Copy the state to ensure immutability
     state = new LlamaWorkerState(*new_state);
