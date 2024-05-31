@@ -1,9 +1,9 @@
-#include "llamagd.hpp"
 #include "llama_state_file.hpp"
+#include "llamagd.hpp"
 #include "llama_worker.hpp"
 #include "llama_utils.hpp"
-#include "gd_throw.hpp"
 #include "conversion.hpp"
+#include "gd_throw.hpp"
 
 #include <stdexcept>
 #include <godot_cpp/variant/utility_functions.hpp>
@@ -57,7 +57,7 @@ namespace godot
       }
       catch (std::runtime_error err)
       {
-         gd_throw_runtime_err(err);
+         gd_throw_err(err);
          return LlamaState::create_state(state);
       }
 

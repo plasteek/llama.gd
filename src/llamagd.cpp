@@ -295,7 +295,7 @@ namespace godot
       catch (std::runtime_error err)
       {
          log("Error while predicting tokens. Aborting");
-         gd_throw_runtime_err(err);
+         gd_throw_err(err);
          call_deferred("emit_signal", "generation_failed", "Error predicting tokens");
       }
       // If the program throws return nothing
@@ -321,7 +321,7 @@ namespace godot
       catch (std::runtime_error err)
       {
          log("Error while predicting tokens. Aborting");
-         gd_throw_runtime_err(err);
+         gd_throw_err(err);
          call_deferred("emit_signal", "generation_failed", "Error predicting tokens");
       }
 

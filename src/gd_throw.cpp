@@ -6,7 +6,7 @@
 
 namespace godot
 {
-   void gd_throw_runtime_err(std::runtime_error err)
+   void gd_throw_err(std::runtime_error err)
    {
       std::string msg(err.what());
       String normalized_msg = string_std_to_gd(msg);
