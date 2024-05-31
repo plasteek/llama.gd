@@ -46,8 +46,7 @@ namespace godot
          return LlamaState::create_state(state);
       }
 
-      // TODO: change init function name
-      state->init(llama_node->get_model(), llama_node->get_params());
+      state->init_ctx(llama_node->get_model(), llama_node->get_params());
       llama_context *ctx = state->ctx;
 
       try

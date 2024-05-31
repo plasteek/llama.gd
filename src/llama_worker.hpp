@@ -25,7 +25,7 @@ public:
    int last_decoded_token_index;
    std::vector<llama_token> tokens;
 
-   void init(llama_model *model, gpt_params *locked_params);
+   void init_ctx(llama_model *model, gpt_params *locked_params);
 };
 
 class LlamaWorker

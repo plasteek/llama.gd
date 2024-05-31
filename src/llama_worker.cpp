@@ -32,13 +32,13 @@ LlamaWorkerState::LlamaWorkerState()
 }
 LlamaWorkerState::LlamaWorkerState(llama_model *model, gpt_params *params) : LlamaWorkerState()
 {
-    init(model, params);
+    init_ctx(model, params);
 }
 LlamaWorkerState::~LlamaWorkerState()
 {
     llama_free(ctx);
 }
-void LlamaWorkerState::init(llama_model *model, gpt_params *params)
+void LlamaWorkerState::init_ctx(llama_model *model, gpt_params *params)
 {
     initialized = true;
     auto cparams = llama_context_params_from_gpt_params(*params);
@@ -108,7 +108,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     }
     if (!state->initialized)
     {
-        state->init(model, params);
+        state->init_ctx(model, params);
     }
     if (state->ctx == nullptr)
     {
