@@ -218,6 +218,7 @@ namespace godot
 
       log("Freeing model and context");
       llama_free_model(model);
+      model = nullptr;
 
       function_call_mutex->unlock();
    }
