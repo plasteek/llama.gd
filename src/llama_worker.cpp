@@ -82,7 +82,6 @@ void LlamaWorker::use_state(const LlamaWorkerState *new_state)
 
     // Copy the state to ensure immutability
     state = new LlamaWorkerState(*new_state);
-    LOG("embd_inp was considered empty and bos was added: %s\n", LOG_TOKENS_TOSTR_PRETTY(new_state->ctx, new_state->tokens).c_str());
 }
 
 void LlamaWorker::insert_without_bos(std::vector<llama_token> *embd, std::vector<llama_token> *tokens, llama_token bos)

@@ -55,7 +55,6 @@ namespace godot
       tokens.resize(n_ctx);
 
       // Just read as much as possible because we don't really have a limit
-      UtilityFunctions::print(tokens.capacity());
       if (!llama_state_load_file(ctx, src_path.c_str(), tokens.data(), tokens.capacity(), &token_count))
       {
          UtilityFunctions::push_error("Cannot load state file");
