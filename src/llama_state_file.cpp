@@ -30,7 +30,6 @@ namespace godot
    {
 
       LlamaWorkerState *state = new LlamaWorkerState();
-      llama_token *tokens;
       size_t token_count;
 
       if (!llama_node->is_model_loaded())
@@ -48,24 +47,23 @@ namespace godot
 
       state->init_ctx(llama_node->get_model(), llama_node->get_params());
       llama_context *ctx = state->ctx;
+      std::vector<llama_token> tokens = state->tokens;
+
+      // Assume the capacity of the tokens to be as much as
+      // the context window as maximum
+      int n_ctx = llama_n_ctx(ctx);
+      tokens.resize(n_ctx);
 
       // Just read as much as possible because we don't really have a limit
-      if (!llama_state_load_file(ctx, src_path.c_str(), tokens, INT_MAX, &token_count))
+      UtilityFunctions::print(tokens.capacity());
+      if (!llama_state_load_file(ctx, src_path.c_str(), tokens.data(), tokens.capacity(), &token_count))
       {
-         UtilityFunctions::push_error("Cannot load state_file");
+         UtilityFunctions::push_error("Cannot load state file");
          return LlamaState::create_state(state);
       }
-
-      // Append read tokens into the state
-      for (int i = 0; i < token_count; i++)
-      {
-         auto token = tokens[i];
-         state->tokens.emplace_back(token);
-      }
+      tokens.resize(token_count);
 
       state->last_decoded_token_index = token_count;
-      std::free(tokens);
-
       return LlamaState::create_state(state);
    }
 
