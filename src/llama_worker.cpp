@@ -437,7 +437,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
 }
 
 // Initialize or cache a state for a prompt
-LlamaWorkerState *LlamaWorker::make_state(const std::string prompt)
+LlamaWorkerState *LlamaWorker::create_state_from_prompt(const std::string prompt)
 {
     auto state = new LlamaWorkerState(model, params);
     state->tokens = ::llama_tokenize(model, prompt, true, true);

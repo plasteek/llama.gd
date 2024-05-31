@@ -56,7 +56,7 @@ public:
    void stop();
    void use_state(const LlamaWorkerState *state);
    // Create a state with initial prompt
-   LlamaWorkerState *make_state(const std::string prompt);
+   LlamaWorkerState *create_state_from_prompt(const std::string prompt);
 };
 
 #endif

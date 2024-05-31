@@ -78,8 +78,8 @@ namespace godot
       void predict_sequence_async(const Array tokens);
       void stop_generation();
 
-      Ref<LlamaState> make_state(const String prompt);
-      void make_state_async(const String prompt);
+      Ref<LlamaState> create_state(const String prompt);
+      void create_state_async(const String prompt);
 
       void use_state(Ref<LlamaState> llama_state);
       void clear_state();

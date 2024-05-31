@@ -51,8 +51,8 @@ namespace godot
       ClassDB::bind_method(D_METHOD("unload_model"), &LlamaGD::unload_model);
       ClassDB::bind_method(D_METHOD("is_model_loaded"), &LlamaGD::is_model_loaded);
 
-      ClassDB::bind_method(D_METHOD("make_state", "prompt"), &LlamaGD::make_state);
-      ClassDB::bind_method(D_METHOD("make_state_async", "prompt"), &LlamaGD::make_state_async);
+      ClassDB::bind_method(D_METHOD("create_state", "prompt"), &LlamaGD::create_state);
+      ClassDB::bind_method(D_METHOD("create_state_async", "prompt"), &LlamaGD::create_state_async);
       ClassDB::bind_method(D_METHOD("use_state", "state"), &LlamaGD::use_state);
       ClassDB::bind_method(D_METHOD("clear_state"), &LlamaGD::clear_state);
 
@@ -427,18 +427,17 @@ namespace godot
       return result;
    }
 
-   void LlamaGD::make_state_async(String prompt)
+   void LlamaGD::create_state_async(String prompt)
    {
       await_generation_thread();
-      text_generation_thread->start(callable_mp(this, &LlamaGD::make_state).bind(prompt));
+      text_generation_thread->start(callable_mp(this, &LlamaGD::create_state).bind(prompt));
    }
-   Ref<LlamaState> LlamaGD::make_state(String prompt)
+   Ref<LlamaState> LlamaGD::create_state(String prompt)
    {
-      // TODO: how the hell do we inject the state to each prediction????????
       prepare_worker();
 
       log("Creating state from prompt");
-      auto state = worker->make_state(string_gd_to_std(prompt));
+      auto state = worker->create_state_from_prompt(string_gd_to_std(prompt));
 
       log("State created. Releasing worker.");
       cleanup_worker();
