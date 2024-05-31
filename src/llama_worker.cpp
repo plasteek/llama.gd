@@ -106,6 +106,10 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
         LOG("No initial state provided, creating a blank");
         state = new LlamaWorkerState(model, params);
     }
+    else
+    {
+        LOG("Initial state provided. Using state");
+    }
     if (!state->initialized)
     {
         state->init_ctx(model, params);
@@ -174,7 +178,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
 
     // construct the prompt tokens
     std::vector<llama_token> token_list;
-    auto cached_tokens = state->tokens;
+    auto state_token_list = state->tokens;
 
     // If the prompt is empty, add starting token
     if (token_list.empty())
@@ -183,7 +187,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
         LOG("embd_inp was considered empty and bos was added: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, token_list).c_str());
     }
     // append the state tokens if exist
-    if (!cached_tokens.empty())
+    if (!state_token_list.empty())
     {
         LOG("Detected state token. Embedding into the prompt\n");
         auto state_tokens = state->tokens;
