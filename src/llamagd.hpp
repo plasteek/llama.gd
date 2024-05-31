@@ -8,7 +8,6 @@
 #include <godot_cpp/classes/thread.hpp>
 #include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/variant/string.hpp>
-
 #include <godot_cpp/classes/ref.hpp>
 
 #include <common.h>
