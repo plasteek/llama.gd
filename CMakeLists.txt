@@ -36,33 +36,37 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     # Fix debug build iterator bound check bug https://stackoverflow.com/questions/74748276/visual-studio-no-displays-the-correct-length-of-stdvector
     add_definitions(-D_ITERATOR_DEBUG_LEVEL=0)
 
+    set(MSVC_COMPILE_OPTIONS
+      /vmg 
+      /vmv
+      -Wno-c++98-compat
+      -Wno-c++98-compat-pedantic
+      -Wno-double-promotion
+      -Wno-old-style-cast
+      -Wno-implicit-float-conversion
+      -Wno-unsafe-buffer-usage
+      -Wno-unused-command-line-argument
+      -Wno-newline-eof
+      -Wno-float-equal
+      -Wno-unknown-argument
+      -Wno-shorten-64-to-32
+      -Wno-sign-conversion
+      -Wno-float-conversion
+      -Wno-cast-align
+      -Wno-cast-qual
+      -Wno-extra-semi-stmt
+      -Wno-cast-function-type-strict
+      -Wno-implicit-int-conversion
+      -Wno-missing-prototypes
+      -Wno-switch-default
+      -Wno-exit-time-destructors
+      -Wno-covered-switch-default
+      -Wno-global-constructors
+    )
+
     # Disable warnings
     add_compile_options(
-      $<$<COMPILE_LANGUAGE:CXX>:/vmg>
-      $<$<COMPILE_LANGUAGE:CXX>:/vmv>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-c++98-compat>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-c++98-compat-pedantic>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-double-promotion>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-old-style-cast>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-implicit-float-conversion>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-unsafe-buffer-usage>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-command-line-argument>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-newline-eof>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-float-equal>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-unknown-argument>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-shorten-64-to-32>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-sign-conversion>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-float-conversion>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-cast-align>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-cast-qual>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-extra-semi-stmt>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-cast-function-type-strict>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-implicit-int-conversion>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-prototypes>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-switch-default>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-exit-time-destructors>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-covered-switch-default>
-      $<$<COMPILE_LANGUAGE:CXX>:-Wno-global-constructors>
+      "$<$<COMPILE_LANGUAGE:CXX>:${MSVC_COMPILE_OPTIONS}>"
     )
   endif()
 endif()
@@ -80,7 +84,7 @@ string(TOLOWER ${LIB_NAME} LIB_NAME)
 
 # Initialize library compilation
 add_library(${LIB_NAME} SHARED ${src_files})
-target_link_libraries(${LIB_NAME} PRIVATE godot-cpp common llama ggml)
+target_link_libraries(${LIB_NAME} PRIVATE godot-cpp common llama)
 
 # Install to basically compile the library I'm guessing
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/install)
