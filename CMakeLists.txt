@@ -80,7 +80,7 @@ string(TOLOWER ${LIB_NAME} LIB_NAME)
 
 # Initialize library compilation
 add_library(${LIB_NAME} SHARED ${src_files})
-target_link_libraries(${LIB_NAME} PRIVATE godot-cpp common llama)
+target_link_libraries(${LIB_NAME} PRIVATE godot-cpp common llama ggml)
 
 # Install to basically compile the library I'm guessing
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/install)
