@@ -115,6 +115,34 @@ void LlamaWorker::use_state(const LlamaWorkerState *new_state)
     state = LlamaWorkerState::clone(new_state, model, params);
 }
 
+// Initialize or cache a state for a prompt
+LlamaWorkerState *LlamaWorker::create_state_from_prompt(const std::string prompt)
+{
+    auto state = new LlamaWorkerState(model, params);
+    state->tokens = ::llama_tokenize(model, prompt, true, true);
+    // Assume we will have evaluated basically the whole prompt
+    state->last_decoded_token_index = state->tokens.size() - 1;
+
+    // New context and sampling context
+    llama_context *ctx = state->ctx;
+    std::vector<llama_token> token_list = state->tokens;
+
+    // Initialize sampling context
+    llama_sampling_context *ctx_sampling = llama_sampling_init(params->sparams);
+    for (int token_index = 0; token_index < token_list.size(); token_index++)
+    {
+        auto token = token_list[token_index];
+        llama_sampling_accept(ctx_sampling, ctx, token, false);
+    }
+
+    // Begin decoding
+    batch_decode_tokens(
+        params->n_batch,
+        ctx,
+        token_list);
+    return state;
+}
+
 void LlamaWorker::insert_without_bos(std::vector<llama_token> *embd, std::vector<llama_token> *tokens, llama_token bos)
 {
     auto new_token_start = tokens->begin();
@@ -472,32 +500,4 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
         llama_free(ctx_guidance);
 
     return generated_text;
-}
-
-// Initialize or cache a state for a prompt
-LlamaWorkerState *LlamaWorker::create_state_from_prompt(const std::string prompt)
-{
-    auto state = new LlamaWorkerState(model, params);
-    state->tokens = ::llama_tokenize(model, prompt, true, true);
-    // Assume we will have evaluated basically the whole prompt
-    state->last_decoded_token_index = state->tokens.size() - 1;
-
-    // New context and sampling context
-    llama_context *ctx = state->ctx;
-    std::vector<llama_token> token_list = state->tokens;
-
-    // Initialize sampling context
-    llama_sampling_context *ctx_sampling = llama_sampling_init(params->sparams);
-    for (int token_index = 0; token_index < token_list.size(); token_index++)
-    {
-        auto token = token_list[token_index];
-        llama_sampling_accept(ctx_sampling, ctx, token, false);
-    }
-
-    // Begin decoding
-    batch_decode_tokens(
-        params->n_batch,
-        ctx,
-        token_list);
-    return state;
 }
