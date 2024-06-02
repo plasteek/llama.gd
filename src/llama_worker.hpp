@@ -56,9 +56,10 @@ public:
    // More direct token prediction
    std::string run(std::vector<llama_token> tokens);
    void stop();
-   void use_state(const LlamaWorkerState *state);
+
    // Create a state with initial prompt
    LlamaWorkerState *create_state_from_prompt(const std::string prompt);
+   void use_state(const LlamaWorkerState *state);
 };
 
 #endif
