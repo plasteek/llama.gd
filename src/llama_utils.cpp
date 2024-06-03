@@ -35,8 +35,6 @@ void batch_decode_tokens(
              token_pos);
       }
 
-      batch.logits[0] = true; // sampling later asserts unless first value of the logits array is valid
-
       // Output the logit for the very last element
       bool is_last = batch_start + batch_count == token_size;
       if (is_last && sample_last_logit)
