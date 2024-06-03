@@ -550,15 +550,8 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     {
         ngram_levels[level].resize(window_size);
         for (int token_pos = 0; token_pos < window_size; token_pos++)
-        {
-            // there are different ways to init these tokens
-            if (0)
-                // initialize randomly from the prompt tokens
-                ngram_levels[level][token_pos] = all_tokens[1 + rand() % (all_tokens.size() - 1)];
-            else
-                // initialize with a sequence of increasing numbers
-                ngram_levels[level][token_pos] = 100 + token_pos;
-        }
+            // initialize randomly from the prompt tokens
+            ngram_levels[level][token_pos] = all_tokens[1 + rand() % (all_tokens.size() - 1)];
     }
 
     std::vector<llama_seq_id> lookahead_seq_ids;
@@ -800,16 +793,8 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
                 else
                 {
                     // If not the last level then just reinitialize em
-                    for (int i = 0; i < window_size; i++)
-                    {
-                        // there are different ways to init these tokens
-                        if (0)
-                            // random init
-                            ngram_levels[ngram_count - 2][i] = all_tokens[1 + rand() % (all_tokens.size() - 1)];
-                        else
-                            // init from the previous level
-                            ngram_levels[ngram_count - 2][i] = ngram_levels[0][i];
-                    }
+                    for (int i = 0; i < window_size; i++) // Random init
+                        ngram_levels[ngram_count - 2][i] = all_tokens[1 + rand() % (all_tokens.size() - 1)];
                 }
             }
 
