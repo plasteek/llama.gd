@@ -4,6 +4,7 @@
 #include <string>
 #include <functional>
 #include <common.h>
+#include <llama.h>
 
 // Lookahead decoding related definitions
 struct ngram_data
@@ -35,10 +36,9 @@ struct ngram_pool
 };
 struct lookahead_params
 {
-   int ngram_size;
-   int window_size;
-   int max_ngram_verify;
-   lookahead_params();
+   int ngram_size = 5;
+   int window_size = 15;
+   int max_ngram_verify = -1;
 };
 
 // C++ level LlamaWorker State object
