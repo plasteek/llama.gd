@@ -492,7 +492,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     // Input and result
     std::vector<llama_token> all_tokens = token_list;
 
-    const int window_size = lookahead_params->window_size; // @
+    const int window_size = lookahead_params->window_size; // W
     const int ngram_count = lookahead_params->ngram_size;  // N
     const int max_ngram_verify =                           // G
         lookahead_params->max_ngram_verify > -1 ? lookahead_params->max_ngram_verify : window_size;
