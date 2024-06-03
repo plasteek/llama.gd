@@ -541,7 +541,7 @@ namespace godot
 
       ClassDB::bind_method(D_METHOD("get_window_size"), &LlamaGD::get_window_size);
       ClassDB::bind_method(D_METHOD("set_window_size", "size"), &LlamaGD::set_window_size);
-      ADD_PROPERTY(PropertyInfo(Variant::INT, "window_size", PROPERTY_HINT_NONE), "set_lookahead", "get_lookahead");
+      ADD_PROPERTY(PropertyInfo(Variant::INT, "window_size", PROPERTY_HINT_NONE), "set_window_size", "get_window_size");
 
       ClassDB::bind_method(D_METHOD("get_ngram_size"), &LlamaGD::get_ngram_size);
       ClassDB::bind_method(D_METHOD("set_ngram_size", "size"), &LlamaGD::set_ngram_size);
