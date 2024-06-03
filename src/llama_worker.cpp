@@ -578,6 +578,24 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     llama_token curr_input_token = llama_sampling_sample(ctx_sampling, ctx_main, NULL, 0);
     llama_sampling_accept(ctx_sampling, ctx_main, curr_input_token, true);
 
+    // yes, this is a duplicate, exactly the same as the one in the lookahead decoding
+    // part. but this is the easiest way to get rid of the initial sampled token
+    {
+        // generated token here, if v = 0 it is the verified (accepted tokens)
+        const std::string token_str = llama_token_to_piece(ctx_main, curr_input_token);
+        bool is_bos = (curr_input_token == llama_token_bos(model));
+        bool is_eos = (curr_input_token == llama_token_eos(model));
+        if ((!is_bos || output_bos) && (!is_eos || output_eos))
+        {
+            generated_result.append(token_str);
+            on_new_token(token_str);
+        }
+        if (llama_token_is_eog(model, curr_input_token))
+            has_eos = true;
+
+        all_tokens.push_back(curr_input_token);
+    }
+
     LOG("generation start with token '%s'\n", llama_token_to_piece(ctx_main, curr_input_token).c_str());
     // prediction start
     while (true && !should_yield)
