@@ -67,10 +67,13 @@ namespace godot
    LlamaGD::LlamaGD()
    {
       params = gpt_params();
+      lparams = lookahead_params();
+
       output_bos = false;
       output_eos = true;
       backend_initialized = false;
       verbose = false;
+      lookahead = false;
 
       model = nullptr;
       worker = nullptr;
@@ -315,8 +318,16 @@ namespace godot
       std::string prediction_result = "";
       try
       {
-         log("Starting prediction");
-         prediction_result = worker->run(tokens);
+         if (lookahead)
+         {
+            log("Starting prediction (lookahead decoding)");
+            prediction_result = worker->run_with_lookahead(tokens, &lparams);
+         }
+         else
+         {
+            log("Starting prediction (autoregressive decoding - normal)");
+            prediction_result = worker->run(tokens);
+         }
       }
       catch (std::runtime_error err)
       {
@@ -522,6 +533,23 @@ namespace godot
       ClassDB::bind_method(D_METHOD("get_input_suffix"), &LlamaGD::get_input_suffix);
       ClassDB::bind_method(D_METHOD("set_input_suffix", "suffix"), &LlamaGD::set_input_suffix);
       ADD_PROPERTY(PropertyInfo(Variant::STRING, "input_suffix", PROPERTY_HINT_MULTILINE_TEXT, "Append to the end of prompt"), "set_input_suffix", "get_input_suffix");
+
+      ADD_GROUP("Lookahead Decoding (Experimental)", "");
+      ClassDB::bind_method(D_METHOD("get_lookahead"), &LlamaGD::get_lookahead);
+      ClassDB::bind_method(D_METHOD("set_lookahead", "enabled"), &LlamaGD::set_lookahead);
+      ADD_PROPERTY(PropertyInfo(Variant::BOOL, "enable_lookahead", PROPERTY_HINT_NONE), "set_lookahead", "get_lookahead");
+
+      ClassDB::bind_method(D_METHOD("get_window_size"), &LlamaGD::get_window_size);
+      ClassDB::bind_method(D_METHOD("set_window_size", "size"), &LlamaGD::set_window_size);
+      ADD_PROPERTY(PropertyInfo(Variant::INT, "lookahead_windows_size", PROPERTY_HINT_NONE), "set_lookahead", "get_lookahead");
+
+      ClassDB::bind_method(D_METHOD("get_ngram_size"), &LlamaGD::get_ngram_size);
+      ClassDB::bind_method(D_METHOD("set_ngram_size", "size"), &LlamaGD::set_ngram_size);
+      ADD_PROPERTY(PropertyInfo(Variant::INT, "lookahead_ngram_size", PROPERTY_HINT_NONE), "set_ngram_size", "get_ngram_size");
+
+      ClassDB::bind_method(D_METHOD("get_max_verify"), &LlamaGD::get_max_verify);
+      ClassDB::bind_method(D_METHOD("set_max_verify", "max"), &LlamaGD::set_max_verify);
+      ADD_PROPERTY(PropertyInfo(Variant::INT, "lookahead_max_ngram_verification", PROPERTY_HINT_NONE, "-1 for windows size"), "set_max_verify", "set_max_verify");
 
       ADD_GROUP("Classifier-Free Guidance (CFG)", "");
       ClassDB::bind_method(D_METHOD("get_cfg_scale"), &LlamaGD::get_cfg_scale);
@@ -917,5 +945,41 @@ namespace godot
    void LlamaGD::set_negative_prompt(const String prompt)
    {
       params.sparams.cfg_negative_prompt = string_gd_to_std(prompt);
+   }
+
+   bool LlamaGD::get_lookahead() const
+   {
+      return lookahead;
+   }
+   void LlamaGD::set_lookahead(const bool enabled)
+   {
+      lookahead = enabled;
+   }
+
+   int LlamaGD::get_window_size() const
+   {
+      return lparams.window_size;
+   }
+   void LlamaGD::set_window_size(const int size)
+   {
+      lparams.window_size = size;
+   }
+
+   int LlamaGD::get_ngram_size() const
+   {
+      return lparams.ngram_size;
+   }
+   void LlamaGD::set_ngram_size(const int size)
+   {
+      lparams.ngram_size = size;
+   }
+
+   int LlamaGD::get_max_verify() const
+   {
+      return lparams.max_ngram_verify;
+   }
+   void LlamaGD::set_max_verify(const int max_verify)
+   {
+      lparams.max_ngram_verify = max_verify;
    }
 }

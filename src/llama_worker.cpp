@@ -509,7 +509,8 @@ lookahead_params::lookahead_params()
 {
     ngram_size = 5;
     window_size = 15;
-    max_ngram_verify = window_size;
+    // -1 for window_size
+    max_ngram_verify = -1;
 }
 
 std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_tokens, lookahead_params *lookahead_params)
@@ -521,9 +522,11 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     std::vector<llama_token> all_tokens = input_tokens;
     llama_context *ctx_main = state->ctx;
 
-    const int max_ngram_verify = lookahead_params->max_ngram_verify;
     const int window_size = lookahead_params->window_size;
     const int ngram_count = lookahead_params->ngram_size;
+    const int max_ngram_verify =
+        // default to windows size (see lookahead params)
+        lookahead_params->max_ngram_verify <= -1 ? lookahead_params->max_ngram_verify : window_size;
 
     const int batch_size = params->n_batch;
     const int input_size = input_tokens.size();

@@ -26,6 +26,7 @@ namespace godot
       Ref<Thread> text_generation_thread;
       Ref<Thread> model_loader_thread;
       gpt_params params;
+      lookahead_params lparams;
 
       llama_model *model;
       LlamaWorker *worker;
@@ -34,6 +35,7 @@ namespace godot
       bool output_bos;
       bool output_eos;
       bool backend_initialized;
+      bool lookahead;
 
       void log(const std::string msg);
 
@@ -170,6 +172,18 @@ namespace godot
 
       String get_negative_prompt() const;
       void set_negative_prompt(const String prompt);
+
+      bool get_lookahead() const;
+      void set_lookahead(const bool enabled);
+
+      int get_window_size() const;
+      void set_window_size(const int size);
+
+      int get_ngram_size() const;
+      void set_ngram_size(const int size);
+
+      int get_max_verify() const;
+      void set_max_verify(const int max_verify);
    };
 }
 
