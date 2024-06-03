@@ -4,7 +4,7 @@
 #include <llama.h>
 #include <common.h>
 
-void batch_decode_tokens(int batch_size, llama_context *ctx, std::vector<llama_token> tokens, int start_index = 0);
+void batch_decode_tokens(int batch_size, llama_context *ctx, std::vector<llama_token> tokens, int start_index = 0, bool sample_last_logit = true);
 
 bool file_exists(const std::string path);
 bool file_is_empty(const std::string path);
