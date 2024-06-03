@@ -50,6 +50,34 @@ void batch_decode_tokens(
    }
 }
 
+void insert_without_bos(std::vector<llama_token> *embd, std::vector<llama_token> *tokens, llama_token bos)
+{
+   auto new_token_start = tokens->begin();
+   if (tokens->front() == bos)
+      ++new_token_start;
+   embd->insert(embd->end(), new_token_start, tokens->end());
+}
+
+std::vector<llama_token> construct_token_list(
+    std::vector<llama_token> *state_token_list,
+    std::vector<llama_token> *input_tokens,
+    llama_token bos_token)
+{
+   std::vector<llama_token> token_list;
+   // If the prompt is empty, add starting token
+   token_list.emplace_back(bos_token);
+   // append the state tokens if exist
+   if (!state_token_list->empty())
+   {
+      LOG("Detected state token. Embedding into the prompt\n");
+      insert_without_bos(&token_list, state_token_list, bos_token);
+   }
+   // append the actual user tokens
+   insert_without_bos(&token_list, &*input_tokens, bos_token);
+
+   return token_list;
+}
+
 bool file_exists(const std::string path)
 {
    std::ifstream f(path.c_str());
