@@ -5,10 +5,41 @@
 #include <functional>
 #include <common.h>
 
-// Runner steps:
-// 1. Setup the runner parameters
-// 2. Call the `.run` function to being generation
-// 3. Cleanup non-parameter variables
+// Lookahead decoding related definitions
+struct ngram_data
+{
+   bool active = false;
+   llama_seq_id seq_id = -1;
+   std::vector<int> batch_index;
+   std::vector<llama_token> tokens;
+};
+struct ngram_pool
+{
+   ngram_pool(int n_vocab, int N, int G)
+   {
+      // This is basically the logits
+      head.resize(n_vocab);
+      count.resize(n_vocab);
+      tokens.resize(n_vocab * G * (N - 1));
+   }
+
+   int n_total = 0;
+   std::vector<int> count;
+   // Head toe the actual tokens?
+   std::vector<int> head;
+   // [n_vocab][G][N - 1]
+   // for each token of the vocab, keep a ring-buffer of capacity G of n-grams of size N - 1
+   // NOTE: this means this is a "3d" array where each "head" has the size of G (for "lookahead")
+   // and the count of n - 1 or so
+   std::vector<llama_token> tokens;
+};
+struct lookahead_params
+{
+   int ngram_size;
+   int window_size;
+   int max_ngram_verify;
+   lookahead_params();
+};
 
 // C++ level LlamaWorker State object
 class LlamaWorkerState
@@ -62,41 +93,6 @@ public:
    // Create a state with initial prompt
    LlamaWorkerState *create_state_from_prompt(const std::string prompt);
    void use_state(const LlamaWorkerState *state);
-};
-
-struct ngram_data
-{
-   bool active = false;
-   llama_seq_id seq_id = -1;
-   std::vector<int> batch_index;
-   std::vector<llama_token> tokens;
-};
-struct ngram_pool
-{
-   ngram_pool(int n_vocab, int N, int G)
-   {
-      // This is basically the logits
-      head.resize(n_vocab);
-      count.resize(n_vocab);
-      tokens.resize(n_vocab * G * (N - 1));
-   }
-
-   int n_total = 0;
-   std::vector<int> count;
-   // Head toe the actual tokens?
-   std::vector<int> head;
-   // [n_vocab][G][N - 1]
-   // for each token of the vocab, keep a ring-buffer of capacity G of n-grams of size N - 1
-   // NOTE: this means this is a "3d" array where each "head" has the size of G (for "lookahead")
-   // and the count of n - 1 or so
-   std::vector<llama_token> tokens;
-};
-struct lookahead_params
-{
-   int ngram_size;
-   int window_size;
-   int max_ngram_verify;
-   lookahead_params();
 };
 
 #endif
