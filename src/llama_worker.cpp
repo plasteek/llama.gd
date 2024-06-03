@@ -28,7 +28,8 @@ LlamaWorkerState::LlamaWorkerState()
 {
     initialized = false;
     ctx = nullptr;
-    last_decoded_token_index = 0;
+    // Has not encoded anything yet
+    last_decoded_token_index = -1;
 }
 LlamaWorkerState::LlamaWorkerState(llama_model *model, gpt_params *params) : LlamaWorkerState()
 {
