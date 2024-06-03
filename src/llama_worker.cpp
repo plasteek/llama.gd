@@ -525,7 +525,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     // seq_id [1, W]         : tokens from the past N - 1 Jacobi iterations (used for generation I think)
     // seq_id [W + 1, W + G] : verification n-grams
     // therefore this batch is seq with id of zero to represent the input
-    batch_decode_tokens(batch_size, ctx_main, token_list, state->last_decoded_token_index, true);
+    batch_decode_tokens(batch_size, ctx_main, token_list, state->last_decoded_token_index, false);
 
     // Copy the decoded result
     for (int seq_id = 1; seq_id < total_branch_size; ++seq_id)
