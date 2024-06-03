@@ -297,7 +297,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
         ctx_main,
         token_list,
         // Decode from the new token and skip all processed token
-        state->last_decoded_token_index);
+        state->last_decoded_token_index + 1);
 
     struct llama_sampling_context *ctx_sampling = llama_sampling_init(sparams);
     if (!ctx_sampling)
