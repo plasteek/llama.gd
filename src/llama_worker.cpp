@@ -431,9 +431,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
 
         LOG("n_past = %d\n", token_pos);
         if ((*params).n_print > 0 && token_pos % (*params).n_print == 0)
-        {
             LOG_TEE("\n\033[31mTokens consumed so far = %d / %d \033[0m\n", token_pos, n_ctx);
-        }
 
         // Handle context extension here
         if (ga_n == 1)
