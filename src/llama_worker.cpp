@@ -801,7 +801,11 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
                     // TODO: should we turn this into like a formula
                     const int idx = current_input_token * (ngram_count - 1) * max_ngram_verify + i * (ngram_count - 1);
                     for (int j = 0; j < ngram_count - 1; j++)
-                        LOG("%s", LOG_TOKENS_TOSTR_PRETTY(ctx_main, pool.tokens[idx + j]).c_str());
+                    {
+                        const std::string token_str = llama_token_to_piece(ctx_main, pool.tokens[idx + j]);
+                        printf("%s", token_str.c_str());
+                    }
+
                     LOG("\n");
                 }
             }
