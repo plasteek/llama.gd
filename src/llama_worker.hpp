@@ -71,7 +71,6 @@ private:
    // It looks weird but we want so that godot can access
    // the object to be used
    LlamaWorkerState *state;
-   void insert_without_bos(std::vector<llama_token> *embd, std::vector<llama_token> *tokens, llama_token bos);
    void ensure_state_initialized();
 
 public:

@@ -143,14 +143,6 @@ LlamaWorkerState *LlamaWorker::create_state_from_prompt(const std::string prompt
     return state;
 }
 
-void LlamaWorker::insert_without_bos(std::vector<llama_token> *embd, std::vector<llama_token> *tokens, llama_token bos)
-{
-    auto new_token_start = tokens->begin();
-    if (tokens->front() == llama_token_bos(model))
-        ++new_token_start;
-    embd->insert(embd->end(), new_token_start, tokens->end());
-}
-
 void LlamaWorker::ensure_state_initialized()
 {
     // Check state
@@ -242,24 +234,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     LOG("add_bos: %d\n", add_bos);
 
     // construct the prompt tokens
-    std::vector<llama_token> token_list;
-    auto state_token_list = state->tokens;
-
-    // If the prompt is empty, add starting token
-    if (token_list.empty())
-    {
-        token_list.emplace_back(llama_token_bos(model));
-        LOG("embd_inp was considered empty and bos was added: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, token_list).c_str());
-    }
-    // append the state tokens if exist
-    if (!state_token_list.empty())
-    {
-        LOG("Detected state token. Embedding into the prompt\n");
-        auto state_tokens = state->tokens;
-        insert_without_bos(&token_list, &state_tokens, llama_token_bos(model));
-    }
-    // append the actual user tokens
-    insert_without_bos(&token_list, &input_tokens, llama_token_bos(model));
+    std::vector<llama_token> token_list = construct_token_list(&state->tokens, &input_tokens, llama_token_bos(model));
 
     // Note: (n_ctx - 4) here is to match the logic for command line prompt handling via
     // --prompt or --file which uses the same value.
@@ -322,7 +297,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
         ctx_main,
         token_list,
         // Decode from the new token and skip all processed token
-        state->last_decoded_token_index + 1);
+        state->last_decoded_token_index);
 
     struct llama_sampling_context *ctx_sampling = llama_sampling_init(sparams);
     if (!ctx_sampling)
@@ -507,20 +482,26 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
 {
     LOG("Worker Start\n");
     std::string generated_result = "";
-    ensure_state_initialized();
 
-    // Input and result
-    std::vector<llama_token> all_tokens = input_tokens;
+    ensure_state_initialized();
     llama_context *ctx_main = state->ctx;
 
-    const int window_size = lookahead_params->window_size;
-    const int ngram_count = lookahead_params->ngram_size;
-    const int max_ngram_verify =
-        // default to windows size (see lookahead params)
+    // Construct the full token first
+    std::vector<llama_token> token_list = construct_token_list(&state->tokens, &input_tokens, llama_token_bos(model));
+    LOG("tokens: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, token_list).c_str());
+
+    // Input and result
+    std::vector<llama_token> all_tokens = token_list;
+
+    const int window_size = lookahead_params->window_size; // @
+    const int ngram_count = lookahead_params->ngram_size;  // N
+    const int max_ngram_verify =                           // G
         lookahead_params->max_ngram_verify > -1 ? lookahead_params->max_ngram_verify : window_size;
 
     const int batch_size = params->n_batch;
-    const int input_size = input_tokens.size();
+    const int input_size = token_list.size();
+
+    const int max_tokens = params->n_predict;
     const int max_context_size = llama_n_ctx(ctx_main);
     const int max_token_list_size = max_context_size - 4;
 
@@ -528,7 +509,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     {
         throw std::runtime_error(
             std::string(__func__) + ": error: prompt too long (" +
-            std::to_string(input_tokens.size()) + " tokens, " +
+            std::to_string(token_list.size()) + " tokens, " +
             std::to_string(max_token_list_size) + "max" + ")");
     }
 
@@ -537,18 +518,15 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     // How much sequence we need for lookahead + verification (will be used in batch)
     const int total_branch_size = window_size + max_ngram_verify + 1;
 
-    LOG("Processing inputs\n");
     // evaluate the prompt and copy the evaluation to other sequences for batch processing
-    // The logit is not evaluated for some reason?
     const auto t_enc_start = ggml_time_us();
 
-    // TODO: need to know how to use the state instead of creating a separate ctx_main?
     // for each decoded batch, we have at most W + G + 1 distinct sequences:
     // seq_id == 0           : the current input token
     // seq_id [1, W]         : tokens from the past N - 1 Jacobi iterations (used for generation I think)
     // seq_id [W + 1, W + G] : verification n-grams
     // therefore this batch is seq with id of zero to represent the input
-    batch_decode_tokens(batch_size, ctx_main, input_tokens, state->last_decoded_token_index + 1);
+    batch_decode_tokens(batch_size, ctx_main, token_list, state->last_decoded_token_index, true);
 
     // Copy the decoded result
     for (int seq_id = 1; seq_id < total_branch_size; ++seq_id)
@@ -557,19 +535,6 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     const auto t_enc_end = ggml_time_us();
     LOG_TEE("encoded %4d tokens in %8.3f seconds, speed: %8.3f t/s\n", input_size, (t_enc_end - t_enc_start) / 1e6f, input_size / ((t_enc_end - t_enc_start) / 1e6f));
 
-    int total_predicted_tokens = 0;
-    int total_accepted_tokens = 0;
-    int n_past = input_tokens.size();
-
-    // used to determine end of generation
-    bool has_eos = false;
-
-    // prepare sampling
-    LOG("initializing sampling context\n");
-    const int context_size = params->n_ctx;
-    llama_batch batch = llama_batch_init(context_size, 0, total_branch_size);
-    llama_sampling_context *ctx_sampling = llama_sampling_init(params->sparams);
-
     // Verification n-grams
     LOG("initializing verification branch with %d ngrams\n", max_ngram_verify);
     std::vector<ngram_data> pending_verification_ngrams(max_ngram_verify);
@@ -577,54 +542,53 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     // These are the lookahead branch (windows_size + (ngram_size - 1))
     // Tokens for the past N - 1 Jacobi iterations
     std::vector<llama_token> last_level(window_size);
-    // This is all ngram windows but NOT the last windows
     std::vector<std::vector<llama_token>> ngram_levels(ngram_count - 1);
 
-    LOG("initializing ngram levels\n");
     // NOTE: because we are doing this in batch, ngram_count is counted VERTICALLY
     // Initial lookahead windows is empty, but we have to fill it
     // for parallel batch processing
-    for (int j = 0; j < ngram_count - 1; j++)
+    for (int level = 0; level < ngram_count - 1; level++)
     {
-        ngram_levels[j].resize(window_size);
-        for (int i = 0; i < window_size; i++)
+        ngram_levels[level].resize(window_size);
+        for (int token_pos = 0; token_pos < window_size; token_pos++)
         {
             // there are different ways to init these tokens
             if (0)
                 // initialize randomly from the prompt tokens
-                ngram_levels[j][i] = all_tokens[1 + rand() % (all_tokens.size() - 1)];
+                ngram_levels[level][token_pos] = all_tokens[1 + rand() % (all_tokens.size() - 1)];
             else
                 // initialize with a sequence of increasing numbers
-                ngram_levels[j][i] = 100 + i;
+                ngram_levels[level][token_pos] = 100 + token_pos;
         }
     }
 
-    LOG("Initializing lookahead sequences\n");
     std::vector<llama_seq_id> lookahead_seq_ids;
     std::vector<llama_seq_id> all_seq_ids(total_branch_size);
     for (int i = 0; i < total_branch_size; i++)
         all_seq_ids[i] = i;
     ngram_pool pool(llama_n_vocab(model), ngram_count, max_ngram_verify);
 
-    // for debugging
-    const bool dump_kv_cache = params->dump_kv_cache;
-    struct llama_kv_cache_view kvc_view = llama_kv_cache_view_init(ctx_main, total_branch_size);
     const auto t_dec_start = ggml_time_us();
 
-    // sample first token as input
-    llama_token current_input_token = llama_sampling_sample(ctx_sampling, ctx_main, NULL, 0);
-    llama_sampling_accept(ctx_sampling, ctx_main, current_input_token, true);
+    // prepare sampling
+    const int context_size = params->n_ctx;
+    llama_batch batch = llama_batch_init(context_size, 0, total_branch_size);
+    llama_sampling_context *ctx_sampling = llama_sampling_init(params->sparams);
 
-    LOG("Generation start\n");
+    int total_predicted_tokens = 0;
+    int total_accepted_tokens = 0;
+    int n_past = token_list.size();
+    // used to determine end of generation
+    bool has_eos = false;
+
+    // sample first token as input
+    llama_token curr_input_token = llama_sampling_sample(ctx_sampling, ctx_main, NULL, 0);
+    llama_sampling_accept(ctx_sampling, ctx_main, curr_input_token, true);
+
+    LOG("generation start with token '%s'\n", llama_token_to_piece(ctx_main, curr_input_token).c_str());
     // prediction start
     while (true && !should_yield)
     {
-        if (dump_kv_cache)
-        {
-            llama_kv_cache_view_update(ctx_main, &kvc_view);
-            llama_kv_cache_dump_view_seqs(kvc_view, 40);
-        }
-
         // build the mask from https://lmsys.org/blog/2023-11-21-lookahead-decoding/
         //
         // Example for W = 5, N = 4, G = 2:
@@ -653,132 +617,128 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
 
         llama_batch_clear(batch);
         // current token - first token of the first level (input)
-        llama_batch_add(batch, current_input_token, n_past, all_seq_ids, true);
+        llama_batch_add(batch, curr_input_token, n_past, all_seq_ids, true);
 
-        LOG("looking up tokens with similar input\n");
         // ngrams starting with `input_token`
-        const int input_ngrams_count = pool.count[current_input_token];
+        const int input_ngrams_count = pool.count[curr_input_token];
         pending_verification_ngrams.resize(input_ngrams_count);
 
-        LOG("preparing verification branch\n");
         // verification n-grams - queue this before the lookahead tokens for less KV cache fragmentation
-        for (int g = 0; g < input_ngrams_count; g++) // Initialize the windows
+        for (int token_pos = 0; token_pos < input_ngrams_count; token_pos++) // Initialize the windows
         {
-            auto ngram_verification = pending_verification_ngrams[g];
+            auto ngram_verification = pending_verification_ngrams[token_pos];
             ngram_verification.active = true;
             ngram_verification.tokens.resize(ngram_count);
             ngram_verification.batch_index.resize(ngram_count);
-            ngram_verification.seq_id = window_size + 1 + g; // see earlier comments about seq_id allocation
-            ngram_verification.batch_index[0] = 0;           // labelled zero to indicate current input (see blog)
-            ngram_verification.tokens[0] = current_input_token;
+            ngram_verification.seq_id = window_size + 1 + token_pos; // see earlier comments about seq_id allocation
+            ngram_verification.batch_index[0] = 0;                   // labelled zero to indicate current input (see blog)
+            ngram_verification.tokens[0] = curr_input_token;
         }
-        // NOTE: level here because we are filling per token (I think), so we have to fill in the sequence manually
-        // loop through each ngram windows and fill the ngrams with an n-th ngram level
+        // loop through each windows and fill the ngrams with an n-th level token
         for (int level = 0; level < ngram_count - 1; level++)
             // iterate over each potential ngrams
-            for (int g = 0; g < input_ngrams_count; g++)
+            for (int token_pos = 0; token_pos < input_ngrams_count; token_pos++)
             {
                 const int idx =
                     // calculate the index at the ring buffer, see the ring buffer comment
-                    current_input_token * (ngram_count - 1) * max_ngram_verify +
-                    g * (ngram_count - 1); // because this is the g-th "window"
+                    curr_input_token * (ngram_count - 1) * max_ngram_verify +
+                    token_pos * (ngram_count - 1); // because this is the g-th "window"
                 const llama_token t = pool.tokens[idx + level];
 
                 // NOTE: +1 to skip the input
-                auto verification_window = pending_verification_ngrams[g];
+                auto verification_window = pending_verification_ngrams[token_pos];
                 // Distribute the tokens into their appropiate batch/window
                 verification_window.tokens[level + 1] = t;
                 verification_window.batch_index[level + 1] = batch.n_tokens;
 
-                llama_batch_add(batch, t, n_past + level + 1, {window_size + 1 + g}, true);
+                llama_batch_add(batch, t, n_past + level + 1, {window_size + 1 + token_pos}, true);
             }
 
         // fill the remaining W - 1 tokens for the first level
         // exclude 1 because of the input token already allocated
-        LOG("filling the rest of W - 1 tokens\n");
         for (int token_pos = 1; token_pos < window_size; token_pos++)
         {
-            auto affected_windows_size = window_size - token_pos;
-            lookahead_seq_ids.resize(affected_windows_size);
+            // The reach the current token has
+            auto max_seq_id = window_size - token_pos;
+            lookahead_seq_ids.resize(max_seq_id);
             // update sequence ids for each respective token on each window
-            for (int j = 0; j < affected_windows_size; j++)
-                lookahead_seq_ids[j] = token_pos + j + 1;
+            for (int seq_id = 0; seq_id < max_seq_id; seq_id++)
+                lookahead_seq_ids[seq_id] = token_pos + seq_id + 1;
             /// Queue the token from input (as basically "input")
             llama_batch_add(batch, ngram_levels[0][token_pos], n_past + token_pos, lookahead_seq_ids, false);
         }
 
         // fill the rest of the levels (queue the lookahead)
         // NOTE: window == ngram_count - 2 to enable to logit the last token of each ngrams
-        LOG("filling the rest of the levels\n");
         for (int level = 1; level < ngram_count - 1; level++)
             for (int token_pos = 0; token_pos < window_size; token_pos++)
                 llama_batch_add(batch, ngram_levels[level][token_pos], n_past + level + token_pos, {token_pos + 1}, level == ngram_count - 2);
 
-        if (llama_decode(ctx_main, batch))
+        if (llama_decode(ctx_main, batch) != 0)
         {
             LOG_TEE("%s : failed to eval, increase kv cache\n", __func__);
             throw std::runtime_error(std::string(__func__) + ": failed to eval increase kv_cache");
         }
 
         int seq_id_best = 0;
+        // Traverse through the resulting decoded ngrams one step at a time
         for (int level = 0; level < ngram_count; ++level)
         {
-            int sampling_index = 0;
-            // try to search for a matching ngram
+            int batch_index = 0;
+            // try to search for a matching ngram for lookahead windows
             // if no active ngrams are left, it means the sampled token does not pass the verification
-            if (level > 0) // for lookahead windows (excluding input)
+            if (level > 0)
             {
-                for (int g = 0; g < pending_verification_ngrams.size(); g++)
+                for (int token_pos = 0; token_pos < pending_verification_ngrams.size(); token_pos++)
                 {
-                    auto verification_level = pending_verification_ngrams[g];
+                    auto verification_win = pending_verification_ngrams[token_pos];
                     // Accept token (already passed the verification)
-                    if (verification_level.active)
+                    if (verification_win.active)
                     {
-                        sampling_index = verification_level.batch_index[level];
-                        seq_id_best = verification_level.seq_id;
+                        batch_index = verification_win.batch_index[level];
+                        seq_id_best = verification_win.seq_id;
                         ++total_accepted_tokens;
                         break;
                     }
                 }
                 // no more matches -> create a new batch
-                if (sampling_index == 0)
+                if (batch_index == 0)
                     break;
             }
 
             // sample the next token
-            LOG("sampling new token\n");
-            current_input_token = llama_sampling_sample(ctx_sampling, ctx_main, NULL, sampling_index);
-            llama_sampling_accept(ctx_sampling, ctx_main, current_input_token, true);
+            curr_input_token = llama_sampling_sample(ctx_sampling, ctx_main, NULL, batch_index);
+            llama_sampling_accept(ctx_sampling, ctx_main, curr_input_token, true);
+            LOG("sampled token: '%s'\n", llama_token_to_piece(ctx_main, curr_input_token, true).c_str());
 
             {
                 // generated token here, if v = 0 it is the verified (accepted tokens)
-                const std::string token_str = llama_token_to_piece(ctx_main, current_input_token);
-                bool is_bos = (current_input_token == llama_token_bos(model));
-                bool is_eos = (current_input_token == llama_token_eos(model));
+                const std::string token_str = llama_token_to_piece(ctx_main, curr_input_token);
+                bool is_bos = (curr_input_token == llama_token_bos(model));
+                bool is_eos = (curr_input_token == llama_token_eos(model));
 
                 if ((!is_bos || output_bos) && (!is_eos || output_eos))
                 {
                     generated_result.append(token_str);
                     on_new_token(token_str);
                 }
-                if (llama_token_is_eog(model, current_input_token))
+                if (llama_token_is_eog(model, curr_input_token))
                     has_eos = true;
 
-                all_tokens.push_back(current_input_token);
+                all_tokens.push_back(curr_input_token);
             }
 
             ++total_predicted_tokens;
             ++n_past;
 
             // end of generation
-            if ((max_token_list_size >= 0 && total_predicted_tokens > max_token_list_size) || has_eos)
+            if ((max_tokens >= 0 && total_predicted_tokens > max_tokens) || has_eos)
                 break;
 
             // verify across active n-grams
-            LOG("verifying active n-grams\n");
-            for (int g = 0; g < pending_verification_ngrams.size(); g++)
+            for (int win_index = 0; win_index < pending_verification_ngrams.size(); win_index++)
             {
-                auto verification_window = pending_verification_ngrams[g];
+                auto verification_window = pending_verification_ngrams[win_index];
                 if (verification_window.active)
                 {
                     // If the window is already too old
@@ -786,28 +746,29 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
                         verification_window.active = false;
                     // (check 1 token forward since we validate future token future token)
                     // see the figure for more info
-                    else if (current_input_token != verification_window.tokens[level + 1])
+                    else if (curr_input_token != verification_window.tokens[level + 1])
                         verification_window.active = false;
                 }
             }
 
             // print known n-grams starting with token id (debug)
+            LOG("current level: %d\n", level);
             if (level == 0)
             {
-                if (pool.count[current_input_token] > 0)
+                if (pool.count[curr_input_token] > 0)
                     LOG(
                         "\n - %d n-grams starting with '%s'\n",
-                        pool.count[current_input_token],
-                        llama_token_to_piece(ctx_main, current_input_token).c_str());
-                for (int i = 0; i < pool.count[current_input_token]; i++)
+                        pool.count[curr_input_token],
+                        llama_token_to_piece(ctx_main, curr_input_token).c_str());
+                for (int i = 0; i < pool.count[curr_input_token]; i++)
                 {
                     LOG("   - ngram %2d: ", i);
                     // TODO: should we turn this into like a formula
-                    const int idx = current_input_token * (ngram_count - 1) * max_ngram_verify + i * (ngram_count - 1);
+                    const int idx = curr_input_token * (ngram_count - 1) * max_ngram_verify + i * (ngram_count - 1);
                     for (int j = 0; j < ngram_count - 1; j++)
                     {
                         const std::string token_str = llama_token_to_piece(ctx_main, pool.tokens[idx + j]);
-                        printf("%s", token_str.c_str());
+                        LOG("%s", token_str.c_str());
                     }
 
                     LOG("\n");
@@ -818,22 +779,25 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
             LOG("updating lookahead tokens\n");
             {
                 // move the 'last" window to the last window
-                for (int i = 0; i < window_size; i++)
-                    last_level[i] = ngram_levels[0][i];
+                for (int token_pos = 0; token_pos < window_size; token_pos++)
+                    last_level[token_pos] = ngram_levels[0][token_pos];
 
-                // shift the windows back (like history)
-                for (int j = 0; j < ngram_count - 2; j++)
-                    ngram_levels[j] = ngram_levels[j + 1];
+                // shift the windows back by 1 level each
+                // exclude the last one because we are shifting it (last element = ngram_count - 1)
+                for (int level = 0; level < ngram_count - 2; level++)
+                    ngram_levels[level] = ngram_levels[level + 1];
 
-                // sample from the last level
-                // https: // github.com/hao-ai-lab/LookaheadDecoding/issues/14#issuecomment-1826198518
+                // sample from the last level (ngram_count - 2)
+                // ngram_count - 1 = last element + win_size
                 if (level == 0)
                 {
-                    for (int i = 0; i < window_size; i++)
-                        ngram_levels[window_size - 2][i] = llama_sampling_sample(
-                            ctx_sampling, ctx_main, NULL,
-                            pending_verification_ngrams.size() * (ngram_count - 1) +
-                                window_size * (ngram_count - 2) + i);
+                    for (int token_pos = 0; token_pos < window_size; token_pos++)
+                    {
+                        auto idx = pending_verification_ngrams.size() * (ngram_count - 1) +
+                                   window_size * (ngram_count - 2) + token_pos;
+                        ngram_levels[ngram_count - 2][token_pos] =
+                            llama_sampling_sample(ctx_sampling, ctx_main, NULL, idx);
+                    }
                 }
                 else
                 {
@@ -849,6 +813,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
                             ngram_levels[ngram_count - 2][i] = ngram_levels[0][i];
                     }
                 }
+                LOG("I PASS NED?\n");
             }
 
             // update ngram pool
@@ -864,25 +829,25 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
                 for (int token_pos = 0; token_pos < window_size; ++token_pos)
                 {
                     const int first_token = last_level[token_pos]; // first token of the n-gram
-                    for (int window = 0; window < ngram_count - 1; ++window)
-                        ngram[window] = ngram_levels[window][token_pos];
+                    for (int level = 0; level < ngram_count - 1; ++level)
+                        ngram[level] = ngram_levels[level][token_pos];
 
                     // filter-out repeating n-grams
                     bool is_unique = true;
-                    for (int k = 0; k < pool.count[first_token]; ++k)
+                    for (int token_pos = 0; token_pos < pool.count[first_token]; ++token_pos)
                     {
                         const int idx =
-                            first_token * (ngram_count - 1) * max_ngram_verify + k * (ngram_count - 1);
+                            first_token * (ngram_count - 1) * max_ngram_verify + token_pos * (ngram_count - 1);
 
+                        // Check here
                         bool is_match = true;
-                        for (int j = 0; j < ngram_count - 1; ++j)
-                        {
-                            if (pool.tokens[idx + j] != ngram[j])
+                        for (int token_pos = 0; token_pos < ngram_count - 1; ++token_pos)
+                            if (pool.tokens[idx + token_pos] != ngram[token_pos])
                             {
                                 is_match = false;
                                 break;
                             }
-                        }
+
                         if (is_match)
                         {
                             is_unique = false;
@@ -895,22 +860,22 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
                     const int head = pool.head[first_token];
                     const int idx = first_token * (ngram_count - 1) * max_ngram_verify + head * (ngram_count - 1);
 
-                    // Copy over the ngram to the pool after we figure it out
-                    for (int i = 0; i < ngram_count - 1; i++)
-                        pool.tokens[idx + i] = ngram[i];
+                    // Copy the tokens in the ngrams we build to the pool
+                    for (int token_pos = 0; token_pos < ngram_count - 1; token_pos++)
+                        pool.tokens[idx + token_pos] = ngram[token_pos];
 
-                    pool.count[first_token] = std::min(ngram_count, pool.count[first_token] + 1);
-                    pool.head[first_token] = (head + 1) % ngram_count;
+                    // Record the start index (head)
+                    pool.count[first_token] = std::min(max_ngram_verify, pool.count[first_token] + 1);
+                    pool.head[first_token] = (head + 1) % max_ngram_verify;
                     pool.n_total++;
                 }
             }
 
-            if ((max_token_list_size >= 0 && total_predicted_tokens > max_token_list_size) || has_eos)
+            if ((max_tokens >= 0 && total_predicted_tokens > max_tokens) || has_eos)
                 break;
 
             // KV cache management
             // if no verification token matched, we simply remove all cells from this batch -> no fragmentation
-            LOG("cleaning kv_cache\n");
             llama_kv_cache_seq_rm(ctx_main, -1, n_past, -1);
             if (seq_id_best != -1)
             {
@@ -941,7 +906,6 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     llama_print_timings(ctx_main);
 
     // Free only the local variables (like the model should not be freed)
-    llama_kv_cache_view_free(&kvc_view);
     llama_sampling_free(ctx_sampling);
     llama_batch_free(batch);
 
