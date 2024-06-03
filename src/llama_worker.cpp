@@ -724,8 +724,12 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
             ++n_past;
 
             // end of generation
+            LOG("max: %d, predicted: %d\n", max_tokens, total_predicted_tokens);
             if ((max_tokens >= 0 && total_predicted_tokens > max_tokens) || has_eos)
+            {
+                LOG("max has been reached, aborting\n");
                 break;
+            }
 
             // verify across active n-grams
             for (int win_index = 0; win_index < pending_verification_ngrams.size(); win_index++)
@@ -851,25 +855,29 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
                     pool.n_total++;
                 }
             }
+        }
 
-            if ((max_tokens >= 0 && total_predicted_tokens > max_tokens) || has_eos)
-                break;
+        if ((max_tokens >= 0 && total_predicted_tokens > max_tokens) || has_eos)
+        {
+            LOG("max token predicted has been reached. generation completed\n");
+            break;
+        }
 
-            // KV cache management
-            // if no verification token matched, we simply remove all cells from this batch -> no fragmentation
-            llama_kv_cache_seq_rm(ctx_main, -1, n_past, -1);
-            if (seq_id_best != 0)
-            {
-                // if a verification token matched, we keep the best sequence and remove the rest
-                // this leads to some KV cache fragmentation
-                llama_kv_cache_seq_keep(ctx_main, seq_id_best);
-                llama_kv_cache_seq_cp(ctx_main, seq_id_best, 0, -1, -1);
-                llama_kv_cache_seq_rm(ctx_main, seq_id_best, -1, -1);
-                for (int s = 1; s < total_branch_size; ++s)
-                    llama_kv_cache_seq_cp(ctx_main, 0, s, -1, -1);
-            }
+        // KV cache management
+        // if no verification token matched, we simply remove all cells from this batch -> no fragmentation
+        llama_kv_cache_seq_rm(ctx_main, -1, n_past, -1);
+        if (seq_id_best != 0)
+        {
+            // if a verification token matched, we keep the best sequence and remove the rest
+            // this leads to some KV cache fragmentation
+            llama_kv_cache_seq_keep(ctx_main, seq_id_best);
+            llama_kv_cache_seq_cp(ctx_main, seq_id_best, 0, -1, -1);
+            llama_kv_cache_seq_rm(ctx_main, seq_id_best, -1, -1);
+            for (int s = 1; s < total_branch_size; ++s)
+                llama_kv_cache_seq_cp(ctx_main, 0, s, -1, -1);
         }
     }
+
     auto t_dec_end = ggml_time_us();
 
     LOG_TEE("\n\n");
