@@ -858,7 +858,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
             // KV cache management
             // if no verification token matched, we simply remove all cells from this batch -> no fragmentation
             llama_kv_cache_seq_rm(ctx_main, -1, n_past, -1);
-            if (seq_id_best != -1)
+            if (seq_id_best != 0)
             {
                 // if a verification token matched, we keep the best sequence and remove the rest
                 // this leads to some KV cache fragmentation
