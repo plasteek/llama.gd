@@ -480,7 +480,6 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
 
 std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_tokens, lookahead_params *lookahead_params)
 {
-    LOG("Worker Start\n");
     std::string generated_result = "";
 
     ensure_state_initialized();
@@ -533,7 +532,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
         llama_kv_cache_seq_cp(ctx_main, 0, seq_id, -1, -1);
 
     const auto t_enc_end = ggml_time_us();
-    LOG_TEE("encoded %4d tokens in %8.3f seconds, speed: %8.3f t/s\n", input_size, (t_enc_end - t_enc_start) / 1e6f, input_size / ((t_enc_end - t_enc_start) / 1e6f));
+    LOG("encoded %4d tokens in %8.3f seconds, speed: %8.3f t/s\n", input_size, (t_enc_end - t_enc_start) / 1e6f, input_size / ((t_enc_end - t_enc_start) / 1e6f));
 
     // Verification n-grams
     LOG("initializing verification branch with %d ngrams\n", max_ngram_verify);
@@ -776,7 +775,6 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
             }
 
             // update lookahead tokens
-            LOG("updating lookahead tokens\n");
             {
                 // move the 'last" window to the last window
                 for (int token_pos = 0; token_pos < window_size; token_pos++)
@@ -813,12 +811,10 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
                             ngram_levels[ngram_count - 2][i] = ngram_levels[0][i];
                     }
                 }
-                LOG("I PASS NED?\n");
             }
 
             // update ngram pool
             // basically append the ngrams we created during the process
-            LOG("updating ngram pool\n");
             if (level == 0)
             {
                 // the first token of the n-gram is determined by the index in the container so it is not stored
