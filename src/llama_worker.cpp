@@ -618,7 +618,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
         // verification n-grams - queue this before the lookahead tokens for less KV cache fragmentation
         for (int token_pos = 0; token_pos < input_ngrams_count; token_pos++) // Initialize the windows
         {
-            auto ngram_verification = pending_verification_ngrams[token_pos];
+            auto &ngram_verification = pending_verification_ngrams[token_pos];
             ngram_verification.active = true;
             ngram_verification.tokens.resize(ngram_count);
             ngram_verification.batch_index.resize(ngram_count);
@@ -638,7 +638,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
                 const llama_token t = pool.tokens[idx + level];
 
                 // NOTE: +1 to skip the input
-                auto verification_window = pending_verification_ngrams[token_pos];
+                auto &verification_window = pending_verification_ngrams[token_pos];
                 // Distribute the tokens into their appropiate batch/window
                 verification_window.tokens[level + 1] = t;
                 verification_window.batch_index[level + 1] = batch.n_tokens;
@@ -683,7 +683,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
             {
                 for (int token_pos = 0; token_pos < pending_verification_ngrams.size(); token_pos++)
                 {
-                    auto verification_win = pending_verification_ngrams[token_pos];
+                    auto &verification_win = pending_verification_ngrams[token_pos];
                     // Accept token (already passed the verification)
                     if (verification_win.active)
                     {
@@ -730,7 +730,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
             // verify across active n-grams
             for (int win_index = 0; win_index < pending_verification_ngrams.size(); win_index++)
             {
-                auto verification_window = pending_verification_ngrams[win_index];
+                auto &verification_window = pending_verification_ngrams[win_index];
                 if (verification_window.active)
                 {
                     // If the window is already too old
