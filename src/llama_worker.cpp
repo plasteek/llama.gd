@@ -151,17 +151,8 @@ void LlamaWorker::insert_without_bos(std::vector<llama_token> *embd, std::vector
     embd->insert(embd->end(), new_token_start, tokens->end());
 }
 
-// This long function is direct implementation from the main.cpp
-std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
+void LlamaWorker::ensure_state_initialized()
 {
-#ifndef LOG_DISABLE_LOGS
-    LOG_TEE("Log start\n");
-#endif // LOG_DISABLE_LOGS
-
-    // NOTE: the comments contains my version of what the hell is going on
-    // Append the prompt
-    std::string generated_text = "";
-
     // Check state
     if (state == nullptr)
     {
@@ -180,8 +171,20 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     {
         LOG("State does not have a context. Aborting\n");
         throw std::runtime_error("State does not have a context initialized\n");
-        return "";
     }
+}
+
+// This long function is direct implementation from the main.cpp
+std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
+{
+#ifndef LOG_DISABLE_LOGS
+    LOG_TEE("Log start\n");
+#endif // LOG_DISABLE_LOGS
+
+    // NOTE: the comments contains my version of what the hell is going on
+    // Append the prompt
+    std::string generated_text = "";
+    ensure_state_initialized();
 
     // Needed llama_context
     llama_sampling_params &sparams = (*params).sparams;
@@ -511,10 +514,10 @@ lookahead_params::lookahead_params()
 
 std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_tokens, lookahead_params *lookahead_params)
 {
-    // TODO: need to check the state (same as run)
+    std::string generated_result = "";
+    ensure_state_initialized();
 
     // Input and result
-    std::string generated_result = "";
     std::vector<llama_token> all_tokens = input_tokens;
     llama_context *ctx_main = state->ctx;
 
@@ -522,6 +525,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     const int window_size = lookahead_params->window_size;
     const int ngram_count = lookahead_params->ngram_size;
 
+    const int batch_size = params->n_batch;
     const int input_size = input_tokens.size();
     const int max_context_size = llama_n_ctx(ctx_main);
     const int max_token_list_size = max_context_size - 4;
@@ -549,8 +553,8 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     // seq_id [1, W]         : tokens from the past N - 1 Jacobi iterations (used for generation I think)
     // seq_id [W + 1, W + G] : verification n-grams
     // therefore this batch is seq with id of zero to represent the input
-    llama_decode(ctx_main, llama_batch_get_one(input_tokens.data(), input_size - 1, 0, 0));
-    llama_decode(ctx_main, llama_batch_get_one(&input_tokens.back(), 1, input_size - 1, 0));
+    batch_decode_tokens(batch_size, ctx_main, input_tokens, state->last_decoded_token_index + 1);
+
     // Copy the decoded result
     for (int seq_id = 1; seq_id < total_branch_size; ++seq_id)
         llama_kv_cache_seq_cp(ctx_main, 0, seq_id, -1, -1);
@@ -926,4 +930,6 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     llama_kv_cache_view_free(&kvc_view);
     llama_sampling_free(ctx_sampling);
     llama_batch_free(batch);
+
+    return generated_result;
 }
