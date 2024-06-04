@@ -501,9 +501,10 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     const int batch_size = params->n_batch;
     const int input_size = token_list.size();
 
-    const int max_tokens = params->n_predict;
     const int max_context_size = llama_n_ctx(ctx_main);
     const int max_token_list_size = max_context_size - 4;
+    // Lookahead does not support context shifting for now, unlike autoregressive
+    const int max_tokens = params->n_predict > -1 ? params->n_predict : max_token_list_size;
 
     if (input_size > max_token_list_size)
     {
