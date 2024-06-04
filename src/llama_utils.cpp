@@ -7,8 +7,7 @@ void batch_decode_tokens(
     int batch_size,
     llama_context *ctx,
     std::vector<llama_token> tokens,
-    int start_index,
-    bool sample_last_logit)
+    int start_index)
 {
    int token_size = tokens.size();
    // Edge case if all the batch "has been" evaluated
@@ -37,7 +36,7 @@ void batch_decode_tokens(
 
       // Output the logit for the very last element
       bool is_last = batch_start + batch_count == token_size;
-      if (is_last && sample_last_logit)
+      if (is_last)
          batch.logits[batch.n_tokens - 1] = true;
 
       if (llama_decode(ctx, batch) != 0)
