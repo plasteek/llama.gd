@@ -365,7 +365,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
 
     // prediction start
     llama_batch predict_batch = llama_batch_init((*params).n_batch, 0, 1); // Should only have 1 at a time
-    while (!should_yield && (remaining > 0))
+    while (!should_yield && (remaining != 0))                              // lower than zero means infinite generation
     {
         // clear for next prediction
         llama_batch_clear(predict_batch);
