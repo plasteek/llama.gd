@@ -465,7 +465,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     }
 
     LOG("prediction completed with %d tokens remaining\n", remaining);
-    llama_print_timings(ctx_main);
+    llama_log_timings(ctx_main);
 
     // Free all the used context here
     // Assume that state is handled immutably
@@ -911,7 +911,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     LOG_TEE("n_predict = %d\n", total_predicted_tokens);
     LOG_TEE("n_accept  = %d\n", total_accepted_tokens);
 
-    llama_print_timings(ctx_main);
+    llama_log_timings(ctx_main);
 
     // Free only the local variables (like the model should not be freed)
     llama_sampling_free(ctx_sampling);

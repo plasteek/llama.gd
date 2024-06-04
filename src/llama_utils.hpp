@@ -11,4 +11,6 @@ std::vector<llama_token> construct_token_list(std::vector<llama_token> *state_to
 bool file_exists(const std::string path);
 bool file_is_empty(const std::string path);
 
+void llama_log_timings(llama_context *ctx);
+
 #endif
