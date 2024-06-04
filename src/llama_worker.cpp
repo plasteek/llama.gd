@@ -177,6 +177,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     // NOTE: the comments contains my version of what the hell is going on
     // Append the prompt
     std::string generated_text = "";
+    auto runtime_start = ggml_time_us();
     ensure_state_initialized();
 
     // Needed llama_context
@@ -465,6 +466,10 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     }
 
     LOG("prediction completed with %d tokens remaining\n", remaining);
+
+    auto runtime_end = ggml_time_us(); // Context can be saved, so the timing may not be accurate
+    LOG_TEE("total runtime: %8.3f seconds\n", (runtime_end - runtime_start) / 1e6f);
+
     llama_log_timings(ctx_main);
 
     // Free all the used context here
@@ -482,6 +487,8 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
 std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_tokens, lookahead_params *lookahead_params)
 {
     std::string generated_result = "";
+
+    const auto runtime_start = ggml_time_us();
 
     ensure_state_initialized();
     llama_context *ctx_main = state->ctx;
@@ -900,6 +907,9 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     }
 
     auto t_dec_end = ggml_time_us();
+    auto runtime_end = ggml_time_us();
+    // Context can sometimes be sved, so the timing may not be accurate
+    LOG_TEE("total runtime: %8.3f seconds\n", (runtime_end - runtime_start) / 1e6f);
 
     LOG_TEE("\n\n");
     LOG_TEE("W = %2d\n", window_size);
