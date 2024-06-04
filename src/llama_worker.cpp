@@ -723,6 +723,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
             curr_input_token = llama_sampling_sample(ctx_sampling, ctx_main, NULL, batch_index);
             llama_sampling_accept(ctx_sampling, ctx_main, curr_input_token, true);
             LOG("sampled token: '%s'\n", llama_token_to_piece(ctx_main, curr_input_token, true).c_str());
+            LOG("level: %d, from_pool: %d\n", level, level > 0);
 
             {
                 // generated token here, if v = 0 it is the verified (accepted tokens)
@@ -769,23 +770,22 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
             }
 
             // print known n-grams starting with token id (debug)
-            LOG("current level: %d\n", level);
             if (level == 0)
             {
                 if (pool.count[curr_input_token] > 0)
                     LOG(
-                        "\n - %d n-grams starting with '%s'\n",
+                        "%d n-grams starting with '%s'\n",
                         pool.count[curr_input_token],
                         llama_token_to_piece(ctx_main, curr_input_token).c_str());
                 for (int i = 0; i < pool.count[curr_input_token]; i++)
                 {
-                    LOG("   - ngram %2d: ", i);
+                    LOG("   - ngram %2d: \n", i);
                     // TODO: should we turn this into like a formula
                     const int idx = curr_input_token * (ngram_count - 1) * max_ngram_verify + i * (ngram_count - 1);
                     for (int j = 0; j < ngram_count - 1; j++)
                     {
                         const std::string token_str = llama_token_to_piece(ctx_main, pool.tokens[idx + j]);
-                        LOG("%s", token_str.c_str());
+                        LOG("- %s\n", token_str.c_str());
                     }
 
                     LOG("\n");
