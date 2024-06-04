@@ -779,16 +779,15 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
                         llama_token_to_piece(ctx_main, curr_input_token).c_str());
                 for (int i = 0; i < pool.count[curr_input_token]; i++)
                 {
-                    LOG("   - ngram %2d: \n", i);
                     // TODO: should we turn this into like a formula
+                    std::stringstream matches;
                     const int idx = curr_input_token * (ngram_count - 1) * max_ngram_verify + i * (ngram_count - 1);
                     for (int j = 0; j < ngram_count - 1; j++)
                     {
                         const std::string token_str = llama_token_to_piece(ctx_main, pool.tokens[idx + j]);
-                        LOG("- %s\n", token_str.c_str());
+                        matches << token_str << ", ";
                     }
-
-                    LOG("\n");
+                    LOG("   - ngram %2d: %s \n", i, matches.str().c_str());
                 }
             }
 
