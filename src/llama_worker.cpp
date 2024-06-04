@@ -526,7 +526,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     // seq_id [1, W]         : tokens from the past N - 1 Jacobi iterations (used for generation I think)
     // seq_id [W + 1, W + G] : verification n-grams
     // therefore this batch is seq with id of zero to represent the input
-    batch_decode_tokens(batch_size, ctx_main, token_list, state->last_decoded_token_index + 1, false);
+    batch_decode_tokens(batch_size, ctx_main, token_list, state->last_decoded_token_index + 1);
 
     // Copy the decoded result
     for (int seq_id = 1; seq_id < total_branch_size; ++seq_id)
@@ -575,7 +575,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     bool has_eos = false;
 
     // sample first token as input
-    llama_token curr_input_token = llama_sampling_sample(ctx_sampling, ctx_main, NULL, 0);
+    llama_token curr_input_token = llama_sampling_sample(ctx_sampling, ctx_main, NULL);
     llama_sampling_accept(ctx_sampling, ctx_main, curr_input_token, true);
 
     // yes, this is a duplicate, exactly the same as the one in the lookahead decoding
