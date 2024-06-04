@@ -574,7 +574,9 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     // used to determine end of generation
     bool has_eos = false;
 
-    // sample first token as input
+    // sample first token as input (do not sample from 0 because the logit from batch API is -1
+    // instead of the usual zero due to not llama_batch_get_one)
+    // https://github.com/ggerganov/llama.cpp/issues/6475#issuecomment-2036861535
     llama_token curr_input_token = llama_sampling_sample(ctx_sampling, ctx_main, NULL);
     llama_sampling_accept(ctx_sampling, ctx_main, curr_input_token, true);
 
