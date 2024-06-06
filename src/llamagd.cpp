@@ -612,13 +612,13 @@ namespace godot
       ClassDB::bind_method(D_METHOD("set_penalize_nl", "enabled"), &LlamaGD::set_penalize_nl);
       ADD_PROPERTY(PropertyInfo(Variant::BOOL, "penalize_new_line", PROPERTY_HINT_NONE, "Penalize new line"), "set_penalize_nl", "get_penalize_nl");
 
-      ClassDB::bind_method(D_METHOD("get_penalize_freq"), &LlamaGD::get_penalty_present);
+      ClassDB::bind_method(D_METHOD("get_penalize_freq"), &LlamaGD::get_penalty_freq);
       ClassDB::bind_method(D_METHOD("set_penalize_freq", "enabled"), &LlamaGD::set_penalty_freq);
-      ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "frequency_penalty", PROPERTY_HINT_NONE, "Penalize frequently occurring token. 0 to disable"), "set_penalize_nl", "get_penalize_nl");
+      ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "frequency_penalty", PROPERTY_HINT_NONE, "Penalize frequently occurring token. 0 to disable"), "set_penalize_freq", "get_penalize_freq");
 
       ClassDB::bind_method(D_METHOD("get_penalize_present"), &LlamaGD::get_penalty_present);
       ClassDB::bind_method(D_METHOD("set_penalize_present", "enabled"), &LlamaGD::set_penalty_present);
-      ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "presence_penalty", PROPERTY_HINT_NONE, "Penalize present tokens. 0 to disable"), "set_penalize_nl", "get_penalize_nl");
+      ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "presence_penalty", PROPERTY_HINT_NONE, "Penalize present tokens. 0 to disable"), "set_penalize_present", "get_penalize_present");
 
       ADD_SUBGROUP("Sampling", "");
       ClassDB::bind_method(D_METHOD("get_top_k"), &LlamaGD::get_top_k);
