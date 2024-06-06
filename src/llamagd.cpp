@@ -50,6 +50,7 @@ namespace godot
       ClassDB::bind_method(D_METHOD("load_model"), &LlamaGD::load_model);
       ClassDB::bind_method(D_METHOD("unload_model"), &LlamaGD::unload_model);
       ClassDB::bind_method(D_METHOD("is_model_loaded"), &LlamaGD::is_model_loaded);
+      ClassDB::bind_method(D_METHOD("is_loading_model"), &LlamaGD::is_loading_model);
 
       ClassDB::bind_method(D_METHOD("create_state", "prompt"), &LlamaGD::create_state);
       ClassDB::bind_method(D_METHOD("create_state_async", "prompt"), &LlamaGD::create_state_async);
@@ -184,6 +185,7 @@ namespace godot
    }
    void LlamaGD::load_model_impl()
    {
+      loading = true;
       // NOTE: the lock is in the main thread call
       // What the hell?
       // dedicate one sequence to the system prompt
@@ -211,8 +213,11 @@ namespace godot
       // params.n_ctx = llama_n_ctx(ctx);
 
       log("Model loaded successfully");
+
       GGML_ASSERT(llama_add_eos_token(model) != 1);
       call_deferred("emit_signal", "model_loaded");
+      loading = false;
+
       function_call_mutex->unlock();
    }
    void LlamaGD::unload_model()
@@ -228,6 +233,10 @@ namespace godot
    bool LlamaGD::is_model_loaded()
    {
       return model != nullptr;
+   }
+   bool LlamaGD::is_loading_model()
+   {
+      return loading;
    }
    bool LlamaGD::is_params_locked()
    {

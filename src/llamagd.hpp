@@ -36,6 +36,7 @@ namespace godot
       bool output_eos;
       bool backend_initialized;
       bool lookahead;
+      bool loading;
 
       void log(const std::string msg);
 
@@ -64,6 +65,7 @@ namespace godot
       void load_model();
       void unload_model();
       bool is_model_loaded();
+      bool is_loading_model();
 
       llama_model *get_model();
       gpt_params *get_params();
