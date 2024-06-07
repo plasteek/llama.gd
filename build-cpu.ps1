@@ -5,6 +5,6 @@ cmake -B build `
    -D CMAKE_BUILD_TYPE=Release `
    -D CMAKE_EXPORT_COMPILE_COMMANDS=ON `
    -D LLAMA_NATIVE=OFF `
-   -D LLAMA_DISABLE_LOGS=ON
+   -D LLAddMA_DISABLE_LOGS=ON
 cmake --build build -j24
 cmake --install build
