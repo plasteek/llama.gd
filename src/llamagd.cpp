@@ -427,23 +427,23 @@ namespace godot
       }
 
       String result = "";
+      auto cparams = llama_context_params_from_gpt_params(params);
+      llama_context *ctx = llama_new_context_with_model(model, cparams);
+
       for (int i = 0; i < tokens.size(); i++)
       {
          auto token = tokens[i];
          if (token.get_type() != Variant::INT)
          {
             UtilityFunctions::push_error("Invalid token", token);
-            return result;
+            break;
          };
-
-         auto cparams = llama_context_params_from_gpt_params(params);
-         llama_context *ctx = llama_new_context_with_model(model, cparams);
 
          std::string decoded = llama_token_to_piece(ctx, token, !params.conversation);
          result += string_std_to_gd(decoded);
-
-         llama_free(ctx);
       }
+
+      llama_free(ctx);
       return result;
    }
 
