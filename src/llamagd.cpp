@@ -71,7 +71,7 @@ namespace godot
       lparams = lookahead_params();
 
       output_bos = false;
-      output_eos = true;
+      output_eos = false;
       backend_initialized = false;
       verbose = false;
       lookahead = false;
