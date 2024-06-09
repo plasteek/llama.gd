@@ -70,11 +70,13 @@ namespace godot
       params = gpt_params();
       lparams = lookahead_params();
 
+      append_bos = true;
       output_bos = false;
       output_eos = false;
-      backend_initialized = false;
+
       verbose = false;
       lookahead = false;
+      backend_initialized = false;
 
       model = nullptr;
       worker = nullptr;
@@ -591,6 +593,10 @@ namespace godot
       ADD_PROPERTY(PropertyInfo(Variant::BOOL, "process_escape", PROPERTY_HINT_NONE, "Escape special characters such as \\n, \\r, \\t, ', \", and \\ to make the model process them"), "set_escape", "get_escape");
 
       ADD_SUBGROUP("Output", "");
+      ClassDB::bind_method(D_METHOD("get_append_bos"), &LlamaGD::get_append_bos);
+      ClassDB::bind_method(D_METHOD("set_append_bos", "enabled"), &LlamaGD::set_append_bos);
+      ADD_PROPERTY(PropertyInfo(Variant::BOOL, "append_bos", PROPERTY_HINT_NONE, "Append BOS automatically"), "set_append_bos", "get_append_bos");
+
       ClassDB::bind_method(D_METHOD("get_output_bos"), &LlamaGD::get_output_bos);
       ClassDB::bind_method(D_METHOD("set_output_bos", "enabled"), &LlamaGD::set_output_bos);
       ADD_PROPERTY(PropertyInfo(Variant::BOOL, "output_bos", PROPERTY_HINT_NONE, "Output the model BOS if enabled"), "set_output_bos", "get_output_bos");
@@ -710,6 +716,15 @@ namespace godot
          return;
       params.input_suffix = string_gd_to_std(suffix);
    };
+
+   bool LlamaGD::get_append_bos() const
+   {
+      return append_bos;
+   }
+   void LlamaGD::set_append_bos(const bool enabled)
+   {
+      append_bos = enabled;
+   }
 
    bool LlamaGD::get_output_bos() const
    {

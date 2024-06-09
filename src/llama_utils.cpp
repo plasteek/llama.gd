@@ -58,11 +58,13 @@ void insert_without_bos(std::vector<llama_token> *embd, std::vector<llama_token>
 std::vector<llama_token> merge_token_list(
     std::vector<llama_token> *state_token_list,
     std::vector<llama_token> *input_tokens,
-    llama_token bos_token)
+    llama_token bos_token,
+    bool beginning_bos)
 {
    std::vector<llama_token> token_list;
-   // If the prompt is empty, add starting token
-   token_list.emplace_back(bos_token);
+   if (beginning_bos)
+      // If the prompt is empty, add starting token
+      token_list.emplace_back(bos_token);
    // append the state tokens if exist
    if (!state_token_list->empty())
    {

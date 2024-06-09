@@ -32,6 +32,7 @@ namespace godot
       LlamaWorker *worker;
       Ref<LlamaState> state;
 
+      bool append_bos;
       bool output_bos;
       bool output_eos;
       bool backend_initialized;
@@ -99,6 +100,9 @@ namespace godot
 
       bool get_flash_attn() const;
       void set_flash_attn(const bool enabled);
+
+      bool get_append_bos() const;
+      void set_append_bos(const bool enabled);
 
       bool get_output_bos() const;
       void set_output_bos(const bool enabled);

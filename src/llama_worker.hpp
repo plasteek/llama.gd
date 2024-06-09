@@ -74,6 +74,7 @@ private:
    void ensure_state_initialized();
 
 public:
+   bool append_bos;
    bool output_bos;
    bool output_eos;
    std::function<void(std::string)> on_new_token;
