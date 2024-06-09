@@ -236,7 +236,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     LOG("add_bos: %d\n", add_bos);
 
     // construct the prompt tokens
-    std::vector<llama_token> token_list = construct_token_list(&state->tokens, &input_tokens, llama_token_bos(model));
+    std::vector<llama_token> token_list = merge_token_list(&state->tokens, &input_tokens, llama_token_bos(model));
 
     // Note: (n_ctx - 4) here is to match the logic for command line prompt handling via
     // --prompt or --file which uses the same value.
@@ -494,7 +494,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     llama_context *ctx_main = state->ctx;
 
     // Construct the full token first
-    std::vector<llama_token> token_list = construct_token_list(&state->tokens, &input_tokens, llama_token_bos(model));
+    std::vector<llama_token> token_list = merge_token_list(&state->tokens, &input_tokens, llama_token_bos(model));
     LOG("tokens: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, token_list).c_str());
 
     // Input and result

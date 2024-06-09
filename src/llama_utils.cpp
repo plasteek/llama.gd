@@ -55,7 +55,7 @@ void insert_without_bos(std::vector<llama_token> *embd, std::vector<llama_token>
    embd->insert(embd->end(), new_token_start, tokens->end());
 }
 
-std::vector<llama_token> construct_token_list(
+std::vector<llama_token> merge_token_list(
     std::vector<llama_token> *state_token_list,
     std::vector<llama_token> *input_tokens,
     llama_token bos_token)
