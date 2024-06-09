@@ -579,6 +579,10 @@ namespace godot
       ADD_PROPERTY(PropertyInfo(Variant::STRING, "negative_prompt", PROPERTY_HINT_MULTILINE_TEXT, "Guidance prompt"), "set_negative_prompt", "get_negative_prompt");
 
       ADD_GROUP("Generation", "");
+      ClassDB::bind_method(D_METHOD("get_append_bos"), &LlamaGD::get_append_bos);
+      ClassDB::bind_method(D_METHOD("set_append_bos", "enabled"), &LlamaGD::set_append_bos);
+      ADD_PROPERTY(PropertyInfo(Variant::BOOL, "append_bos", PROPERTY_HINT_NONE, "Append BOS automatically"), "set_append_bos", "get_append_bos");
+
       ClassDB::bind_method(D_METHOD("get_n_ctx"), &LlamaGD::get_n_ctx);
       ClassDB::bind_method(D_METHOD("set_n_ctx", "context_size"), &LlamaGD::set_n_ctx);
       ADD_PROPERTY(PropertyInfo(Variant::INT, "context_size", PROPERTY_HINT_NONE, "Set context size"), "set_n_ctx", "get_n_ctx");
@@ -600,10 +604,6 @@ namespace godot
       ADD_PROPERTY(PropertyInfo(Variant::BOOL, "process_escape", PROPERTY_HINT_NONE, "Escape special characters such as \\n, \\r, \\t, ', \", and \\ to make the model process them"), "set_escape", "get_escape");
 
       ADD_SUBGROUP("Output", "");
-      ClassDB::bind_method(D_METHOD("get_append_bos"), &LlamaGD::get_append_bos);
-      ClassDB::bind_method(D_METHOD("set_append_bos", "enabled"), &LlamaGD::set_append_bos);
-      ADD_PROPERTY(PropertyInfo(Variant::BOOL, "append_bos", PROPERTY_HINT_NONE, "Append BOS automatically"), "set_append_bos", "get_append_bos");
-
       ClassDB::bind_method(D_METHOD("get_output_bos"), &LlamaGD::get_output_bos);
       ClassDB::bind_method(D_METHOD("set_output_bos", "enabled"), &LlamaGD::set_output_bos);
       ADD_PROPERTY(PropertyInfo(Variant::BOOL, "output_bos", PROPERTY_HINT_NONE, "Output the model BOS if enabled"), "set_output_bos", "get_output_bos");
