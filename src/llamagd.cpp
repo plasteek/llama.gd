@@ -378,6 +378,7 @@ namespace godot
       worker = new LlamaWorker(
           model,
           &params);
+      worker->append_bos = append_bos;
 
       worker->output_eos = output_eos;
       worker->output_bos = output_bos;
