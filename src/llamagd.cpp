@@ -418,6 +418,13 @@ namespace godot
 
       std::string payload = string_gd_to_std(prompt);
       auto tokens = ::llama_tokenize(model, payload, true, true);
+
+      // To ensure tokenization is accurate, because of append_bos
+      // remove BOS too if needed
+      bool first_token_bos = tokens[0] == llama_token_bos(model);
+      if (!append_bos && first_token_bos)
+         tokens.erase(tokens.begin());
+
       return int_vec_to_gd_arr(tokens);
    }
    String LlamaGD::decode(const Array tokens)
