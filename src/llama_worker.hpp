@@ -72,6 +72,7 @@ private:
    // the object to be used
    LlamaWorkerState *state;
    void ensure_state_initialized();
+   void init_state_for_token(std::vector<llama_token> token_list);
 
 public:
    bool append_bos;

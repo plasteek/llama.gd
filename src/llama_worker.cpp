@@ -170,6 +170,41 @@ void LlamaWorker::ensure_state_initialized()
     }
 }
 
+void LlamaWorker::init_state_for_token(std::vector<llama_token> token_list)
+{
+    ensure_state_initialized();
+
+    // check the cache to see how many tokens we can use (if applicable)
+    size_t n_matching_session_tokens = 0;
+    if (!state->tokens.empty())
+    {
+        for (llama_token id : state->tokens)
+        {
+            if (n_matching_session_tokens >= token_list.size() || id != token_list[n_matching_session_tokens])
+                break;
+            n_matching_session_tokens++;
+        }
+
+        if (n_matching_session_tokens >= token_list.size())
+        {
+            LOG_TEE("%s: session file has exact match for prompt!\n", __func__);
+        }
+        else if (n_matching_session_tokens < (token_list.size() / 2))
+        {
+            LOG_TEE("%s: warning: session file has low similarity to prompt (%zu / %zu tokens); will mostly be reevaluated\n",
+                    __func__, n_matching_session_tokens, token_list.size());
+        }
+        else
+        {
+            LOG_TEE("%s: session file matches %zu / %zu tokens of prompt\n",
+                    __func__, n_matching_session_tokens, token_list.size());
+        }
+
+        // remove any "future" tokens that we might have inherited from the previous session
+        llama_kv_cache_seq_rm(state->ctx, -1, n_matching_session_tokens, -1);
+    }
+}
+
 // This long function is direct implementation from the main.cpp
 std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
 {
@@ -181,6 +216,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     // Append the prompt
     std::string generated_text = "";
     auto runtime_start = ggml_time_us();
+
     ensure_state_initialized();
 
     // Needed llama_context
@@ -246,36 +282,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     std::vector<llama_token> token_list = merge_token_list(&state->tokens, &input_tokens, llama_token_bos(model), append_bos);
     if (token_list.size() <= 0)
         token_list.emplace(token_list.begin(), llama_token_bos(model));
-
-    // check the cache to see how many tokens we can use (if applicable)
-    size_t n_matching_session_tokens = 0;
-    if (!state->tokens.empty())
-    {
-        for (llama_token id : state->tokens)
-        {
-            if (n_matching_session_tokens >= token_list.size() || id != token_list[n_matching_session_tokens])
-                break;
-            n_matching_session_tokens++;
-        }
-
-        if (n_matching_session_tokens >= token_list.size())
-        {
-            LOG_TEE("%s: session file has exact match for prompt!\n", __func__);
-        }
-        else if (n_matching_session_tokens < (token_list.size() / 2))
-        {
-            LOG_TEE("%s: warning: session file has low similarity to prompt (%zu / %zu tokens); will mostly be reevaluated\n",
-                    __func__, n_matching_session_tokens, token_list.size());
-        }
-        else
-        {
-            LOG_TEE("%s: session file matches %zu / %zu tokens of prompt\n",
-                    __func__, n_matching_session_tokens, token_list.size());
-        }
-
-        // remove any "future" tokens that we might have inherited from the previous session
-        llama_kv_cache_seq_rm(ctx_main, -1, n_matching_session_tokens, -1);
-    }
+    init_state_for_token(token_list);
 
     // Note: (n_ctx - 4) here is to match the logic for command line prompt handling via
     // --prompt or --file which uses the same value.
@@ -537,8 +544,9 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
 
     // Construct the full token first
     std::vector<llama_token> token_list = merge_token_list(&state->tokens, &input_tokens, llama_token_bos(model), false);
-    if (append_bos)
+    if (token_list.size() <= 0)
         token_list.emplace(token_list.begin(), llama_token_bos(model));
+    init_state_for_token(token_list);
 
     LOG("tokens: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_main, token_list).c_str());
 
