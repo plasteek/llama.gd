@@ -466,7 +466,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
             // if we run out of context:
             // - take the n_keep first tokens from the original prompt (via n_past)
             // - take half of the last (n_ctx - n_keep) tokens and recompute the logits in batches
-            if (token_pos + token_list.size() + std::max<int>(0, guidance_offset) >= n_ctx)
+            if (token_pos + std::max<int>(0, guidance_offset) >= n_ctx)
             {
                 if ((*params).n_predict == -2)
                 {
