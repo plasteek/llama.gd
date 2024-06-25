@@ -247,6 +247,36 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     if (token_list.size() <= 0)
         token_list.emplace(token_list.begin(), llama_token_bos(model));
 
+    // check the cache to see how many tokens we can use (if applicable)
+    size_t n_matching_session_tokens = 0;
+    if (!state->tokens.empty())
+    {
+        for (llama_token id : state->tokens)
+        {
+            if (n_matching_session_tokens >= token_list.size() || id != token_list[n_matching_session_tokens])
+                break;
+            n_matching_session_tokens++;
+        }
+
+        if (n_matching_session_tokens >= token_list.size())
+        {
+            LOG_TEE("%s: session file has exact match for prompt!\n", __func__);
+        }
+        else if (n_matching_session_tokens < (token_list.size() / 2))
+        {
+            LOG_TEE("%s: warning: session file has low similarity to prompt (%zu / %zu tokens); will mostly be reevaluated\n",
+                    __func__, n_matching_session_tokens, token_list.size());
+        }
+        else
+        {
+            LOG_TEE("%s: session file matches %zu / %zu tokens of prompt\n",
+                    __func__, n_matching_session_tokens, token_list.size());
+        }
+
+        // remove any "future" tokens that we might have inherited from the previous session
+        llama_kv_cache_seq_rm(ctx_main, -1, n_matching_session_tokens, -1);
+    }
+
     // Note: (n_ctx - 4) here is to match the logic for command line prompt handling via
     // --prompt or --file which uses the same value.
     int max_token_size = n_ctx - 4;
