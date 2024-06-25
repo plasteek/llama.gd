@@ -7,7 +7,8 @@ void batch_decode_tokens(
     int batch_size,
     llama_context *ctx,
     std::vector<llama_token> tokens,
-    int start_index)
+    int start_index,
+    int n_parallel)
 {
    int token_size = tokens.size();
    // Edge case if all the batch "has been" evaluated
@@ -44,6 +45,12 @@ void batch_decode_tokens(
          LOG_TEE("%s : failed to eval\n", __func__);
          throw std::runtime_error(std::string(__func__) + ": failed to eval");
       }
+   }
+   // assign the system KV cache to all parallel sequences
+   // this way, the parallel sequences will "reuse" the prompt tokens without having to copy them
+   for (int32_t i = 1; i < n_parallel; ++i)
+   {
+      llama_kv_cache_seq_cp(ctx, 0, i, -1, -1);
    }
 }
 

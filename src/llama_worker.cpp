@@ -141,7 +141,9 @@ LlamaWorkerState *LlamaWorker::create_state_from_prompt(const std::string prompt
     batch_decode_tokens(
         params->n_batch,
         ctx,
-        token_list);
+        token_list,
+        0,
+        params->n_parallel);
     return state;
 }
 
@@ -306,7 +308,8 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
         ctx_main,
         token_list,
         // Decode from the new token and skip all processed token
-        state->last_decoded_token_index + 1);
+        state->last_decoded_token_index + 1,
+        params->n_parallel);
 
     struct llama_sampling_context *ctx_sampling = llama_sampling_init(sparams);
     if (!ctx_sampling)
@@ -362,7 +365,9 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
         batch_decode_tokens(
             n_batch,
             ctx_guidance,
-            guidance_tokens);
+            guidance_tokens,
+            0,
+            params->n_parallel);
         guidance_tokens.clear();
     }
 
@@ -544,7 +549,7 @@ std::string LlamaWorker::run_with_lookahead(std::vector<llama_token> input_token
     // seq_id [1, W]         : tokens from the past N - 1 Jacobi iterations (used for generation I think)
     // seq_id [W + 1, W + G] : verification n-grams
     // therefore this batch is seq with id of zero to represent the input
-    batch_decode_tokens(batch_size, ctx_main, token_list, state->last_decoded_token_index + 1);
+    batch_decode_tokens(batch_size, ctx_main, token_list, state->last_decoded_token_index + 1, (*params).n_parallel);
 
     // Copy the decoded result
     for (int seq_id = 1; seq_id < total_branch_size; ++seq_id)
