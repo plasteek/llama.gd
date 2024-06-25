@@ -237,8 +237,8 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     LOG("add_bos: %d\n", add_bos);
 
     // construct the prompt tokens
-    std::vector<llama_token> token_list = merge_token_list(&state->tokens, &input_tokens, llama_token_bos(model), false);
-    if (append_bos)
+    std::vector<llama_token> token_list = merge_token_list(&state->tokens, &input_tokens, llama_token_bos(model), append_bos);
+    if (token_list.size() <= 0)
         token_list.emplace(token_list.begin(), llama_token_bos(model));
 
     // Note: (n_ctx - 4) here is to match the logic for command line prompt handling via
