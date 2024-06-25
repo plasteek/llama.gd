@@ -6,6 +6,7 @@ cmake -B build `
    -D CMAKE_BUILD_TYPE=Release `
    -D LLAMA_CUDA=ON `
    -D CMAKE_EXPORT_COMPILE_COMMANDS=ON `
-   -D LLAMA_NATIVE=OFF
+   -D LLAMA_NATIVE=OFF `
+   -D LLAMA_OPENMP=OFF
 cmake --build build -j24
 cmake --install build
