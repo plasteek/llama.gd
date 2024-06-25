@@ -27,18 +27,16 @@ void batch_decode_tokens(
       {
          auto token_pos = batch_start + token_index;
          auto token = tokens[token_pos];
-         llama_batch_add(batch, token, token_pos, {0}, false);
+
+         // Output the logit for the very last element
+         bool is_last = batch_start + batch_count == token_size;
+         llama_batch_add(batch, token, token_pos, {0}, is_last);
 
          LOG_TEE(
              "batch_decode: token: '%s', token_pos: %d\n",
              llama_token_to_piece(ctx, token).c_str(),
              token_pos);
       }
-
-      // Output the logit for the very last element
-      bool is_last = batch_start + batch_count == token_size;
-      if (is_last)
-         batch.logits[batch.n_tokens - 1] = true;
 
       if (llama_decode(ctx, batch) != 0)
       {
@@ -47,11 +45,11 @@ void batch_decode_tokens(
       }
    }
    // assign the system KV cache to all parallel sequences
-   // this way, the parallel sequences will "reuse" the prompt tokens without having to copy them
-   for (int32_t i = 1; i < n_parallel; ++i)
-   {
-      llama_kv_cache_seq_cp(ctx, 0, i, -1, -1);
-   }
+   // // this way, the parallel sequences will "reuse" the prompt tokens without having to copy them
+   // for (int32_t i = 1; i < n_parallel; ++i)
+   // {
+   //    llama_kv_cache_seq_cp(ctx, 0, i, -1, -1);
+   // }
 }
 
 void insert_without_bos(std::vector<llama_token> *embd, std::vector<llama_token> *tokens, llama_token bos)
