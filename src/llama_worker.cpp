@@ -368,7 +368,7 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     }
 
     // prepare for Guidance (if enabled)
-    int guidance_offset; // Needed for shifting context
+    int guidance_offset = 0; // Needed for shifting context
     if (ctx_guidance)
     {
         int prompt_size = token_list.size();
