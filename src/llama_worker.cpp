@@ -206,6 +206,10 @@ std::string LlamaWorker::run(std::vector<llama_token> input_tokens)
     {
         LOG_TEE("%s: warning: scaling RoPE frequency by %g.\n", __func__, (*params).rope_freq_scale);
     }
+    if ((*params).seed == LLAMA_DEFAULT_SEED)
+    {
+        (*params).seed = time(NULL);
+    }
 
     LOG_TEE("%s: build = %d (%s)\n", __func__, LLAMA_BUILD_NUMBER, LLAMA_COMMIT);
     LOG_TEE("%s: built with %s for %s\n", __func__, LLAMA_COMPILER, LLAMA_BUILD_TARGET);
