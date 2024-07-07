@@ -69,6 +69,7 @@ namespace godot
    {
       params = gpt_params();
       lparams = lookahead_params();
+      params.n_ctx = -1; // Default to model's max context
 
       append_bos = true;
       output_bos = false;
@@ -375,6 +376,8 @@ namespace godot
    LlamaWorker *LlamaGD::prepare_worker()
    {
       log("Setting up new worker");
+      params.n_ctx = params.n_ctx < 0 ? llama_n_ctx_train(model) : params.n_ctx;
+
       worker = new LlamaWorker(
           model,
           &params);
