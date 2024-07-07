@@ -578,8 +578,8 @@ namespace godot
       ClassDB::bind_method(D_METHOD("set_cfg_scale", "scale"), &LlamaGD::set_cfg_scale);
       ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "cfg_scale", PROPERTY_HINT_NONE, "How strong is guidance"), "set_cfg_scale", "get_cfg_scale");
 
-      ClassDB::bind_method(D_METHOD("get_negative_prompt"), &LlamaGD::get_cfg_scale);
-      ClassDB::bind_method(D_METHOD("set_negative_prompt", "prompt"), &LlamaGD::set_cfg_scale);
+      ClassDB::bind_method(D_METHOD("get_negative_prompt"), &LlamaGD::get_negative_prompt);
+      ClassDB::bind_method(D_METHOD("set_negative_prompt", "prompt"), &LlamaGD::set_negative_prompt);
       ADD_PROPERTY(PropertyInfo(Variant::STRING, "negative_prompt", PROPERTY_HINT_MULTILINE_TEXT, "Guidance prompt"), "set_negative_prompt", "get_negative_prompt");
 
       ADD_GROUP("Generation", "");
